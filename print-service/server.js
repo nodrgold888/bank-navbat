@@ -30,7 +30,7 @@ app.use((req, res, next) => {
 const PRINTER_SHARE_NAME = process.env.PRINTER_SHARE_NAME || 'XP-80C'; // Windows'da share qilingan printer nomi
 const COPY_TIMEOUT_MS = 8000; // printer javob bermasa, servisni ilib qo'ymaslik uchun
 const LOGO_PATH = path.join(__dirname, 'assets', 'logo.png');
-const BRANCH_ADDRESS = "Toshkent shahri, Ko'kcha Darvoza, 489B";
+const BRANCH_ADDRESS = "Toshkent shahri, Uchtepa tumani, Ko'kcha Darvoza, 489B";
 const BRANCH_PHONE = process.env.BRANCH_PHONE || '1284';
 
 // ---- ASCII-safe decorative helpers (Unicode box-drawing chars are risky —
@@ -103,7 +103,7 @@ app.post('/print', async (req, res) => {
     // ---- Ticket number: the focal point — big & bold, plain (no invert) ----
     printer.println('Navbat raqami');
     printer.bold(true);
-    printer.setTextSize(1, 1); // yarim: (3,2) edi -> (1,1)
+    printer.setTextSize(2, 2);
     printer.println(String(number));
     printer.setTextSize(0, 0);
     printer.bold(false);
@@ -113,7 +113,9 @@ app.post('/print', async (req, res) => {
     starRule(printer);
     printer.println('Xizmat turi');
     printer.bold(true);
-    printer.println(asciiSafe(service || '-').toUpperCase()); // yarim: 2x edi -> oddiy
+    printer.setTextSize(1, 1);
+    printer.println(asciiSafe(service || '-').toUpperCase());
+    printer.setTextSize(0, 0);
     printer.bold(false);
 
     // ---- Details: boxed card instead of loose lines ----
