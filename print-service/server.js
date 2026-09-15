@@ -87,7 +87,6 @@ app.post('/print', async (req, res) => {
     if (fs.existsSync(LOGO_PATH)) {
       try {
         await printer.printImage(LOGO_PATH);
-        printer.newLine();
       } catch (e) {
         console.warn('  -> logo chop etilmadi:', e.message);
       }
@@ -95,39 +94,30 @@ app.post('/print', async (req, res) => {
 
     // ---- Header ----
     printer.bold(true);
-    printer.setTextSize(1, 1); // 2x — bank nomi
     printer.println('"DAVR BANK" XATB');
-    printer.setTextSize(0, 0);
     printer.bold(false);
     printer.println('Uchtepa filiali');
-    printer.newLine();
     printer.println('Xush kelibsiz!');
     printer.newLine();
 
     // ---- Ticket number: the focal point — big & bold, plain (no invert) ----
     printer.println('Navbat raqami');
     printer.bold(true);
-    printer.setTextSize(3, 2);
+    printer.setTextSize(1, 1); // yarim: (3,2) edi -> (1,1)
     printer.println(String(number));
     printer.setTextSize(0, 0);
     printer.bold(false);
-    printer.newLine();
 
     // ---- Service: its own big, bold section — not buried in the card ----
     printer.alignCenter();
     starRule(printer);
-    printer.newLine();
     printer.println('Xizmat turi');
     printer.bold(true);
-    printer.setTextSize(1, 1); // 2x
-    printer.println(asciiSafe(service || '-').toUpperCase());
-    printer.setTextSize(0, 0);
+    printer.println(asciiSafe(service || '-').toUpperCase()); // yarim: 2x edi -> oddiy
     printer.bold(false);
-    printer.newLine();
 
     // ---- Details: boxed card instead of loose lines ----
     starRule(printer);
-    printer.newLine();
 
     printer.alignLeft();
     boxTop(printer);
@@ -137,19 +127,14 @@ app.post('/print', async (req, res) => {
     boxRow(printer, 'Taxminiy kutish', etaMin != null ? `~${etaMin} daqiqa` : '-');
     boxBottom(printer);
     printer.alignCenter();
-    printer.newLine();
 
     // ---- Branch contact info ----
-    printer.setTextSize(0, 0);
     printer.println(BRANCH_ADDRESS);
-    printer.newLine();
     printer.bold(true);
     printer.println(`Yagona axborot xizmati: ${BRANCH_PHONE}`);
     printer.bold(false);
-    printer.newLine();
 
     starRule(printer);
-    printer.newLine();
 
     // ---- Footer: inverted black bar, like the "thank you" line on the sample ----
     printer.bold(true);
@@ -157,7 +142,6 @@ app.post('/print', async (req, res) => {
     printer.println('   KUTGANINGIZ UCHUN RAHMAT!   ');
     printer.invert(false);
     printer.bold(false);
-    printer.newLine();
     printer.cut();
 
     const buffer = printer.getBuffer();
