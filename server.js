@@ -58,7 +58,8 @@ const DEFAULT_SERVICES = [
   {
     id: 'tolovlar',
     name: 'Toʻlovlar va pul oʻtkazmalari',
-    subtitle: 'Kartalar, transferlar, toʻlovlar',
+    subtitle:
+      "Kontrakt toʻlovlari, kommunal toʻlovlar, shtraf toʻlovlari, pul oʻtkazmalari va boshqa toʻlov turlari",
     prefix: 'C',
     icon: '💸',
     color: '#d97706',
