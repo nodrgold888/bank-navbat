@@ -39,7 +39,7 @@ if exist "%DESKTOP%\kiosk.bat" (
     call "%DESKTOP%\kiosk.bat"
 ) else (
     echo OGOHLANTIRISH: %DESKTOP%\kiosk.bat topilmadi — Chrome qo'lda ochiladi.
-    start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk --kiosk-printing --incognito "https://bank-navbat.onrender.com/kiosk"
+    start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk --kiosk-printing --incognito "https://bank-navbat.onrender.com/kiosk?shared=1"
 )
 
 endlocal

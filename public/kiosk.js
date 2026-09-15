@@ -17,6 +17,13 @@
   var myTicket = null; // { code, serviceId, serviceName, serviceIcon, serviceColor }
 
   // ---- Auto-return to the main menu after a ticket is issued ----
+  // Only makes sense on the shared physical kiosk terminal — it needs to
+  // reset itself for the next customer. Someone who scanned the QR code on
+  // their own phone should keep watching their live ticket status instead
+  // of getting yanked back to the menu. Distinguished by a URL flag that
+  // only the physical kiosk's Chrome shortcut passes (see kiosk.bat:
+  // ".../kiosk?shared=1"); a plain "/kiosk" link (the QR poster) does not.
+  var IS_SHARED_KIOSK = new URLSearchParams(location.search).get('shared') === '1';
   var AUTO_RETURN_MS = 5000;
   var autoReturnTimer = null;
 
@@ -29,6 +36,7 @@
 
   function scheduleAutoReturn() {
     clearAutoReturn();
+    if (!IS_SHARED_KIOSK) return;
     autoReturnTimer = setTimeout(backToSelect, AUTO_RETURN_MS);
   }
 
