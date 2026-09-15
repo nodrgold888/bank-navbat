@@ -86,6 +86,14 @@ const DEFAULT_SERVICES = [
     icon: '🤝',
     color: '#7c3aed',
   },
+  {
+    id: 'valyuta',
+    name: 'Valyuta ayirboshlash',
+    subtitle: "Dollar, yevro va boshqa valyutalarni so'mga almashtirish",
+    prefix: 'G',
+    icon: '💱',
+    color: '#dc2626',
+  },
 ];
 
 // Average handling time per customer (minutes) until real data is collected.
