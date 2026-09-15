@@ -293,6 +293,23 @@ body.kiosk {
   grid-template-columns: 1fr;
   gap: 12px;
 }
+
+/* Album/landscape kiosk screens (wide touchscreen, not a phone) — stop
+   hugging the left edge with a narrow 560px column and a huge empty gap;
+   widen the container and lay the service cards out in two columns. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .k-wrap {
+    max-width: 1100px;
+  }
+  .svc-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .k-info {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
 .svc-card {
   --c: var(--blue);
   display: grid;
@@ -468,6 +485,17 @@ body.kiosk {
 }
 .k-info .ib-contacts b {
   font-weight: 800;
+}
+
+.page-credit {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+.page-credit b {
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 700;
 }
 
 /* ==========================================================================
@@ -786,6 +814,9 @@ body.tv {
 }
 .tvf-branch b {
   opacity: 1;
+}
+.tvf-credit {
+  font-size: 0.85em;
 }
 
 @media (max-width: 1150px) {
