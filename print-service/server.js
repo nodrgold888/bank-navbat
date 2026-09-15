@@ -113,14 +113,24 @@ app.post('/print', async (req, res) => {
     printer.bold(false);
     printer.newLine();
 
-    // ---- Details: boxed card instead of loose lines ----
+    // ---- Service: its own big, bold section — not buried in the card ----
     printer.alignCenter();
+    starRule(printer);
+    printer.newLine();
+    printer.println('Xizmat turi');
+    printer.bold(true);
+    printer.setTextSize(1, 1); // 2x
+    printer.println(asciiSafe(service || '-').toUpperCase());
+    printer.setTextSize(0, 0);
+    printer.bold(false);
+    printer.newLine();
+
+    // ---- Details: boxed card instead of loose lines ----
     starRule(printer);
     printer.newLine();
 
     printer.alignLeft();
     boxTop(printer);
-    boxRow(printer, 'Xizmat', service || '-');
     boxRow(printer, 'Sana', `${date || ''}  ${time || ''}`);
     boxRow(printer, 'Navbatdagi tartibingiz', position != null ? `${position}-o'rin` : '-');
     boxRow(printer, 'Sizdan oldin', ahead != null ? `${ahead} kishi` : '-');
