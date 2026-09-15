@@ -16,6 +16,30 @@
   var lastView = null;
   var myTicket = null; // { code, serviceId, serviceName, serviceIcon, serviceColor }
 
+  // ---- Local receipt printer (print-service running on this kiosk PC) ----
+  var PRINT_SERVICE_URL = 'http://localhost:9100/print';
+
+  function printTicket(ticket, peopleAhead) {
+    var now = new Date();
+    var p = function (n) {
+      return String(n).padStart(2, '0');
+    };
+    var payload = {
+      service: ticket.serviceName,
+      number: ticket.code,
+      ahead: peopleAhead,
+      date: p(now.getDate()) + '.' + p(now.getMonth() + 1) + '.' + now.getFullYear(),
+      time: p(now.getHours()) + ':' + p(now.getMinutes()),
+    };
+    fetch(PRINT_SERVICE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).catch(function (err) {
+      console.warn('Chek chop etilmadi (print-servis ishlamayapti?):', err.message);
+    });
+  }
+
   // ---- Clock ----
   function tickClock() {
     var d = new Date();
@@ -79,6 +103,7 @@
         serviceColor: t.serviceColor,
       };
       showTicket(t.position, t.peopleAhead, null);
+      printTicket(myTicket, t.peopleAhead);
     } catch (err) {
       alert('Xatolik: ' + err.message);
     } finally {
