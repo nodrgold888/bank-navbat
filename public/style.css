@@ -294,6 +294,31 @@ body.kiosk {
   gap: 12px;
 }
 
+/* Any desktop-width browser (testing the plain /kiosk link, not just the
+   physical terminal) — modest 2-column layout so it doesn't sit cramped
+   in a 560px column with empty space either side. This is NOT gated on
+   shared-kiosk: it's a normal, moderate responsive breakpoint, safe even
+   for a phone in landscape since it doesn't blow sizes up to kiosk scale
+   (that extreme version stays exclusively behind ?shared=1 below). */
+@media (min-width: 700px) {
+  .k-wrap {
+    max-width: 1000px;
+  }
+  .svc-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .k-info {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .ticket {
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 /* Full-screen layout for the physical shared kiosk terminal ONLY.
    Gated on body.shared-kiosk (set by kiosk.js from the "?shared=1" URL
    flag that only kiosk.bat passes) rather than viewport size/orientation
