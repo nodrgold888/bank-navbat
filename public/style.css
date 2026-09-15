@@ -1253,35 +1253,73 @@ body.qr {
 }
 .qr-poster .steps {
   text-align: left;
-  margin: 22px auto 0;
-  max-width: 360px;
+  margin: 26px auto 0;
+  max-width: 380px;
   color: var(--ink);
   font-size: 0.95rem;
-  line-height: 1.6;
+  line-height: 1.4;
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  counter-reset: qrstep;
+}
+.qr-poster .steps li {
+  counter-increment: qrstep;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.qr-poster .steps li::before {
+  content: counter(qrstep);
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--green));
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(15, 45, 82, 0.18);
 }
 .qr-poster .info-block {
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
+  margin-top: 26px;
+  padding: 18px 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, var(--blue-soft) 0%, var(--green-soft) 100%);
+  text-align: center;
 }
 .info-block .ib-branch {
-  font-weight: 700;
+  font-weight: 800;
   color: var(--navy);
   font-size: 0.95rem;
+  letter-spacing: 0.02em;
 }
 .info-block .ib-addr {
   color: var(--muted);
   font-size: 0.84rem;
-  margin: 6px 0 10px;
+  margin: 6px 0 12px;
   line-height: 1.55;
 }
 .info-block .ib-contacts {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 16px;
+  gap: 8px 10px;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: 0.86rem;
   color: var(--ink);
+}
+.info-block .ib-contacts span {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 14px;
+  box-shadow: 0 1px 2px rgba(15, 45, 82, 0.05);
 }
 .info-block .ib-contacts b {
   color: var(--navy);
@@ -1301,6 +1339,11 @@ body.qr {
   .qr-poster {
     box-shadow: none;
     border: none;
+  }
+  .qr-poster .steps li::before,
+  .qr-poster .info-block {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
   .qr-poster .print-btn,
   .back-link {
