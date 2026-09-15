@@ -294,77 +294,82 @@ body.kiosk {
   gap: 12px;
 }
 
-/* Album/landscape kiosk screens (wide touchscreen, not a phone) — stop
-   hugging the left edge with a narrow 560px column and a huge empty gap;
-   fill the screen and scale everything up for a big touch display. */
+/* Full-screen layout for the physical shared kiosk terminal ONLY.
+   Gated on body.shared-kiosk (set by kiosk.js from the "?shared=1" URL
+   flag that only kiosk.bat passes) rather than viewport size/orientation
+   alone — a large phone held sideways (iPhone Pro Max, many Samsung
+   Galaxy models) hits ~926px landscape width, which would otherwise
+   false-positive on a naive width-based breakpoint and blow up a
+   customer's own phone screen to kiosk scale. The min-width/landscape
+   condition stays as a secondary sanity check, not the deciding one. */
 @media (min-width: 900px) and (orientation: landscape) {
-  .k-wrap {
+  body.shared-kiosk .k-wrap {
     max-width: 1800px;
     padding: 32px 48px 56px;
   }
-  .k-brand {
+  body.shared-kiosk .k-brand {
     font-size: 1.5rem;
   }
-  .k-clock {
+  body.shared-kiosk .k-clock {
     font-size: 1.3rem;
   }
-  .k-illus {
+  body.shared-kiosk .k-illus {
     width: 110px;
     height: 110px;
   }
-  .k-title {
+  body.shared-kiosk .k-title {
     font-size: 2.6rem;
     margin-bottom: 8px;
   }
-  .k-sub {
+  body.shared-kiosk .k-sub {
     font-size: 1.2rem;
     margin-bottom: 28px;
   }
-  .svc-cards {
+  body.shared-kiosk .svc-cards {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
-  .svc-card {
+  body.shared-kiosk .svc-card {
     grid-template-columns: 84px 1fr auto;
     gap: 22px;
     padding: 26px 28px;
     border-radius: 20px;
   }
-  .svc-card .svc-ic {
+  body.shared-kiosk .svc-card .svc-ic {
     width: 84px;
     height: 84px;
     font-size: 2.6rem;
     border-radius: 18px;
   }
-  .svc-card .svc-title {
+  body.shared-kiosk .svc-card .svc-title {
     font-size: 1.55rem;
   }
-  .svc-card .svc-sub {
+  body.shared-kiosk .svc-card .svc-sub {
     font-size: 1.05rem;
     margin-top: 5px;
   }
-  .svc-card .svc-meta {
+  body.shared-kiosk .svc-card .svc-meta {
     font-size: 1.05rem;
   }
-  .k-info {
+  body.shared-kiosk .k-info {
     max-width: 900px;
     margin-left: auto;
     margin-right: auto;
     font-size: 1.1rem;
   }
-  .ticket {
+  body.shared-kiosk .ticket {
     max-width: 720px;
     margin: 24px auto 0;
     padding: 48px 44px 40px;
   }
-  .ticket .t-svc {
+  body.shared-kiosk .ticket .t-svc {
     font-size: 1.2rem;
     padding: 9px 18px;
   }
-  .ticket .t-lbl {
+  body.shared-kiosk .ticket .t-lbl {
     font-size: 1.3rem;
   }
-  .ticket .t-code {
+  body.shared-kiosk .ticket .t-code {
     font-size: 7rem;
   }
 }

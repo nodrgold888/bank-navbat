@@ -27,6 +27,15 @@
   var AUTO_RETURN_MS = 5000;
   var autoReturnTimer = null;
 
+  // Same flag also gates the full-screen "album" layout in style.css. Sizing
+  // that up purely from viewport width/orientation would misfire on a large
+  // phone held sideways (iPhone Pro Max / many Samsung Galaxy models hit
+  // ~926px landscape width, over a naive 900px breakpoint) — a personal
+  // phone must never get the giant kiosk-scale cards.
+  if (IS_SHARED_KIOSK) {
+    document.body.classList.add('shared-kiosk');
+  }
+
   function clearAutoReturn() {
     if (autoReturnTimer) {
       clearTimeout(autoReturnTimer);
