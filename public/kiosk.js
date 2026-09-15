@@ -16,6 +16,22 @@
   var lastView = null;
   var myTicket = null; // { code, serviceId, serviceName, serviceIcon, serviceColor }
 
+  // ---- Auto-return to the main menu after a ticket is issued ----
+  var AUTO_RETURN_MS = 5000;
+  var autoReturnTimer = null;
+
+  function clearAutoReturn() {
+    if (autoReturnTimer) {
+      clearTimeout(autoReturnTimer);
+      autoReturnTimer = null;
+    }
+  }
+
+  function scheduleAutoReturn() {
+    clearAutoReturn();
+    autoReturnTimer = setTimeout(backToSelect, AUTO_RETURN_MS);
+  }
+
   // ---- Local receipt printer (print-service running on this kiosk PC) ----
   var PRINT_SERVICE_URL = 'http://localhost:9100/print';
 
@@ -104,6 +120,7 @@
       };
       showTicket(t.position, t.peopleAhead, null);
       printTicket(myTicket, t.peopleAhead);
+      scheduleAutoReturn();
     } catch (err) {
       alert('Xatolik: ' + err.message);
     } finally {
@@ -141,6 +158,7 @@
   }
 
   function backToSelect() {
+    clearAutoReturn();
     myTicket = null;
     screenTicket.hidden = true;
     screenSelect.hidden = false;
