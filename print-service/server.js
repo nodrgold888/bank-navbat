@@ -30,8 +30,7 @@ app.use((req, res, next) => {
 const PRINTER_SHARE_NAME = process.env.PRINTER_SHARE_NAME || 'XP-80C'; // Windows'da share qilingan printer nomi
 const COPY_TIMEOUT_MS = 8000; // printer javob bermasa, servisni ilib qo'ymaslik uchun
 const LOGO_PATH = path.join(__dirname, 'assets', 'logo.png');
-const BRANCH_ADDRESS =
-  "100033, Toshkent sh., Uchtepa tumani, Jamshid va Uyg'ur ko'chalari chorrahasi, 3-uy.";
+const BRANCH_ADDRESS = "Toshkent shahri, Ko'kcha Darvoza, 489B";
 const BRANCH_PHONE = process.env.BRANCH_PHONE || '1284';
 
 // ---- ASCII-safe decorative helpers (Unicode box-drawing chars are risky —
