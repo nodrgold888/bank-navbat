@@ -30,19 +30,13 @@ app.use((req, res, next) => {
 const PRINTER_SHARE_NAME = process.env.PRINTER_SHARE_NAME || 'XP-80C'; // Windows'da share qilingan printer nomi
 const COPY_TIMEOUT_MS = 8000; // printer javob bermasa, servisni ilib qo'ymaslik uchun
 const LOGO_PATH = path.join(__dirname, 'assets', 'logo.png');
+const KIOSK_URL = process.env.KIOSK_URL || 'https://bank-navbat.onrender.com/kiosk';
 
-// Har bir band: kichik, oddiy shrift yorliq + katta, qalin qiymat — reklama
-// maketidagi "ваш номер / время прибытия / ..." uslubiga o'xshash.
-function labelValue(printer, label, value, height, width) {
+// "Yorliq: qiymat" — bitta qatorda, oddiy shrift, XalqBanki chekidagi
+// "Xizmat: ..." / "Sana: ..." uslubi.
+function inlineRow(printer, label, value) {
   printer.bold(false);
-  printer.setTextSize(0, 0);
-  printer.println(label);
-  printer.bold(true);
-  printer.setTextSize(height, width);
-  printer.println(value);
-  printer.setTextSize(0, 0);
-  printer.bold(false);
-  printer.newLine();
+  printer.println(`${label}: ${value}`);
 }
 
 app.post('/print', async (req, res) => {
@@ -80,45 +74,43 @@ app.post('/print', async (req, res) => {
     printer.bold(false);
     printer.println('Uchtepa tumani filiali');
     printer.newLine();
-    printer.drawLine('=');
+    printer.println('Xush kelibsiz!');
     printer.newLine();
 
-    // ---- Ticket number: the focal point — big, bold, inverted block ----
-    printer.println('SIZNING RAQAMINGIZ');
+    // ---- Ticket number: the focal point — big & bold, plain (no invert) ----
+    printer.println('Navbat raqami');
+    printer.bold(true);
+    printer.setTextSize(3, 2);
+    printer.println(String(number));
+    printer.setTextSize(0, 0);
+    printer.bold(false);
     printer.newLine();
+
+    // ---- Details, one line each: "Label: value" ----
+    printer.alignLeft();
+    inlineRow(printer, 'Xizmat', service || '-');
+    inlineRow(printer, 'Sana', `${date || ''}  ${time || ''}`);
+    inlineRow(printer, 'Sizdan oldin', ahead != null ? `${ahead} kishi` : '-');
+    printer.alignCenter();
+    printer.newLine();
+
+    // ---- QR: scan to reopen the kiosk / check the queue from your phone ----
+    try {
+      printer.printQR(KIOSK_URL, { cellSize: 5, correction: 'M' });
+      printer.newLine();
+      printer.println('Navbatni telefoningizdan kuzatish');
+      printer.println('uchun QR-kodni skanerlang');
+      printer.newLine();
+    } catch (e) {
+      console.warn('  -> QR chop etilmadi:', e.message);
+    }
+
+    // ---- Footer: inverted black bar, like the "thank you" line on the sample ----
     printer.bold(true);
     printer.invert(true);
-    printer.setTextSize(4, 3); // juda katta shrift
-    printer.println(` ${number} `);
-    printer.setTextSize(0, 0);
+    printer.println(' Kutganingiz uchun rahmat! ');
     printer.invert(false);
     printer.bold(false);
-    printer.newLine();
-    printer.drawLine('.');
-    printer.newLine();
-
-    // ---- Time, service, and queue position — same label/value rhythm ----
-    labelValue(printer, "VAQT", `${date || ''}  (${time || ''})`, 0, 1);
-    labelValue(printer, 'TANLANGAN XIZMAT', service || '-', 0, 1);
-    labelValue(
-      printer,
-      'SIZDAN OLDINGILAR',
-      ahead != null ? String(ahead) : '0',
-      2, 1
-    );
-
-    printer.drawLine('=');
-
-    // ---- Footer ----
-    printer.newLine();
-    printer.println('Iltimos, navbatingizni kuting.');
-    printer.newLine();
-    printer.bold(true);
-    printer.setTextSize(0, 1); // biroz kengroq
-    printer.println('RAHMAT!');
-    printer.setTextSize(0, 0);
-    printer.bold(false);
-    printer.newLine();
     printer.newLine();
     printer.cut();
 
