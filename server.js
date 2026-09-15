@@ -50,7 +50,7 @@ const DEFAULT_SERVICES = [
     id: 'depozitlar',
     name: 'Depozitlar',
     subtitle:
-      "Omonat ochish, jamg'arma hisoblari, mijoz mablag'lari, chet elga chiqish uchun bank spravkasi (ma'lumotnoma)",
+      "Omonat va jamg'arma hisoblari ochish, mablag'larni saqlash, chet davlatlarga safar uchun bank ma'lumotnomasini rasmiylashtirish",
     prefix: 'B',
     icon: '💰',
     color: '#16a34a',
