@@ -84,10 +84,10 @@ app.post('/print', async (req, res) => {
     // ---- Header ----
     printer.bold(true);
     printer.setTextSize(1, 1); // 2x — bank nomi
-    printer.println('DAVR BANK');
+    printer.println('"DAVR BANK" XATB');
     printer.setTextSize(0, 0);
     printer.bold(false);
-    printer.println('Uchtepa tumani filiali');
+    printer.println('Uchtepa filiali');
     printer.newLine();
     printer.println('Xush kelibsiz!');
     printer.newLine();
