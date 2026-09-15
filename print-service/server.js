@@ -44,28 +44,59 @@ app.post('/print', async (req, res) => {
       // interface va driver YO'Q — buferni o'zimiz yozamiz va Windows share orqali yuboramiz
     });
 
+    // ---- Header ----
     printer.alignCenter();
+    printer.setTypeFontA();
     printer.bold(true);
+    printer.setTextSize(1, 1); // 2x — bank nomi
     printer.println('DAVR BANK');
+    printer.setTextSize(0, 0);
     printer.bold(false);
     printer.println('Uchtepa tumani filiali');
-    printer.drawLine();
-    printer.println(service || '');
+    printer.newLine();
+    printer.drawLine('=');
+
+    // ---- Service name ----
+    printer.newLine();
+    printer.bold(true);
+    printer.println((service || '').toUpperCase());
+    printer.bold(false);
     printer.newLine();
 
-    printer.setTextSize(2, 2); // katta shrift
-    printer.println(number);
-    printer.setTextSize(0, 0); // normal shrift
-
+    // ---- Ticket number: big, bold, inverted (black block) so it pops ----
+    printer.println('SIZNING RAQAMINGIZ');
     printer.newLine();
+    printer.bold(true);
+    printer.invert(true);
+    printer.setTextSize(4, 3); // juda katta shrift
+    printer.println(` ${number} `);
+    printer.setTextSize(0, 0);
+    printer.invert(false);
+    printer.bold(false);
+    printer.newLine();
+
+    // ---- Info block ----
+    printer.drawLine('-');
     printer.alignLeft();
-    printer.println(`Sizdan oldingilar     ${ahead != null ? ahead : ''}`);
-    printer.println(`Sana                  ${date || ''}`);
-    printer.println(`Vaqt                  ${time || ''}`);
-    printer.drawLine();
+    printer.bold(true);
+    printer.leftRight('Sizdan oldingilar', ahead != null ? String(ahead) : '-');
+    printer.bold(false);
+    printer.leftRight('Sana', date || '-');
+    printer.leftRight('Vaqt', time || '-');
+    printer.drawLine('-');
+
+    // ---- Footer ----
+    printer.newLine();
     printer.alignCenter();
     printer.println('Iltimos, navbatingizni kuting.');
-    printer.println('Rahmat!');
+    printer.newLine();
+    printer.bold(true);
+    printer.setTextSize(0, 1); // biroz kengroq
+    printer.println('RAHMAT!');
+    printer.setTextSize(0, 0);
+    printer.bold(false);
+    printer.newLine();
+    printer.newLine();
     printer.cut();
 
     const buffer = printer.getBuffer();
