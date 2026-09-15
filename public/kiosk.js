@@ -35,7 +35,7 @@
   // ---- Local receipt printer (print-service running on this kiosk PC) ----
   var PRINT_SERVICE_URL = 'http://localhost:9100/print';
 
-  function printTicket(ticket, peopleAhead) {
+  function printTicket(ticket, peopleAhead, position, etaMin) {
     var now = new Date();
     var p = function (n) {
       return String(n).padStart(2, '0');
@@ -44,6 +44,8 @@
       service: ticket.serviceName,
       number: ticket.code,
       ahead: peopleAhead,
+      position: position,
+      etaMin: etaMin,
       date: p(now.getDate()) + '.' + p(now.getMonth() + 1) + '.' + now.getFullYear(),
       time: p(now.getHours()) + ':' + p(now.getMinutes()),
     };
@@ -119,7 +121,7 @@
         serviceColor: t.serviceColor,
       };
       showTicket(t.position, t.peopleAhead, null);
-      printTicket(myTicket, t.peopleAhead);
+      printTicket(myTicket, t.peopleAhead, t.position, t.etaMin);
       scheduleAutoReturn();
     } catch (err) {
       alert('Xatolik: ' + err.message);

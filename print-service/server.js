@@ -30,7 +30,9 @@ app.use((req, res, next) => {
 const PRINTER_SHARE_NAME = process.env.PRINTER_SHARE_NAME || 'XP-80C'; // Windows'da share qilingan printer nomi
 const COPY_TIMEOUT_MS = 8000; // printer javob bermasa, servisni ilib qo'ymaslik uchun
 const LOGO_PATH = path.join(__dirname, 'assets', 'logo.png');
-const KIOSK_URL = process.env.KIOSK_URL || 'https://bank-navbat.onrender.com/kiosk';
+const BRANCH_ADDRESS =
+  "100033, Toshkent sh., Uchtepa tumani, Jamshid va Uyg'ur ko'chalari chorrahasi, 3-uy.";
+const BRANCH_PHONE = process.env.BRANCH_PHONE || '1284';
 
 // ---- ASCII-safe decorative helpers (Unicode box-drawing chars are risky —
 // thermal codepages already mangle non-ASCII like "oʻ", so stick to +,-,|,*) ----
@@ -44,8 +46,19 @@ function boxBottom(printer) {
   printer.println('+' + '-'.repeat(BOX_WIDTH) + '+');
 }
 
+// Printer codepage can't encode the Uzbek modifier-letter apostrophe (ʻ/ʼ) or
+// curly quotes — node-thermal-printer silently drops in "?" per character
+// when that happens (confirmed: "bo'limi" -> "bo?limi" on real paper), so
+// normalize to plain ASCII before anything reaches the printer.
+function asciiSafe(text) {
+  if (text == null) return text;
+  return String(text)
+    .replace(/[ʻʼ‘’ʾʿ]/g, "'")
+    .replace(/[“”]/g, '"');
+}
+
 function boxRow(printer, label, value) {
-  const text = ` ${label}: ${value}`;
+  const text = ` ${asciiSafe(label)}: ${asciiSafe(value)}`;
   const line = text.length > BOX_WIDTH ? text.slice(0, BOX_WIDTH) : text.padEnd(BOX_WIDTH, ' ');
   printer.println('|' + line + '|');
 }
@@ -56,7 +69,7 @@ function starRule(printer) {
 
 app.post('/print', async (req, res) => {
   try {
-    const { service, number, ahead, date, time } = req.body || {};
+    const { service, number, ahead, date, time, position, etaMin } = req.body || {};
 
     if (!number) {
       return res.status(400).json({ error: "'number' (chek raqami) majburiy" });
@@ -110,24 +123,21 @@ app.post('/print', async (req, res) => {
     boxTop(printer);
     boxRow(printer, 'Xizmat', service || '-');
     boxRow(printer, 'Sana', `${date || ''}  ${time || ''}`);
+    boxRow(printer, 'Navbatdagi tartibingiz', position != null ? `${position}-o'rin` : '-');
     boxRow(printer, 'Sizdan oldin', ahead != null ? `${ahead} kishi` : '-');
+    boxRow(printer, 'Taxminiy kutish', etaMin != null ? `~${etaMin} daqiqa` : '-');
     boxBottom(printer);
     printer.alignCenter();
     printer.newLine();
 
-    // ---- QR: scan to reopen the kiosk / check the queue from your phone ----
-    try {
-      printer.bold(true);
-      printer.println('NAVBATNI TELEFONDA KUZATING');
-      printer.bold(false);
-      printer.newLine();
-      printer.printQR(KIOSK_URL, { cellSize: 6, correction: 'M' });
-      printer.newLine();
-      printer.println('QR-kodni skanerlang');
-      printer.newLine();
-    } catch (e) {
-      console.warn('  -> QR chop etilmadi:', e.message);
-    }
+    // ---- Branch contact info ----
+    printer.setTextSize(0, 0);
+    printer.println(BRANCH_ADDRESS);
+    printer.newLine();
+    printer.bold(true);
+    printer.println(`Yagona axborot xizmati: ${BRANCH_PHONE}`);
+    printer.bold(false);
+    printer.newLine();
 
     starRule(printer);
     printer.newLine();
