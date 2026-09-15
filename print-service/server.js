@@ -32,11 +32,26 @@ const COPY_TIMEOUT_MS = 8000; // printer javob bermasa, servisni ilib qo'ymaslik
 const LOGO_PATH = path.join(__dirname, 'assets', 'logo.png');
 const KIOSK_URL = process.env.KIOSK_URL || 'https://bank-navbat.onrender.com/kiosk';
 
-// "Yorliq: qiymat" — bitta qatorda, oddiy shrift, XalqBanki chekidagi
-// "Xizmat: ..." / "Sana: ..." uslubi.
-function inlineRow(printer, label, value) {
-  printer.bold(false);
-  printer.println(`${label}: ${value}`);
+// ---- ASCII-safe decorative helpers (Unicode box-drawing chars are risky —
+// thermal codepages already mangle non-ASCII like "oʻ", so stick to +,-,|,*) ----
+const BOX_WIDTH = 46; // ichki kenglik; +---+  chegara bilan jami 48 ustunga teng
+
+function boxTop(printer) {
+  printer.println('+' + '-'.repeat(BOX_WIDTH) + '+');
+}
+
+function boxBottom(printer) {
+  printer.println('+' + '-'.repeat(BOX_WIDTH) + '+');
+}
+
+function boxRow(printer, label, value) {
+  const text = ` ${label}: ${value}`;
+  const line = text.length > BOX_WIDTH ? text.slice(0, BOX_WIDTH) : text.padEnd(BOX_WIDTH, ' ');
+  printer.println('|' + line + '|');
+}
+
+function starRule(printer) {
+  printer.println('* '.repeat(Math.floor(BOX_WIDTH / 2)).trim());
 }
 
 app.post('/print', async (req, res) => {
@@ -86,29 +101,41 @@ app.post('/print', async (req, res) => {
     printer.bold(false);
     printer.newLine();
 
-    // ---- Details, one line each: "Label: value" ----
+    // ---- Details: boxed card instead of loose lines ----
+    printer.alignCenter();
+    starRule(printer);
+    printer.newLine();
+
     printer.alignLeft();
-    inlineRow(printer, 'Xizmat', service || '-');
-    inlineRow(printer, 'Sana', `${date || ''}  ${time || ''}`);
-    inlineRow(printer, 'Sizdan oldin', ahead != null ? `${ahead} kishi` : '-');
+    boxTop(printer);
+    boxRow(printer, 'Xizmat', service || '-');
+    boxRow(printer, 'Sana', `${date || ''}  ${time || ''}`);
+    boxRow(printer, 'Sizdan oldin', ahead != null ? `${ahead} kishi` : '-');
+    boxBottom(printer);
     printer.alignCenter();
     printer.newLine();
 
     // ---- QR: scan to reopen the kiosk / check the queue from your phone ----
     try {
-      printer.printQR(KIOSK_URL, { cellSize: 5, correction: 'M' });
+      printer.bold(true);
+      printer.println('NAVBATNI TELEFONDA KUZATING');
+      printer.bold(false);
       printer.newLine();
-      printer.println('Navbatni telefoningizdan kuzatish');
-      printer.println('uchun QR-kodni skanerlang');
+      printer.printQR(KIOSK_URL, { cellSize: 6, correction: 'M' });
+      printer.newLine();
+      printer.println('QR-kodni skanerlang');
       printer.newLine();
     } catch (e) {
       console.warn('  -> QR chop etilmadi:', e.message);
     }
 
+    starRule(printer);
+    printer.newLine();
+
     // ---- Footer: inverted black bar, like the "thank you" line on the sample ----
     printer.bold(true);
     printer.invert(true);
-    printer.println(' Kutganingiz uchun rahmat! ');
+    printer.println('   KUTGANINGIZ UCHUN RAHMAT!   ');
     printer.invert(false);
     printer.bold(false);
     printer.newLine();
