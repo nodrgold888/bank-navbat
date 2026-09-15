@@ -24,7 +24,7 @@
   // only the physical kiosk's Chrome shortcut passes (see kiosk.bat:
   // ".../kiosk?shared=1"); a plain "/kiosk" link (the QR poster) does not.
   var IS_SHARED_KIOSK = new URLSearchParams(location.search).get('shared') === '1';
-  var AUTO_RETURN_MS = 5000;
+  var AUTO_RETURN_MS = 3000;
   var autoReturnTimer = null;
 
   // Same flag also gates the full-screen "album" layout in style.css. Sizing
