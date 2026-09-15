@@ -71,14 +71,6 @@ const DEFAULT_SERVICES = [
     color: '#0891b2',
   },
   {
-    id: 'xizmat',
-    name: 'Mijozlarga xizmat koʻrsatish',
-    subtitle: 'Jismoniy shaxslar bilan ishlash',
-    prefix: 'E',
-    icon: '👥',
-    color: '#db2777',
-  },
-  {
     id: 'escrow',
     name: 'Escrow xizmati',
     subtitle: 'Uy 🏠 va avtomashina 🚗 oldi-sotdi bitimlari',
