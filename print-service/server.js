@@ -29,6 +29,21 @@ app.use((req, res, next) => {
 
 const PRINTER_SHARE_NAME = process.env.PRINTER_SHARE_NAME || 'XP-80C'; // Windows'da share qilingan printer nomi
 const COPY_TIMEOUT_MS = 8000; // printer javob bermasa, servisni ilib qo'ymaslik uchun
+const LOGO_PATH = path.join(__dirname, 'assets', 'logo.png');
+
+// Har bir band: kichik, oddiy shrift yorliq + katta, qalin qiymat — reklama
+// maketidagi "ваш номер / время прибытия / ..." uslubiga o'xshash.
+function labelValue(printer, label, value, height, width) {
+  printer.bold(false);
+  printer.setTextSize(0, 0);
+  printer.println(label);
+  printer.bold(true);
+  printer.setTextSize(height, width);
+  printer.println(value);
+  printer.setTextSize(0, 0);
+  printer.bold(false);
+  printer.newLine();
+}
 
 app.post('/print', async (req, res) => {
   try {
@@ -44,9 +59,20 @@ app.post('/print', async (req, res) => {
       // interface va driver YO'Q — buferni o'zimiz yozamiz va Windows share orqali yuboramiz
     });
 
-    // ---- Header ----
-    printer.alignCenter();
     printer.setTypeFontA();
+    printer.alignCenter();
+
+    // ---- Logo ----
+    if (fs.existsSync(LOGO_PATH)) {
+      try {
+        await printer.printImage(LOGO_PATH);
+        printer.newLine();
+      } catch (e) {
+        console.warn('  -> logo chop etilmadi:', e.message);
+      }
+    }
+
+    // ---- Header ----
     printer.bold(true);
     printer.setTextSize(1, 1); // 2x — bank nomi
     printer.println('DAVR BANK');
@@ -55,15 +81,9 @@ app.post('/print', async (req, res) => {
     printer.println('Uchtepa tumani filiali');
     printer.newLine();
     printer.drawLine('=');
-
-    // ---- Service name ----
-    printer.newLine();
-    printer.bold(true);
-    printer.println((service || '').toUpperCase());
-    printer.bold(false);
     printer.newLine();
 
-    // ---- Ticket number: big, bold, inverted (black block) so it pops ----
+    // ---- Ticket number: the focal point — big, bold, inverted block ----
     printer.println('SIZNING RAQAMINGIZ');
     printer.newLine();
     printer.bold(true);
@@ -74,20 +94,23 @@ app.post('/print', async (req, res) => {
     printer.invert(false);
     printer.bold(false);
     printer.newLine();
+    printer.drawLine('.');
+    printer.newLine();
 
-    // ---- Info block ----
-    printer.drawLine('-');
-    printer.alignLeft();
-    printer.bold(true);
-    printer.leftRight('Sizdan oldingilar', ahead != null ? String(ahead) : '-');
-    printer.bold(false);
-    printer.leftRight('Sana', date || '-');
-    printer.leftRight('Vaqt', time || '-');
-    printer.drawLine('-');
+    // ---- Time, service, and queue position — same label/value rhythm ----
+    labelValue(printer, "VAQT", `${date || ''}  (${time || ''})`, 0, 1);
+    labelValue(printer, 'TANLANGAN XIZMAT', service || '-', 0, 1);
+    labelValue(
+      printer,
+      'SIZDAN OLDINGILAR',
+      ahead != null ? String(ahead) : '0',
+      2, 1
+    );
+
+    printer.drawLine('=');
 
     // ---- Footer ----
     printer.newLine();
-    printer.alignCenter();
     printer.println('Iltimos, navbatingizni kuting.');
     printer.newLine();
     printer.bold(true);
