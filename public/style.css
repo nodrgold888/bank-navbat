@@ -391,6 +391,10 @@ body.kiosk {
     font-size: 1.2rem;
     padding: 9px 18px;
   }
+  body.shared-kiosk .ticket .t-svc-sub {
+    font-size: 1.05rem;
+    margin-top: 12px;
+  }
   body.shared-kiosk .ticket .t-lbl {
     font-size: 1.3rem;
   }
@@ -473,6 +477,12 @@ body.kiosk {
   padding: 7px 14px;
   border-radius: 999px;
   font-size: 0.98rem;
+}
+.ticket .t-svc-sub {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.4;
 }
 .ticket .t-lbl {
   margin-top: 18px;

@@ -222,8 +222,8 @@ function formatCode(service, n) {
 function serviceMeta(id) {
   const s = svc(id);
   return s
-    ? { id: s.id, name: s.name, icon: s.icon, color: s.color, prefix: s.prefix }
-    : { id, name: id, icon: '•', color: '#64748b', prefix: '' };
+    ? { id: s.id, name: s.name, subtitle: s.subtitle, icon: s.icon, color: s.color, prefix: s.prefix }
+    : { id, name: id, subtitle: '', icon: '•', color: '#64748b', prefix: '' };
 }
 
 // Ticket counters reset daily at midnight, per service type.
@@ -796,6 +796,7 @@ const API_HANDLERS = {
         code: ticket.code,
         serviceId: ticket.serviceId,
         serviceName: m.name,
+        serviceSubtitle: m.subtitle,
         serviceIcon: m.icon,
         serviceColor: m.color,
         position: peopleAhead + 1,

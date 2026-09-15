@@ -134,6 +134,7 @@
         code: t.code,
         serviceId: t.serviceId,
         serviceName: t.serviceName,
+        serviceSubtitle: t.serviceSubtitle,
         serviceIcon: t.serviceIcon,
         serviceColor: t.serviceColor,
       };
@@ -156,6 +157,7 @@
     $('ticketCard').style.setProperty('--c', myTicket.serviceColor || '#1f6fd6');
     $('tSvcIcon').textContent = myTicket.serviceIcon || '•';
     $('tSvcName').textContent = myTicket.serviceName || '';
+    $('tSvcSub').textContent = myTicket.serviceSubtitle || '';
     $('tCode').textContent = myTicket.code;
 
     var calledBox = $('tCalled');
