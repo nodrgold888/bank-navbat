@@ -65,7 +65,8 @@ const DEFAULT_SERVICES = [
   {
     id: 'kartalar',
     name: 'Bank kartalari',
-    subtitle: 'Visa/Uzcard/Humo, karta mahsulotlari',
+    subtitle:
+      "Visa/Uzcard/Humo: yangi karta ochish, qayta chiqarish (yo'qolgan/muddati tugagan), bloklash, PIN almashtirish, karta biriktirish",
     prefix: 'D',
     icon: '💳',
     color: '#0891b2',
