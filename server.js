@@ -34,7 +34,10 @@ const PORT = Number(process.env.PORT) || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const DATA_FILE = path.join(__dirname, 'data', 'state.json');
 
-const OPERATOR_COUNT = 6;
+const OPERATOR_COUNT = 7;
+// Operator 7 is dedicated to currency exchange only, instead of the default
+// "handles every service" assignment the rest get.
+const DEDICATED_OPERATORS = { 7: ['valyuta'] };
 
 // The service types. Each has an independent, daily-incrementing queue.
 const DEFAULT_SERVICES = [
@@ -118,7 +121,7 @@ function freshState() {
       id: i,
       name: `${i}-operator`,
       online: true,
-      serviceIds: DEFAULT_SERVICES.map((s) => s.id),
+      serviceIds: DEDICATED_OPERATORS[i] || DEFAULT_SERVICES.map((s) => s.id),
       currentTicketId: null,
     });
   }

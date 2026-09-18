@@ -51,8 +51,70 @@
 
   // ---- Local receipt printer (print-service running on this kiosk PC) ----
   var PRINT_SERVICE_URL = 'http://localhost:9100/print';
+  var PRINT_TIMEOUT_MS = 6000; // print-servisning o'zi 8s ichida javob beradi/bermaydi
+  var PRINT_RETRY_DELAY_MS = 1500;
 
-  function printTicket(ticket, peopleAhead, position, etaMin) {
+  var toastTimer = null;
+  function toast(msg) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      t.classList.remove('show');
+    }, 3200);
+  }
+
+  var lastPrintPayload = null; // qo'lda qayta chop etish uchun saqlanadi
+  var btnReprint = $('btnReprint');
+
+  function postPrint(payload) {
+    var controller = new AbortController();
+    var timer = setTimeout(function () {
+      controller.abort();
+    }, PRINT_TIMEOUT_MS);
+    return fetch(PRINT_SERVICE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res;
+      })
+      .finally(function () {
+        clearTimeout(timer);
+      });
+  }
+
+  function sleep(ms) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, ms);
+    });
+  }
+
+  // Bitta muvaffaqiyatsizlik ko'pincha vaqtinchalik (printer uyg'onmoqda,
+  // tarmoq sekinlashuvi) — jimgina yo'qotib yubormasdan, bir marta qayta
+  // urinamiz, keyin muvaffaqiyatsiz bo'lsa mijozga ko'rinadigan qilamiz.
+  async function attemptPrint(payload) {
+    try {
+      await postPrint(payload);
+      return true;
+    } catch (err) {
+      console.warn('Chek chop etilmadi (1-urinish):', err.message);
+      await sleep(PRINT_RETRY_DELAY_MS);
+      try {
+        await postPrint(payload);
+        return true;
+      } catch (err2) {
+        console.warn('Chek chop etilmadi (2-urinish):', err2.message);
+        return false;
+      }
+    }
+  }
+
+  async function printTicket(ticket, peopleAhead, position, etaMin) {
     var now = new Date();
     var p = function (n) {
       return String(n).padStart(2, '0');
@@ -66,14 +128,28 @@
       date: p(now.getDate()) + '.' + p(now.getMonth() + 1) + '.' + now.getFullYear(),
       time: p(now.getHours()) + ':' + p(now.getMinutes()),
     };
-    fetch(PRINT_SERVICE_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    }).catch(function (err) {
-      console.warn('Chek chop etilmadi (print-servis ishlamayapti?):', err.message);
-    });
+    lastPrintPayload = payload;
+    btnReprint.hidden = true;
+
+    var ok = await attemptPrint(payload);
+    if (!ok) {
+      toast('Chek chop etilmadi — printerni tekshiring');
+      btnReprint.hidden = false;
+    }
   }
+
+  btnReprint.addEventListener('click', async function () {
+    if (!lastPrintPayload) return;
+    btnReprint.disabled = true;
+    var ok = await attemptPrint(lastPrintPayload);
+    btnReprint.disabled = false;
+    if (ok) {
+      toast('Chek chop etildi');
+      btnReprint.hidden = true;
+    } else {
+      toast('Chek chop etilmadi — printerni tekshiring');
+    }
+  });
 
   // ---- Clock ----
   function tickClock() {
@@ -181,6 +257,8 @@
   function backToSelect() {
     clearAutoReturn();
     myTicket = null;
+    lastPrintPayload = null;
+    btnReprint.hidden = true;
     screenTicket.hidden = true;
     screenSelect.hidden = false;
     renderCards(lastView);

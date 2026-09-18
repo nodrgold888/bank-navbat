@@ -9,7 +9,7 @@
     return document.getElementById(id);
   };
 
-  var OPERATOR_COUNT = 6;
+  var OPERATOR_COUNT = 7;
   // Deep link: /staff?operator=3 fixes this station to operator 3 (handy for
   // kiosk-mode bookmarks on each operator's machine).
   var urlOp = Number(new URLSearchParams(location.search).get('operator'));
