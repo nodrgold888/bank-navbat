@@ -51,14 +51,15 @@
   function render(view) {
     var call = view.lastCall;
     if (call) {
+      var opName = call.operatorName || call.operatorId + '-operator';
       $('hlCode').textContent = call.code;
-      $('hlOp').textContent = call.operatorId + '-OPERATOR';
+      $('hlOp').textContent = opName.toUpperCase();
       $('hlGoto').textContent =
         (call.serviceIcon ? call.serviceIcon + ' ' : '') +
         call.serviceName +
         ' — Iltimos, ' +
-        call.operatorId +
-        '-operatorga murojaat qiling';
+        opName +
+        'ga murojaat qiling';
       $('hlNote').textContent = call.recall ? 'Qayta chaqirilmoqda' : '';
     } else {
       $('hlCode').textContent = '—';
@@ -89,8 +90,8 @@
         : '';
       cell.innerHTML =
         '<div class="op-name">' +
-        b.id +
-        '-operator <small>' +
+        b.name +
+        ' <small>' +
         statusTxt +
         '</small></div>' +
         '<div class="op-code">' +

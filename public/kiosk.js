@@ -240,8 +240,7 @@
     var active = $('tActive');
     if (calledOperator) {
       calledBox.hidden = false;
-      calledBox.textContent =
-        myTicket.code + ' — Iltimos, ' + calledOperator + '-operatorga murojaat qiling';
+      calledBox.textContent = myTicket.code + ' — Iltimos, ' + calledOperator + 'ga murojaat qiling';
       active.hidden = true;
     } else {
       calledBox.hidden = true;
@@ -286,7 +285,7 @@
       return b.ticketCode === myTicket.code;
     });
     if (calledRow) {
-      showTicket(0, 0, calledRow.id);
+      showTicket(0, 0, calledRow.name);
       return;
     }
 

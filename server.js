@@ -38,6 +38,7 @@ const OPERATOR_COUNT = 7;
 // Operator 7 is dedicated to currency exchange only, instead of the default
 // "handles every service" assignment the rest get.
 const DEDICATED_OPERATORS = { 7: ['valyuta'] };
+const OPERATOR_NAME_OVERRIDES = { 7: 'Valyuta' };
 
 // The service types. Each has an independent, daily-incrementing queue.
 const DEFAULT_SERVICES = [
@@ -119,7 +120,7 @@ function freshState() {
   for (let i = 1; i <= OPERATOR_COUNT; i++) {
     operators.push({
       id: i,
-      name: `${i}-operator`,
+      name: OPERATOR_NAME_OVERRIDES[i] || `${i}-operator`,
       online: true,
       serviceIds: DEDICATED_OPERATORS[i] || DEFAULT_SERVICES.map((s) => s.id),
       currentTicketId: null,

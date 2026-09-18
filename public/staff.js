@@ -10,6 +10,12 @@
   };
 
   var OPERATOR_COUNT = 7;
+  // Mirrors server.js's OPERATOR_NAME_OVERRIDES — used before the first
+  // /api/state response arrives, when the picker/login UI has no server data yet.
+  var OPERATOR_NAME_OVERRIDES = { 7: 'Valyuta' };
+  var operatorLabel = function (n) {
+    return OPERATOR_NAME_OVERRIDES[n] || n + '-operator';
+  };
   // Deep link: /staff?operator=3 fixes this station to operator 3 (handy for
   // kiosk-mode bookmarks on each operator's machine).
   var urlOp = Number(new URLSearchParams(location.search).get('operator'));
@@ -29,7 +35,7 @@
     for (var i = 1; i <= OPERATOR_COUNT; i++) {
       (function (n) {
         var btn = document.createElement('button');
-        btn.textContent = n + '-operator';
+        btn.textContent = operatorLabel(n);
         btn.addEventListener('click', function () {
           chooseOperator(n);
         });
@@ -44,7 +50,7 @@
     $('opPick').hidden = true;
     $('panel').hidden = false;
     $('opBadge').textContent = String(n);
-    $('opTitle').textContent = n + '-operator';
+    $('opTitle').textContent = operatorLabel(n);
     Navbat.post('/api/operator', { operatorId: n, online: true }).catch(function () {});
     if (lastView) render(lastView);
   }
