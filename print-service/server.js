@@ -29,9 +29,36 @@ app.use((req, res, next) => {
 
 const PRINTER_SHARE_NAME = process.env.PRINTER_SHARE_NAME || 'XP-80C'; // Windows'da share qilingan printer nomi
 const COPY_TIMEOUT_MS = 8000; // printer javob bermasa, servisni ilib qo'ymaslik uchun
+const PRINT_RETRY_COUNT = 2; // vaqtinchalik xatolarda (spooler band, printer uyg'onmoqda) qayta urinish soni
+const PRINT_RETRY_DELAY_MS = 1000;
 const LOGO_PATH = path.join(__dirname, 'assets', 'logo.png');
 const BRANCH_ADDRESS = "Toshkent shahri, Uchtepa tumani, Ko'kcha Darvoza, 489B";
 const BRANCH_PHONE = process.env.BRANCH_PHONE || '1284';
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Windows share'ga nusxalashda vaqtinchalik xatolar (spooler band, printer
+// uyqudan uyg'onmoqda) tez-tez uchraydi — bir necha marta urinib ko'ramiz,
+// har safar bo'sh joydan boshlamaymiz.
+async function copyToShare(tempFile) {
+  const cmd = `copy /b "${tempFile}" "\\\\localhost\\${PRINTER_SHARE_NAME}"`;
+  let lastErr;
+  for (let attempt = 1; attempt <= PRINT_RETRY_COUNT + 1; attempt += 1) {
+    try {
+      execSync(cmd, { shell: 'cmd.exe', timeout: COPY_TIMEOUT_MS });
+      return;
+    } catch (err) {
+      lastErr = err;
+      console.warn(`  -> nusxalash urinishi ${attempt} muvaffaqiyatsiz: ${err.message}`);
+      if (attempt <= PRINT_RETRY_COUNT) {
+        await sleep(PRINT_RETRY_DELAY_MS);
+      }
+    }
+  }
+  throw lastErr;
+}
 
 // ---- ASCII-safe decorative helpers (Unicode box-drawing chars are risky —
 // thermal codepages already mangle non-ASCII like "oʻ", so stick to +,-,|,*) ----
@@ -152,10 +179,7 @@ app.post('/print', async (req, res) => {
     fs.writeFileSync(tempFile, buffer);
 
     try {
-      execSync(`copy /b "${tempFile}" "\\\\localhost\\${PRINTER_SHARE_NAME}"`, {
-        shell: 'cmd.exe',
-        timeout: COPY_TIMEOUT_MS,
-      });
+      await copyToShare(tempFile);
     } finally {
       fs.unlinkSync(tempFile);
     }
@@ -173,8 +197,25 @@ app.post('/print', async (req, res) => {
   }
 });
 
-app.get('/health', (req, res) => {
-  res.json({ ok: true, printer: PRINTER_SHARE_NAME });
+// Shunchaki "servis tirik"ligini emas, printer share'i haqiqatan ham
+// ko'rinayotganini tekshiradi — shu tufayli kiosk chop etishdan oldin
+// muammoni oldindan bila oladi.
+app.get('/health', async (req, res) => {
+  try {
+    execSync(`dir "\\\\localhost\\${PRINTER_SHARE_NAME}"`, { shell: 'cmd.exe', timeout: 3000 });
+    res.json({ ok: true, printer: PRINTER_SHARE_NAME });
+  } catch (err) {
+    res.status(503).json({ ok: false, printer: PRINTER_SHARE_NAME, error: err.message });
+  }
+});
+
+// Servis nssm orqali kuzatuvsiz Windows xizmati sifatida ishlaydi — kutilmagan
+// xato butun jarayonni yiqitib qo'ymasin, shunchaki logga yozilsin.
+process.on('uncaughtException', (err) => {
+  console.error('  -> KUTILMAGAN XATO:', err);
+});
+process.on('unhandledRejection', (err) => {
+  console.error('  -> KUTILMAGAN PROMISE XATOSI:', err);
 });
 
 app.listen(9100, () => {
