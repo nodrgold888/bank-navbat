@@ -23,9 +23,31 @@
   // of getting yanked back to the menu. Distinguished by a URL flag that
   // only the physical kiosk's Chrome shortcut passes (see kiosk.bat:
   // ".../kiosk?shared=1"); a plain "/kiosk" link (the QR poster) does not.
-  var IS_SHARED_KIOSK = new URLSearchParams(location.search).get('shared') === '1';
-  var AUTO_RETURN_MS = 2000;
-  var autoReturnTimer = null;
+  //
+  // The flag is also cached in localStorage the first time it's seen: some
+  // domain-forwarding/proxy setups drop query strings on later navigations
+  // (e.g. Chrome kiosk mode reloading, or a bookmarked/history URL missing
+  // it), which would otherwise silently turn the shared kiosk back into
+  // "personal phone" mode — no auto-return, no kiosk-scale layout — with no
+  // visible error, just it "not going back."
+  var IS_SHARED_KIOSK = (function () {
+    if (new URLSearchParams(location.search).get('shared') === '1') {
+      try {
+        localStorage.setItem('kioskShared', '1');
+      } catch (e) {
+        /* private mode / storage disabled — flag just won't persist */
+      }
+      return true;
+    }
+    try {
+      return localStorage.getItem('kioskShared') === '1';
+    } catch (e) {
+      return false;
+    }
+  })();
+  var AUTO_RETURN_MS = 3000;
+  var autoReturnDeadline = 0; // 0 = no return scheduled
+  var autoReturnCheckTimer = null;
 
   // Same flag also gates the full-screen "album" layout in style.css. Sizing
   // that up purely from viewport width/orientation would misfire on a large
@@ -37,17 +59,34 @@
   }
 
   function clearAutoReturn() {
-    if (autoReturnTimer) {
-      clearTimeout(autoReturnTimer);
-      autoReturnTimer = null;
+    autoReturnDeadline = 0;
+    if (autoReturnCheckTimer) {
+      clearInterval(autoReturnCheckTimer);
+      autoReturnCheckTimer = null;
     }
   }
 
+  // A repeating check against a wall-clock deadline, rather than a single
+  // setTimeout — immune to the timer being silently dropped, and self-heals
+  // if the tab was ever backgrounded/throttled (checks again as soon as it's
+  // visible, via the visibilitychange listener below) instead of depending
+  // on a background timer firing on schedule.
   function scheduleAutoReturn() {
-    clearAutoReturn();
     if (!IS_SHARED_KIOSK) return;
-    autoReturnTimer = setTimeout(backToSelect, AUTO_RETURN_MS);
+    autoReturnDeadline = Date.now() + AUTO_RETURN_MS;
+    if (autoReturnCheckTimer) return;
+    autoReturnCheckTimer = setInterval(function () {
+      if (autoReturnDeadline && Date.now() >= autoReturnDeadline) {
+        backToSelect();
+      }
+    }, 250);
   }
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && autoReturnDeadline && Date.now() >= autoReturnDeadline) {
+      backToSelect();
+    }
+  });
 
   // ---- Local receipt printer (print-service running on this kiosk PC) ----
   var PRINT_SERVICE_URL = 'http://localhost:9100/print';
