@@ -895,6 +895,8 @@ body.tv {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
+  text-align: center;
   gap: 0;
   min-height: 0;
   overflow: hidden;
@@ -947,9 +949,11 @@ body.tv {
   font-weight: 700;
   opacity: 0.85;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: baseline;
+  gap: 8px;
   line-height: 1.1;
+  max-width: 100%;
 }
 .op-cell .op-name small {
   font-size: clamp(0.95rem, 1.6vh, 1.3rem);
@@ -973,9 +977,12 @@ body.tv {
   font-size: clamp(1rem, 1.8vh, 1.5rem);
   opacity: 0.85;
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 4px 8px;
   line-height: 1.1;
+  max-width: 100%;
 }
 
 /* Valyuta's featured box isn't constrained by a grid row's 1fr height like
