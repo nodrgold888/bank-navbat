@@ -891,9 +891,6 @@ body.tv {
 .op-cell.idle {
   opacity: 0.42;
 }
-.op-cell.paused {
-  opacity: 0.5;
-}
 .op-cell.just-called {
   background: linear-gradient(120deg, #1c7fd0 0%, #22a24f 100%);
   color: #fff;

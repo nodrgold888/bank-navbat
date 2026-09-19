@@ -118,19 +118,24 @@
       $('hlNote').textContent = '';
     }
 
-    // Operator grid (6)
+    // Operator grid — paused/offline operators are left off the board
+    // entirely (a customer has nowhere to go for one anyway), instead of
+    // showing a dimmed "dam olishda" box that just takes up space.
     var grid = $('opGrid');
     grid.innerHTML = '';
-    view.board.forEach(function (b) {
+    view.board
+      .filter(function (b) {
+        return b.online;
+      })
+      .forEach(function (b) {
       var cell = document.createElement('div');
       cell.className = 'op-cell';
-      if (!b.online) cell.classList.add('paused');
-      else if (!b.ticketCode) cell.classList.add('idle');
+      if (!b.ticketCode) cell.classList.add('idle');
       if (call && call.operatorId === b.id && b.ticketCode === call.code) {
         cell.classList.add('just-called');
       }
 
-      var statusTxt = !b.online ? 'dam olishda' : b.ticketCode ? '' : 'boʻsh';
+      var statusTxt = b.ticketCode ? '' : 'boʻsh';
       var svcHtml = b.ticketCode
         ? '<span class="dot" style="background:' +
           (b.serviceColor || '#789') +
