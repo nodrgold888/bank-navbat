@@ -65,7 +65,7 @@ const DEFAULT_SERVICES = [
     name: 'Kreditlash',
     subtitle: 'Isteʼmol, avtokredit, ipoteka, mikroqarz',
     prefix: 'A',
-    icon: '💳',
+    icon: '🏦',
     color: '#6366f1',
   },
   {

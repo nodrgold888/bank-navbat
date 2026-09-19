@@ -47,7 +47,7 @@ bank-navbat/
   public/
     index.html         hub with links to every view
     kiosk.html/.js      customer kiosk (mobile-first)
-    tv.html/.js         TV display (6 operators, notification sounds)
+    tv.html/.js         TV display (operator board, notification sounds)
     staff.html/.js      operator panel
     qr.html/.js         printable QR poster
     admin.html/.js      admin dashboard
@@ -69,19 +69,37 @@ bank-navbat/
 - **Ticket numbers:** `<prefix><3 digits>` per service, incrementing per day
   (`A001`, `A002`, … / `B001`, …).
 
-### Service types (5)
+### Service types (7)
 
 | # | Icon | Title | Subtitle | Prefix |
 |---|------|-------|----------|--------|
-| 1 | 💳 | Kreditlash | Isteʼmol, avtokredit, ipoteka, mikroqarz | **A** |
+| 1 | 🏦 | Kreditlash | Isteʼmol, avtokredit, ipoteka, mikroqarz | **A** |
 | 2 | 💰 | Depozitlar | Omonat, jamgʻarma, mijoz mablagʻlari | **B** |
-| 3 | 💸 | Toʻlovlar va pul oʻtkazmalari | Kartalar, transferlar, toʻlovlar | **C** |
+| 3 | 💸 | Toʻlovlar va pul oʻtkazmalari | Kontrakt, kommunal, jarima toʻlovlari, pul oʻtkazmalari | **C** |
 | 4 | 💳 | Bank kartalari | Visa/Uzcard/Humo, karta mahsulotlari | **D** |
-| 5 | 👥 | Mijozlarga xizmat koʻrsatish | Jismoniy shaxslar bilan ishlash | **E** |
+| 5 | 🖥️ | Terminalar bilan ishlash | POS-terminallarni ulash/sozlash, texnik xizmat | **E** |
+| 6 | 🤝 | Escrow xizmati | Uy va avtomashina oldi-sotdi bitimlari | **F** |
+| 7 | 💱 | Valyuta ayirboshlash | Dollar, yevro va boshqa valyutalarni soʻmga almashtirish | **G** |
 
-### Operators (6)
+### Operators (7)
 
-Any operator can serve any service type. Each staff panel:
+Each operator is dedicated to a fixed subset of services (`DEDICATED_OPERATORS`
+in `server.js`), not "any operator serves anything":
+
+| Operator | Services |
+|----------|----------|
+| 1-operator | Depozitlar, Toʻlovlar, Escrow |
+| 2-operator | Bank kartalari, Terminalar bilan ishlash |
+| 3-operator | Kreditlash |
+| 4-operator | Kreditlash |
+| 5-operator | Bank kartalari, Terminalar bilan ishlash |
+| 6-operator | Depozitlar, Toʻlovlar, Escrow |
+| Valyuta (7) | Valyuta ayirboshlash |
+
+A "Chaqirish" click on a queue the logged-in operator isn't assigned to is
+rejected server-side (403) and shown disabled/greyed in the staff panel.
+
+Each staff panel:
 
 - **Keyingisini chaqirish** — completes the current customer (served) and pulls the
   **longest-waiting** ticket across the queues that operator is assigned to
@@ -112,20 +130,26 @@ clamped to 2–20 min) for the TV footer and the admin dashboard.
 Edit the two constants at the top of [`server.js`](server.js):
 
 ```js
-const OPERATOR_COUNT = 6;              // change the number of operators
+const OPERATOR_COUNT = 7;              // change the number of operators
+
+const DEDICATED_OPERATORS = {          // fixed service assignment per operator id
+  1: ['depozitlar', 'tolovlar', 'escrow'],
+  // ...add/edit entries; an operator id with no entry defaults to every service
+};
+const OPERATOR_NAME_OVERRIDES = { 7: 'Valyuta' }; // custom display name, optional
 
 const DEFAULT_SERVICES = [             // add / edit a service type
   { id: 'kreditlash', name: 'Kreditlash',
     subtitle: 'Isteʼmol, avtokredit, ipoteka, mikroqarz',
-    prefix: 'A', icon: '💳', color: '#6366f1' },
-  // ...add another { id, name, subtitle, prefix, icon, color }
+    prefix: 'A', icon: '🏦', color: '#6366f1' },
+  // ...add another { id, name, subtitle, prefix, icon, color } — keep prefixes unique
 ];
 ```
 
 Then delete `data/state.json` (or `POST /api/reset`) and restart. Every view — kiosk
 cards, TV board, staff panel, admin table — picks up the change automatically from
-the server's view model. New operators default to serving all service types and
-start online.
+the server's view model. An operator id with no entry in `DEDICATED_OPERATORS`
+defaults to serving every service type and starts online.
 
 ## API reference
 
