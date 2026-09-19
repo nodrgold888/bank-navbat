@@ -650,8 +650,10 @@ body.tv {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.12);
-  padding-bottom: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 14px 22px;
 }
 .tv-head .title {
   font-size: 3.1rem;
@@ -659,6 +661,24 @@ body.tv {
   display: flex;
   gap: 16px;
   align-items: center;
+}
+.tv-live {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  margin-left: 6px;
+}
+.tv-live .live-dot {
+  width: 12px;
+  height: 12px;
+}
+.live-dot.live-dot-off {
+  background: #ef4444;
+  animation: none;
+  box-shadow: none;
 }
 .tv-head .title .brand-logo {
   width: 76px;
@@ -860,10 +880,11 @@ body.tv {
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 14px;
-  padding: clamp(10px, 2vh, 24px) 24px;
+  padding: clamp(4px, 0.9vh, 16px) 22px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  gap: 0;
   min-height: 0;
   overflow: hidden;
 }
@@ -879,26 +900,26 @@ body.tv {
   border-color: rgba(255, 255, 255, 0.35);
   animation: op-cell-pulse 1s ease 0s 3;
   /* Pop visually above its neighbors instead of just changing color — makes
-     it unmistakable which box is being called, even at a glance. */
+     it unmistakable which box is being called, even at a glance. Kept
+     modest (transform + a capped font bump, overflow still hidden): an
+     earlier, much larger version of this with overflow:visible spilled the
+     called box's text over the row below it. */
   position: relative;
   z-index: 2;
   transform: scale(1.06);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-  overflow: visible; /* text below is bigger than the base cell was sized for */
 }
-/* The called operator's own text goes noticeably bigger than every other
-   box on the board — this is the one a customer needs to actually read. */
+/* The called operator's own text goes a bit bigger than every other box on
+   the board — capped so it still fits inside the cell (overflow: hidden is
+   inherited from .op-cell), rather than resizing to whatever felt biggest. */
 .op-cell.just-called .op-name {
-  font-size: clamp(2.2rem, 4.2vh, 3.2rem);
-}
-.op-cell.just-called .op-name small {
-  font-size: clamp(1.3rem, 2.4vh, 1.8rem);
+  font-size: clamp(1.4rem, 2.8vh, 2.35rem);
 }
 .op-cell.just-called .op-code {
-  font-size: clamp(3.8rem, 7.6vh, 6.6rem);
+  font-size: clamp(2.35rem, 5.1vh, 4.85rem);
 }
 .op-cell.just-called .op-svc {
-  font-size: clamp(1.6rem, 2.8vh, 2.2rem);
+  font-size: clamp(1.05rem, 1.9vh, 1.55rem);
 }
 @keyframes op-cell-pulse {
   0%,
@@ -914,23 +935,24 @@ body.tv {
   opacity: 1;
 }
 .op-cell .op-name {
-  font-size: clamp(1.8rem, 3.4vh, 2.6rem);
+  font-size: clamp(1.3rem, 2.6vh, 2.2rem);
   font-weight: 700;
   opacity: 0.85;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  line-height: 1.1;
 }
 .op-cell .op-name small {
-  font-size: clamp(1.1rem, 2vh, 1.5rem);
+  font-size: clamp(0.95rem, 1.6vh, 1.3rem);
   font-weight: 600;
   opacity: 0.75;
 }
 .op-cell .op-code {
-  font-size: clamp(3rem, 6.2vh, 5.4rem);
+  font-size: clamp(2.2rem, 4.8vh, 4.6rem);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  line-height: 1.15;
+  line-height: 1.05;
   color: #6fe6a0;
 }
 .op-cell.idle .op-code {
@@ -940,11 +962,12 @@ body.tv {
   color: #fff;
 }
 .op-cell .op-svc {
-  font-size: clamp(1.3rem, 2.2vh, 1.8rem);
+  font-size: clamp(1rem, 1.8vh, 1.5rem);
   opacity: 0.85;
   display: flex;
   align-items: center;
   gap: 8px;
+  line-height: 1.1;
 }
 .op-cell .op-svc .dot,
 .wait-item .dot {
@@ -1026,6 +1049,9 @@ body.tv {
 .tvf-stats b {
   color: #fff;
   font-size: 1.9rem;
+}
+.tvf-ic {
+  margin-right: 4px;
 }
 .tvf-branch {
   font-size: 1.15rem;

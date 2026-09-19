@@ -204,6 +204,7 @@
 
   function onConn(online) {
     $('offline').classList.toggle('show', !online);
+    $('liveDot').classList.toggle('live-dot-off', !online);
   }
 
   Navbat.connect(render, onConn);
