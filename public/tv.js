@@ -45,6 +45,11 @@
     hl.classList.remove('flash');
     void hl.offsetWidth;
     hl.classList.add('flash');
+
+    var bell = $('hlBell');
+    bell.classList.remove('ring');
+    void bell.offsetWidth;
+    bell.classList.add('ring');
   }
 
   // ---- Render ----

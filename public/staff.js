@@ -174,6 +174,32 @@
     });
   }
 
+  // ---- "Operatorlar holati" — who's serving which ticket right now ----
+  function buildOpsStatus(view) {
+    var box = $('opsStatus');
+    box.innerHTML = '';
+    (view.operators || []).forEach(function (o) {
+      var row = document.createElement('div');
+      row.className = 's2-oprow' + (o.id === opId ? ' s2-oprow-me' : '');
+      var statusHtml;
+      if (!o.online) {
+        statusHtml = '<span class="s2-op-status paused">Tanaffusda</span>';
+      } else if (o.current) {
+        statusHtml =
+          '<span class="s2-op-ticket tabnum">' +
+          o.current.code +
+          '</span><span class="s2-op-svc">' +
+          (o.current.serviceIcon ? o.current.serviceIcon + ' ' : '') +
+          o.current.serviceName +
+          '</span>';
+      } else {
+        statusHtml = '<span class="s2-op-status idle">Boʻsh</span>';
+      }
+      row.innerHTML = '<span class="s2-op-name">' + o.name + '</span>' + statusHtml;
+      box.appendChild(row);
+    });
+  }
+
   // ---- Service-type checkboxes (setup) ----
   function buildSvcChecks(view) {
     var box = $('svcChecks');
@@ -276,6 +302,7 @@
     $('waitTotal').textContent = total;
     buildQueues(view);
     buildSvcChecks(view);
+    buildOpsStatus(view);
   }
 
   function startTimer() {

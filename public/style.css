@@ -725,6 +725,32 @@ body.tv {
   opacity: 0.55;
   font-weight: 400;
 }
+.hl-bell {
+  font-size: 0.55em;
+  display: inline-block;
+  transform-origin: top center;
+}
+.hl-bell.ring {
+  animation: bell-ring 0.9s ease 0s 3;
+}
+@keyframes bell-ring {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(18deg);
+  }
+  40% {
+    transform: rotate(-16deg);
+  }
+  60% {
+    transform: rotate(10deg);
+  }
+  80% {
+    transform: rotate(-6deg);
+  }
+}
 .headline .code {
   color: #63e58c; /* Davr green — pops over the blue side of the panel */
 }
@@ -775,6 +801,16 @@ body.tv {
   background: linear-gradient(120deg, #1c7fd0 0%, #22a24f 100%);
   color: #fff;
   border-color: rgba(255, 255, 255, 0.35);
+  animation: op-cell-pulse 1s ease 0s 3;
+}
+@keyframes op-cell-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(111, 230, 160, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(111, 230, 160, 0.45);
+  }
 }
 .op-cell.just-called .op-name,
 .op-cell.just-called .op-svc {
@@ -1306,6 +1342,44 @@ body.staff {
   opacity: 0.45;
 }
 
+.s2-ops {
+  padding: 0 12px 10px;
+}
+.s2-oprow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 6px;
+  border-top: 1px solid var(--line);
+}
+.s2-oprow-me {
+  background: var(--blue-soft);
+  border-radius: 8px;
+}
+.s2-oprow .s2-op-name {
+  flex: 1;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.s2-oprow .s2-op-ticket {
+  font-weight: 800;
+  color: var(--navy);
+}
+.s2-oprow .s2-op-svc {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.s2-oprow .s2-op-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.s2-oprow .s2-op-status.idle {
+  color: var(--muted);
+}
+.s2-oprow .s2-op-status.paused {
+  color: #b45309;
+}
+
 .s2-checks {
   padding: 0 12px 12px;
 }
@@ -1584,6 +1658,38 @@ table.admin-table .swatch {
   width: 12px;
   height: 12px;
   border-radius: 3px;
+}
+.admin-ops {
+  margin-top: 22px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+.admin-ops h2 {
+  font-size: 1.05rem;
+  margin: 0 0 4px;
+}
+.admin-ops .admin-table-wrap {
+  padding: 0;
+  border: none;
+  box-shadow: none;
+}
+.op-status-tag {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.op-status-tag.online {
+  background: rgba(22, 163, 74, 0.14);
+  color: #16a34a;
+}
+.op-status-tag.paused {
+  background: rgba(217, 119, 6, 0.14);
+  color: #b45309;
 }
 .admin-queue {
   margin-top: 22px;

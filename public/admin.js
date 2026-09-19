@@ -51,6 +51,37 @@
       tb.appendChild(tr);
     });
 
+    // operators status — who's serving which ticket right now
+    var svcById = {};
+    view.services.forEach(function (s) {
+      svcById[s.id] = s;
+    });
+    var opsTb = $('opsTbody');
+    opsTb.innerHTML = '';
+    (view.operators || []).forEach(function (o) {
+      var tr = document.createElement('tr');
+      var statusHtml = o.online
+        ? '<span class="op-status-tag online">Onlayn</span>'
+        : '<span class="op-status-tag paused">Tanaffusda</span>';
+      var ticketHtml = o.current ? o.current.code : '—';
+      var svcHtml = o.current
+        ? (o.current.serviceIcon ? o.current.serviceIcon + ' ' : '') + o.current.serviceName
+        : '—';
+      var assignedHtml = o.serviceIds
+        .map(function (id) {
+          var s = svcById[id];
+          return s ? s.icon + ' ' + s.name : id;
+        })
+        .join(', ');
+      tr.innerHTML =
+        '<td>' + o.name + '</td>' +
+        '<td>' + statusHtml + '</td>' +
+        '<td class="num tabnum">' + ticketHtml + '</td>' +
+        '<td>' + svcHtml + '</td>' +
+        '<td>' + assignedHtml + '</td>';
+      opsTb.appendChild(tr);
+    });
+
     // waiting-queue list with cancel buttons
     var q = view.queue || [];
     $('qCount').textContent = q.length;
