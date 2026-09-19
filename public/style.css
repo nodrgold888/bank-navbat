@@ -1010,28 +1010,6 @@ body.tv {
   font-size: 1.6rem;
 }
 
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 18px;
-  margin-top: auto;
-  padding-top: 16px;
-  font-size: 1.3rem;
-  opacity: 0.85;
-  flex-shrink: 0;
-}
-.legend span {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.legend i {
-  width: 18px;
-  height: 18px;
-  border-radius: 3px;
-  display: inline-block;
-}
-
 .tv-foot {
   display: flex;
   flex-direction: column;

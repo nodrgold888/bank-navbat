@@ -188,16 +188,6 @@
     }
     manageWaitingScroll(wl);
 
-    // Legend (service colors)
-    var lg = $('legend');
-    lg.innerHTML = '';
-    view.services.forEach(function (s) {
-      var span = document.createElement('span');
-      span.innerHTML =
-        '<i style="background:' + s.color + '"></i>' + s.icon + ' ' + s.name;
-      lg.appendChild(span);
-    });
-
     // Footer stats
     $('stIssued').textContent = view.stats.issued;
     $('stServed').textContent = view.stats.served;
