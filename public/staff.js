@@ -82,17 +82,23 @@
       } else if (url === '/api/cancel') {
         toast('Chipta bekor qilindi: ' + (res.ticket && res.ticket.code));
       }
-      // Don't re-render from the now-stale `lastView` here: the server pushes
-      // the real updated state (via SSE, almost instantly) right after the
-      // action commits, and that real render() call reflects what actually
-      // happened. A stale re-render would flash the pre-action state (e.g. a
-      // cancelled ticket briefly reappearing) before the real update lands.
-      busy = false;
     } catch (err) {
       toast('Xatolik: ' + err.message);
-      // Nothing changed server-side on failure, so the last known view is
-      // still correct — safe to re-render it to restore button state.
+    } finally {
       busy = false;
+      // Fetch the real current state and render it directly, rather than
+      // waiting on the server's next SSE push: when an action doesn't
+      // actually change anything (e.g. recalling with no active ticket, or
+      // calling next when the queue is already empty), the broadcast state
+      // is byte-identical to before and common.js's dedup skips calling
+      // render() for it — which used to leave every button stuck disabled
+      // until some unrelated event elsewhere finally forced a redraw.
+      try {
+        var freshRes = await fetch('/api/state', { cache: 'no-store' });
+        if (freshRes.ok) lastView = await freshRes.json();
+      } catch (e) {
+        /* fall through to re-rendering the last known view below */
+      }
       if (lastView) render(lastView);
     }
   }
