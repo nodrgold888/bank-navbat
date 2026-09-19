@@ -50,6 +50,17 @@
     bell.classList.remove('ring');
     void bell.offsetWidth;
     bell.classList.add('ring');
+
+    // Big, hard-to-miss full-screen flash + headline pop — the bell/pulse
+    // alone were too subtle to notice from across a room.
+    var boom = $('tvBoom');
+    boom.classList.remove('boom');
+    void boom.offsetWidth;
+    boom.classList.add('boom');
+
+    hl.classList.remove('pop');
+    void hl.offsetWidth;
+    hl.classList.add('pop');
   }
 
   // ---- Render ----
