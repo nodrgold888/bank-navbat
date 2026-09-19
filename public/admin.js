@@ -54,30 +54,40 @@
     view.services.forEach(function (s) {
       svcById[s.id] = s;
     });
-    var opsTb = $('opsTbody');
-    opsTb.innerHTML = '';
+    var opsBox = $('opsTbody');
+    opsBox.innerHTML = '';
     (view.operators || []).forEach(function (o) {
-      var tr = document.createElement('tr');
+      var card = document.createElement('div');
+      card.className = 'op-card' + (o.current ? ' op-card-active' : '');
       var statusHtml = o.online
         ? '<span class="op-status-tag online">Onlayn</span>'
         : '<span class="op-status-tag paused">Tanaffusda</span>';
-      var ticketHtml = o.current ? o.current.code : '—';
-      var svcHtml = o.current
-        ? (o.current.serviceIcon ? o.current.serviceIcon + ' ' : '') + o.current.serviceName
-        : '—';
-      var assignedHtml = o.serviceIds
+      var currentHtml = o.current
+        ? '<div class="op-card-ticket tabnum">' +
+          o.current.code +
+          '</div><div class="op-card-svc">' +
+          (o.current.serviceIcon ? o.current.serviceIcon + ' ' : '') +
+          o.current.serviceName +
+          '</div>'
+        : '<div class="op-card-idle">Boʻsh</div>';
+      var chipsHtml = o.serviceIds
         .map(function (id) {
           var s = svcById[id];
-          return s ? s.icon + ' ' + s.name : id;
+          return '<span class="op-card-chip">' + (s ? s.icon + ' ' + s.name : id) + '</span>';
         })
-        .join(', ');
-      tr.innerHTML =
-        '<td>' + o.name + '</td>' +
-        '<td>' + statusHtml + '</td>' +
-        '<td class="num tabnum">' + ticketHtml + '</td>' +
-        '<td>' + svcHtml + '</td>' +
-        '<td>' + assignedHtml + '</td>';
-      opsTb.appendChild(tr);
+        .join('');
+      card.innerHTML =
+        '<div class="op-card-head">' +
+        '<span class="op-card-name">' +
+        o.name +
+        '</span>' +
+        statusHtml +
+        '</div>' +
+        currentHtml +
+        '<div class="op-card-chips">' +
+        chipsHtml +
+        '</div>';
+      opsBox.appendChild(card);
     });
 
     // waiting-queue list with cancel buttons

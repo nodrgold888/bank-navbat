@@ -9,72 +9,92 @@
   </head>
   <body class="admin">
     <div class="admin-wrap">
-      <a class="back-link" href="/">← Bosh sahifa</a>
-      <div class="brand-lockup">
-        <img class="brand-logo" src="/img/logo.jpg" alt="Davr Bank" />
-        <h1>Davr Bank — Admin panel</h1>
-      </div>
-      <p class="sub" id="subLine">Bugungi kun — real vaqtda yangilanadi</p>
+      <header class="admin-header">
+        <a class="back-link" href="/">← Bosh sahifa</a>
+        <div class="admin-header-row">
+          <div class="brand-lockup">
+            <img class="brand-logo" src="/img/logo.jpg" alt="Davr Bank" />
+            <h1>Admin panel</h1>
+          </div>
+          <div class="admin-live">
+            <span class="live-dot"></span>
+            <span id="subLine">Bugungi kun — real vaqtda yangilanadi</span>
+          </div>
+        </div>
+      </header>
 
       <div class="kpi-row">
-        <div class="kpi"><div class="v" id="kIssued">0</div><div class="k">Berilgan raqamlar</div></div>
-        <div class="kpi"><div class="v" id="kServed">0</div><div class="k">Xizmat koʻrsatilgan</div></div>
-        <div class="kpi"><div class="v" id="kWaiting">0</div><div class="k">Navbatda kutayotganlar</div></div>
-        <div class="kpi"><div class="v" id="kBusiest">—</div><div class="k">Eng band xizmat turi</div></div>
+        <div class="kpi kpi-blue">
+          <span class="kpi-ic">🎫</span>
+          <div class="kpi-body"><div class="v" id="kIssued">0</div><div class="k">Berilgan raqamlar</div></div>
+        </div>
+        <div class="kpi kpi-green">
+          <span class="kpi-ic">✅</span>
+          <div class="kpi-body"><div class="v" id="kServed">0</div><div class="k">Xizmat koʻrsatilgan</div></div>
+        </div>
+        <div class="kpi kpi-amber">
+          <span class="kpi-ic">⏳</span>
+          <div class="kpi-body"><div class="v" id="kWaiting">0</div><div class="k">Navbatda kutayotganlar</div></div>
+        </div>
+        <div class="kpi kpi-purple">
+          <span class="kpi-ic">🔥</span>
+          <div class="kpi-body"><div class="v" id="kBusiest">—</div><div class="k">Eng band xizmat turi</div></div>
+        </div>
       </div>
 
-      <div class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Xizmat turi</th>
-              <th>Berilgan</th>
-              <th>Xizmat koʻrsatilgan</th>
-              <th>Oʻtkazib yuborilgan</th>
-              <th>Bekor qilingan</th>
-              <th>Navbatda</th>
-              <th>Oʻrtacha kutish (daq.)</th>
-              <th>Oʻrtacha xizmat (daq.)</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-
-      <div class="admin-ops">
-        <h2>Operatorlar holati</h2>
-        <p class="q-hint">Har bir operator hozir qaysi chiptani qabul qilayotgani.</p>
+      <section class="admin-card">
+        <div class="admin-card-head">
+          <h2>Xizmat turlari statistikasi</h2>
+          <p class="admin-card-sub">Bugungi kun boʻyicha, xizmat turlari kesimida</p>
+        </div>
         <div class="admin-table-wrap">
           <table class="admin-table">
             <thead>
               <tr>
-                <th>Operator</th>
-                <th>Holati</th>
-                <th>Hozirgi chipta</th>
                 <th>Xizmat turi</th>
-                <th>Biriktirilgan xizmatlar</th>
+                <th>Berilgan</th>
+                <th>Xizmat koʻrsatilgan</th>
+                <th>Oʻtkazib yuborilgan</th>
+                <th>Bekor qilingan</th>
+                <th>Navbatda</th>
+                <th>Oʻrtacha kutish (daq.)</th>
+                <th>Oʻrtacha xizmat (daq.)</th>
               </tr>
             </thead>
-            <tbody id="opsTbody"></tbody>
+            <tbody id="tbody"></tbody>
           </table>
         </div>
-      </div>
+      </section>
 
-      <div class="admin-queue">
-        <h2>
-          Navbatdagi chiptalar <span id="qCount">0</span>
-          <span class="q-sub" id="qCancelled"></span>
-        </h2>
-        <p class="q-hint">Keraksiz (takroriy, sinov, tashlab ketilgan) chiptani bu yerdan olib tashlang.</p>
+      <section class="admin-card">
+        <div class="admin-card-head">
+          <h2>Operatorlar holati</h2>
+          <p class="admin-card-sub">Har bir operator hozir qaysi chiptani qabul qilayotgani</p>
+        </div>
+        <div class="ops-grid" id="opsTbody"></div>
+      </section>
+
+      <section class="admin-card">
+        <div class="admin-card-head">
+          <h2>
+            Navbatdagi chiptalar
+            <span class="admin-card-badge" id="qCount">0</span>
+          </h2>
+          <p class="admin-card-sub">
+            Keraksiz (takroriy, sinov, tashlab ketilgan) chiptani bu yerdan olib tashlang.
+            <span class="q-sub" id="qCancelled"></span>
+          </p>
+        </div>
         <div class="q-list" id="queueList"></div>
-      </div>
+      </section>
 
-      <div class="admin-actions">
+      <section class="admin-card admin-danger">
+        <div class="admin-card-head">
+          <h2>Navbatni nolga tushirish</h2>
+          <p class="admin-card-sub">Raqamlar har kuni yarim tunda avtomatik nolga tushadi</p>
+        </div>
         <button class="btn-reset" id="btnReset">Navbatni hozir nolga tushirish</button>
-        <span style="color: rgba(255, 255, 255, 0.82); align-self: center">
-          (raqamlar har kuni yarim tunda avtomatik nolga tushadi)
-        </span>
-      </div>
+      </section>
 
       <div class="admin-credit">
         © Davr Bank navbat tizimi. Developed by <b>Bahodirov Nodirjon</b>, <b>AbuZarr Abdumuminov</b> and <b>Rustamov Shahboz</b>
