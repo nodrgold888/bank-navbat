@@ -891,7 +891,7 @@ body.tv {
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 14px;
-  padding: clamp(4px, 0.9vh, 16px) 22px;
+  padding: clamp(4px, 0.9vh, 16px) 16px;
   display: flex;
   flex-direction: column;
   justify-content: center;
