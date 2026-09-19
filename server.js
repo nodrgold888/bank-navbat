@@ -30,6 +30,16 @@ const QRCode = require('qrcode');
 // Configuration
 // ---------------------------------------------------------------------------
 
+// A single unexpected error anywhere (a bad request, an edge case in the
+// midnight rollover, etc.) must not take down every screen at once — log it
+// and keep serving everyone else instead of crashing the whole process.
+process.on('uncaughtException', (err) => {
+  console.error('KUTILMAGAN XATO (jarayon davom etadi):', err);
+});
+process.on('unhandledRejection', (err) => {
+  console.error('KUTILMAGAN PROMISE XATOSI (jarayon davom etadi):', err);
+});
+
 const PORT = Number(process.env.PORT) || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const DATA_FILE = path.join(__dirname, 'data', 'state.json');
@@ -783,13 +793,19 @@ function serveStatic(req, res, urlPath) {
 // ---------------------------------------------------------------------------
 
 function readJsonBody(req) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     let raw = '';
+    let tooLarge = false;
     req.on('data', (chunk) => {
+      if (tooLarge) return;
       raw += chunk;
-      if (raw.length > 1e6) req.destroy();
+      if (raw.length > 1e6) {
+        tooLarge = true;
+        req.destroy();
+      }
     });
     req.on('end', () => {
+      if (tooLarge) return; // 'close' below settles the promise instead
       if (!raw) return resolve({});
       try {
         resolve(JSON.parse(raw));
@@ -797,7 +813,12 @@ function readJsonBody(req) {
         resolve({});
       }
     });
-    req.on('error', () => resolve({}));
+    req.on('error', () => reject(new HttpError(400, "So'rovni o'qib bo'lmadi")));
+    // req.destroy() above fires 'close' (not 'end') — without this, the
+    // request would hang forever waiting on an 'end' event that never comes.
+    req.on('close', () => {
+      if (tooLarge) reject(new HttpError(413, "So'rov hajmi juda katta"));
+    });
   });
 }
 
