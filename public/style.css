@@ -965,7 +965,7 @@ body.tv {
   overflow: hidden;
 }
 .waiting-panel h2 {
-  font-size: 1.7rem;
+  font-size: 2.1rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #74dfa0;
@@ -977,7 +977,15 @@ body.tv {
   gap: 10px;
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  /* Every waiting queue is sent now (no more 8-item cutoff) — scroll instead
+     of clipping so a long list is still fully reachable rather than
+     silently hidden past the fold; auto-scrolled by tv.js so nobody has to
+     touch this unattended display for it to cycle through. */
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.waiting-list::-webkit-scrollbar {
+  display: none;
 }
 .wait-item {
   display: flex;
@@ -985,20 +993,21 @@ body.tv {
   gap: 14px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  padding: 12px 16px;
+  padding: 14px 18px;
+  flex-shrink: 0;
 }
 .wait-item .wi-code {
-  font-size: 2.6rem;
+  font-size: 3.4rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
 .wait-item .wi-svc {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   opacity: 0.82;
 }
 .wait-empty {
   opacity: 0.5;
-  font-size: 1.3rem;
+  font-size: 1.6rem;
 }
 
 .legend {
@@ -1007,8 +1016,9 @@ body.tv {
   gap: 12px 18px;
   margin-top: auto;
   padding-top: 16px;
-  font-size: 1.05rem;
+  font-size: 1.3rem;
   opacity: 0.85;
+  flex-shrink: 0;
 }
 .legend span {
   display: flex;
@@ -1016,8 +1026,8 @@ body.tv {
   gap: 6px;
 }
 .legend i {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   border-radius: 3px;
   display: inline-block;
 }
@@ -1032,15 +1042,15 @@ body.tv {
 .tvf-stats {
   display: flex;
   justify-content: space-between;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   opacity: 0.8;
 }
 .tvf-stats b {
   color: #fff;
-  font-size: 1.5rem;
+  font-size: 1.9rem;
 }
 .tvf-branch {
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   opacity: 0.55;
 }
 .tvf-branch b {

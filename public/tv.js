@@ -12,6 +12,40 @@
   var soundOn = localStorage.getItem('tvSound') !== 'off';
   var lastSeq = null;
   var initialised = false;
+  var lastWaitingSig = null;
+
+  // ---- Auto-scroll the waiting-queue panel ----
+  // Every waiting ticket is sent now (no more 8-item cutoff), so the list
+  // can be taller than the panel. This is an unattended display — nobody's
+  // going to scroll it by hand — so cycle through it automatically instead
+  // of just clipping whatever doesn't fit.
+  var waitingScrollTimer = null;
+  var waitingScrollPaused = false;
+  function manageWaitingScroll(el) {
+    var overflow = el.scrollHeight - el.clientHeight;
+    if (overflow <= 4) {
+      if (waitingScrollTimer) {
+        clearInterval(waitingScrollTimer);
+        waitingScrollTimer = null;
+      }
+      el.scrollTop = 0;
+      return;
+    }
+    if (waitingScrollTimer) return; // already cycling
+    waitingScrollTimer = setInterval(function () {
+      if (waitingScrollPaused) return;
+      var max = el.scrollHeight - el.clientHeight;
+      if (el.scrollTop >= max) {
+        waitingScrollPaused = true;
+        setTimeout(function () {
+          el.scrollTop = 0;
+          waitingScrollPaused = false;
+        }, 2500);
+        return;
+      }
+      el.scrollTop += 1;
+    }, 40);
+  }
 
   updateSoundBtn();
   $('soundToggle').addEventListener('click', function () {
@@ -119,31 +153,40 @@
       grid.appendChild(cell);
     });
 
-    // Waiting list (next up to 8, across all queues)
+    // Waiting list — every queue, not just the first few. Only rebuild the
+    // DOM when the actual set of waiting tickets changes, so an in-progress
+    // auto-scroll (below) isn't reset to the top on every routine state push.
     var wl = $('waitingList');
-    wl.innerHTML = '';
-    if (!view.waitingList.length) {
-      var e = document.createElement('div');
-      e.className = 'wait-empty';
-      e.textContent = 'Hozircha navbatda hech kim yoʻq';
-      wl.appendChild(e);
-    } else {
-      view.waitingList.forEach(function (w) {
-        var item = document.createElement('div');
-        item.className = 'wait-item';
-        item.innerHTML =
-          '<span class="dot" style="background:' +
-          (w.serviceColor || '#789') +
-          '"></span>' +
-          '<span class="wi-code tabnum">' +
-          w.code +
-          '</span><span class="wi-svc">' +
-          (w.serviceIcon ? w.serviceIcon + ' ' : '') +
-          w.serviceName +
-          '</span>';
-        wl.appendChild(item);
-      });
+    var waitingSig = view.waitingList.map(function (w) {
+      return w.code;
+    }).join(',');
+    if (waitingSig !== lastWaitingSig) {
+      lastWaitingSig = waitingSig;
+      wl.innerHTML = '';
+      if (!view.waitingList.length) {
+        var e = document.createElement('div');
+        e.className = 'wait-empty';
+        e.textContent = 'Hozircha navbatda hech kim yoʻq';
+        wl.appendChild(e);
+      } else {
+        view.waitingList.forEach(function (w) {
+          var item = document.createElement('div');
+          item.className = 'wait-item';
+          item.innerHTML =
+            '<span class="dot" style="background:' +
+            (w.serviceColor || '#789') +
+            '"></span>' +
+            '<span class="wi-code tabnum">' +
+            w.code +
+            '</span><span class="wi-svc">' +
+            (w.serviceIcon ? w.serviceIcon + ' ' : '') +
+            w.serviceName +
+            '</span>';
+          wl.appendChild(item);
+        });
+      }
     }
+    manageWaitingScroll(wl);
 
     // Legend (service colors)
     var lg = $('legend');

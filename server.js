@@ -555,7 +555,12 @@ function buildView() {
       createdAt: t.createdAt,
     };
   };
-  const waitingList = waitingSorted.slice(0, 8).map(mapWaiting);
+  // Was capped at 8 — cut off queues once more than 8 people total were
+  // waiting across ALL services combined, so the TV board could silently
+  // stop showing some queues entirely. The TV scrolls this list now, so
+  // send everyone waiting (same generous cap as the admin queue below,
+  // just for payload size, not for hiding anyone).
+  const waitingList = waitingSorted.slice(0, 120).map(mapWaiting);
   // Full waiting queue for the admin cancel UI — capped for payload size.
   const fullQueue = waitingSorted.slice(0, 120).map(mapWaiting);
 
