@@ -394,6 +394,9 @@ function callNext(operatorId, serviceId) {
   const op = getOp(operatorId);
   if (!op) throw new HttpError(400, 'Nomaʼlum operator');
   if (serviceId && !svc(serviceId)) throw new HttpError(400, 'Nomaʼlum xizmat turi');
+  if (serviceId && !op.serviceIds.includes(serviceId)) {
+    throw new HttpError(403, 'Bu xizmat turi sizga biriktirilmagan');
+  }
   completeCurrent(op, 'served');
   const next = assignNext(op, serviceId || null);
   return { called: next };

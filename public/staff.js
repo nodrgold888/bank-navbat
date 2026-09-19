@@ -145,9 +145,12 @@
   function buildQueues(view) {
     var box = $('queues');
     box.innerHTML = '';
+    var me = myOp(view);
+    var mine = me ? me.serviceIds : [];
     view.services.forEach(function (s) {
+      var assigned = mine.indexOf(s.id) !== -1;
       var row = document.createElement('div');
-      row.className = 's2-qrow';
+      row.className = 's2-qrow' + (assigned ? '' : ' s2-qrow-unassigned');
       row.innerHTML =
         '<span class="dot" style="background:' +
         s.color +
@@ -162,7 +165,8 @@
         '</span>' +
         '<button class="s2-qcall">Chaqirish</button>';
       var btn = row.querySelector('button');
-      btn.disabled = busy || s.waiting === 0;
+      btn.disabled = busy || s.waiting === 0 || !assigned;
+      btn.title = assigned ? '' : 'Bu xizmat turi sizga biriktirilmagan';
       btn.addEventListener('click', function () {
         action('/api/call-next', { serviceId: s.id });
       });
