@@ -10,7 +10,6 @@
   };
 
   var busy = false;
-  var lastView = null;
 
   function fmtWaited(createdAt) {
     var m = Math.max(0, Math.round((Date.now() - createdAt) / 60000));
@@ -18,7 +17,6 @@
   }
 
   function render(view) {
-    lastView = view;
     $('subLine').textContent = 'Ish kuni: ' + view.businessDate + ' — real vaqtda yangilanadi';
 
     $('kIssued').textContent = view.stats.issued;
@@ -115,18 +113,31 @@
     });
   }
 
+  function setQueueButtonsDisabled(v) {
+    $('queueList')
+      .querySelectorAll('button')
+      .forEach(function (b) {
+        b.disabled = v;
+      });
+  }
+
   async function cancelTicket(code) {
     if (busy) return;
     if (!confirm(code + ' chiptasini navbatdan butunlay olib tashlaysizmi?')) return;
     busy = true;
+    setQueueButtonsDisabled(true);
     try {
       await Navbat.post('/api/cancel', { code: code });
       toast('Bekor qilindi: ' + code);
+      // Don't re-render with the stale pre-cancel `lastView` here — that would
+      // briefly put the just-cancelled ticket back in the list. The server
+      // pushes the real, updated state (via SSE, near-instantly) right after
+      // the cancel commits, which re-renders the list correctly on its own.
     } catch (err) {
       toast('Xatolik: ' + err.message);
     } finally {
       busy = false;
-      if (lastView) render(lastView);
+      setQueueButtonsDisabled(false);
     }
   }
 

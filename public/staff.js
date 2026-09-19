@@ -82,9 +82,16 @@
       } else if (url === '/api/cancel') {
         toast('Chipta bekor qilindi: ' + (res.ticket && res.ticket.code));
       }
+      // Don't re-render from the now-stale `lastView` here: the server pushes
+      // the real updated state (via SSE, almost instantly) right after the
+      // action commits, and that real render() call reflects what actually
+      // happened. A stale re-render would flash the pre-action state (e.g. a
+      // cancelled ticket briefly reappearing) before the real update lands.
+      busy = false;
     } catch (err) {
       toast('Xatolik: ' + err.message);
-    } finally {
+      // Nothing changed server-side on failure, so the last known view is
+      // still correct — safe to re-render it to restore button state.
       busy = false;
       if (lastView) render(lastView);
     }
