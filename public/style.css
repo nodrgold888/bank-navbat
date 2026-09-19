@@ -867,6 +867,17 @@ body.tv {
   min-height: 1.3em;
 }
 
+/* Valyuta gets pulled out of the regular grid into its own centered,
+   featured box — :empty (when offline) collapses to nothing so it doesn't
+   leave a gap. */
+.valyuta-wrap {
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.valyuta-wrap:empty {
+  display: none;
+}
 .op-grid {
   flex: 1;
   display: grid;
@@ -966,6 +977,38 @@ body.tv {
   gap: 8px;
   line-height: 1.1;
 }
+
+/* Valyuta's featured box isn't constrained by a grid row's 1fr height like
+   the regular cells, so it can safely afford bigger, fixed text sizes. */
+.valyuta-wrap {
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.valyuta-wrap:empty {
+  display: none;
+}
+.valyuta-cell {
+  width: min(100%, 480px);
+  margin: 4px 0 14px;
+  padding: 16px 28px;
+  border-width: 2px;
+  border-color: #eab308;
+  background: rgba(234, 179, 8, 0.1);
+}
+.valyuta-cell .op-name {
+  font-size: 1.5rem;
+}
+.valyuta-cell .op-code {
+  font-size: 3.6rem;
+}
+.valyuta-cell .op-svc {
+  font-size: 1.2rem;
+}
+.valyuta-cell.just-called {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
 .op-cell .op-svc .dot,
 .wait-item .dot {
   width: 12px;

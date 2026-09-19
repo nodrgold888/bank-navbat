@@ -118,23 +118,9 @@
       $('hlNote').textContent = '';
     }
 
-    // Operator grid — paused/offline operators are left off the board
-    // entirely (a customer has nowhere to go for one anyway), instead of
-    // showing a dimmed "dam olishda" box that just takes up space.
-    var grid = $('opGrid');
-    grid.innerHTML = '';
-    view.board
-      .filter(function (b) {
-        return b.online;
-      })
-      .forEach(function (b) {
-      var cell = document.createElement('div');
-      cell.className = 'op-cell';
-      if (!b.ticketCode) cell.classList.add('idle');
-      if (call && call.operatorId === b.id && b.ticketCode === call.code) {
-        cell.classList.add('just-called');
-      }
-
+    // Shared markup builder for both the regular grid cells and the
+    // featured Valyuta box below.
+    function opCellHtml(b) {
       var statusTxt = b.ticketCode ? '' : 'boʻsh';
       var svcHtml = b.ticketCode
         ? '<span class="dot" style="background:' +
@@ -143,7 +129,7 @@
           (b.serviceIcon ? b.serviceIcon + ' ' : '') +
           (b.serviceName || '')
         : '';
-      cell.innerHTML =
+      return (
         '<div class="op-name">' +
         b.name +
         ' <small>' +
@@ -154,9 +140,50 @@
         '</div>' +
         '<div class="op-svc">' +
         svcHtml +
-        '</div>';
-      grid.appendChild(cell);
+        '</div>'
+      );
+    }
+
+    // Valyuta gets its own featured, centered box instead of sitting in the
+    // regular grid — pulled out here, before the grid loop below.
+    var onlineBoard = view.board.filter(function (b) {
+      return b.online;
     });
+    var valyutaWrap = $('valyutaWrap');
+    valyutaWrap.innerHTML = '';
+    var valyuta = onlineBoard.find(function (b) {
+      return b.name === 'Valyuta';
+    });
+    if (valyuta) {
+      var vCell = document.createElement('div');
+      vCell.className = 'op-cell valyuta-cell';
+      if (!valyuta.ticketCode) vCell.classList.add('idle');
+      if (call && call.operatorId === valyuta.id && valyuta.ticketCode === call.code) {
+        vCell.classList.add('just-called');
+      }
+      vCell.innerHTML = opCellHtml(valyuta);
+      valyutaWrap.appendChild(vCell);
+    }
+
+    // Operator grid — paused/offline operators are left off the board
+    // entirely (a customer has nowhere to go for one anyway), instead of
+    // showing a dimmed "dam olishda" box that just takes up space.
+    var grid = $('opGrid');
+    grid.innerHTML = '';
+    onlineBoard
+      .filter(function (b) {
+        return b.name !== 'Valyuta';
+      })
+      .forEach(function (b) {
+        var cell = document.createElement('div');
+        cell.className = 'op-cell';
+        if (!b.ticketCode) cell.classList.add('idle');
+        if (call && call.operatorId === b.id && b.ticketCode === call.code) {
+          cell.classList.add('just-called');
+        }
+        cell.innerHTML = opCellHtml(b);
+        grid.appendChild(cell);
+      });
 
     // Waiting list — every queue, not just the first few. Only rebuild the
     // DOM when the actual set of waiting tickets changes, so an in-progress
