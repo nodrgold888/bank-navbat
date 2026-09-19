@@ -966,6 +966,23 @@ setInterval(() => {
   if (checkRollover()) commit();
 }, 60 * 1000);
 
+// Free hosting plans (e.g. Render's free tier) suspend the service after
+// ~15 minutes with no *inbound* HTTP traffic — a plain setInterval inside the
+// process doesn't count, since it generates no external request. Making a
+// real request to our own public URL does count as inbound traffic and keeps
+// the host from ever seeing 15 idle minutes, at no cost and no separate
+// uptime service. Only runs when RENDER_EXTERNAL_URL is actually set (i.e.
+// really running on Render), so local/dev runs never self-ping.
+if (process.env.RENDER_EXTERNAL_URL) {
+  const SELF_PING_INTERVAL_MS = 10 * 60 * 1000; // comfortably under the ~15 min sleep threshold
+  const selfPingUrl = `${process.env.RENDER_EXTERNAL_URL.replace(/\/+$/, '')}/api/qr`;
+  setInterval(() => {
+    fetch(selfPingUrl).catch(() => {
+      /* a missed ping just means we skip resetting the idle clock this time */
+    });
+  }, SELF_PING_INTERVAL_MS);
+}
+
 server.listen(PORT, () => {
   const addrs = ['localhost', ...lanAddresses()];
   console.log('\n  Bank navbat tizimi ishga tushdi\n');
