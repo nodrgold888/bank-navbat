@@ -878,6 +878,27 @@ body.tv {
   color: #fff;
   border-color: rgba(255, 255, 255, 0.35);
   animation: op-cell-pulse 1s ease 0s 3;
+  /* Pop visually above its neighbors instead of just changing color — makes
+     it unmistakable which box is being called, even at a glance. */
+  position: relative;
+  z-index: 2;
+  transform: scale(1.06);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  overflow: visible; /* text below is bigger than the base cell was sized for */
+}
+/* The called operator's own text goes noticeably bigger than every other
+   box on the board — this is the one a customer needs to actually read. */
+.op-cell.just-called .op-name {
+  font-size: clamp(2.2rem, 4.2vh, 3.2rem);
+}
+.op-cell.just-called .op-name small {
+  font-size: clamp(1.3rem, 2.4vh, 1.8rem);
+}
+.op-cell.just-called .op-code {
+  font-size: clamp(3.8rem, 7.6vh, 6.6rem);
+}
+.op-cell.just-called .op-svc {
+  font-size: clamp(1.6rem, 2.8vh, 2.2rem);
 }
 @keyframes op-cell-pulse {
   0%,
