@@ -39,7 +39,7 @@ const OPERATOR_COUNT = 7;
 // "handles every service" default.
 const DEDICATED_OPERATORS = {
   1: ['depozitlar', 'tolovlar', 'escrow'],
-  2: ['kartalar'],
+  2: ['kartalar', 'terminalar'],
   3: ['kreditlash'],
   4: ['kreditlash'],
   5: ['kartalar', 'terminalar'],
