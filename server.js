@@ -42,7 +42,7 @@ const DEDICATED_OPERATORS = {
   2: ['kartalar'],
   3: ['kreditlash'],
   4: ['kreditlash'],
-  5: ['kartalar'],
+  5: ['kartalar', 'terminalar'],
   6: ['depozitlar', 'tolovlar', 'escrow'],
   7: ['valyuta'],
 };
@@ -84,6 +84,15 @@ const DEFAULT_SERVICES = [
     prefix: 'D',
     icon: '💳',
     color: '#0891b2',
+  },
+  {
+    id: 'terminalar',
+    name: 'Terminalar bilan ishlash',
+    subtitle:
+      "POS-terminallarni ulash va sozlash, texnik xizmat koʻrsatish, ishlamay qolgan terminallar boʻyicha murojaatlar",
+    prefix: 'E',
+    icon: '🖥️',
+    color: '#0d9488',
   },
   {
     id: 'escrow',
