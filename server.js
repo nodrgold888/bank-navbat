@@ -35,9 +35,17 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
 const DATA_FILE = path.join(__dirname, 'data', 'state.json');
 
 const OPERATOR_COUNT = 7;
-// Operator 7 is dedicated to currency exchange only, instead of the default
-// "handles every service" assignment the rest get.
-const DEDICATED_OPERATORS = { 7: ['valyuta'] };
+// Each operator is dedicated to a fixed subset of services, instead of the
+// "handles every service" default.
+const DEDICATED_OPERATORS = {
+  1: ['depozitlar', 'tolovlar', 'escrow'],
+  2: ['kartalar'],
+  3: ['kreditlash'],
+  4: ['kreditlash'],
+  5: ['kartalar'],
+  6: ['depozitlar', 'tolovlar', 'escrow'],
+  7: ['valyuta'],
+};
 const OPERATOR_NAME_OVERRIDES = { 7: 'Valyuta' };
 
 // The service types. Each has an independent, daily-incrementing queue.
