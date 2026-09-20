@@ -26,27 +26,32 @@
       ? view.report.busiest.icon + ' ' + view.report.busiest.name
       : '—';
 
-    // per-service table
+    // per-service stats — one card per service instead of a dense
+    // 8-column table, grouping the "flow" numbers (issued/served/waiting)
+    // big and up top, with the less-often-needed numbers (no-show,
+    // cancelled, averages) smaller underneath.
     var tb = $('tbody');
     tb.innerHTML = '';
     view.report.byService.forEach(function (r) {
-      var tr = document.createElement('tr');
-      tr.innerHTML =
-        '<td><span class="svc-tag"><span class="swatch" style="background:' +
-        r.color +
-        '"></span>' +
-        r.icon +
-        ' ' +
-        r.name +
-        '</span></td>' +
-        '<td class="num">' + r.issued + '</td>' +
-        '<td class="num">' + r.served + '</td>' +
-        '<td class="num">' + r.noShow + '</td>' +
-        '<td class="num">' + (r.cancelled || 0) + '</td>' +
-        '<td class="num">' + r.waiting + '</td>' +
-        '<td class="num">' + r.avgWaitMin + '</td>' +
-        '<td class="num">' + r.avgServeMin + '</td>';
-      tb.appendChild(tr);
+      var card = document.createElement('div');
+      card.className = 'admin-svc-card';
+      card.innerHTML =
+        '<div class="admin-svc-head">' +
+        '<span class="swatch" style="background:' + r.color + '"></span>' +
+        '<span class="admin-svc-name">' + r.icon + ' ' + r.name + '</span>' +
+        '</div>' +
+        '<div class="admin-svc-stats">' +
+        '<div class="admin-svc-stat"><div class="v">' + r.issued + '</div><div class="k">Berilgan</div></div>' +
+        '<div class="admin-svc-stat"><div class="v">' + r.served + '</div><div class="k">Xizmat koʻrsatilgan</div></div>' +
+        '<div class="admin-svc-stat"><div class="v">' + r.waiting + '</div><div class="k">Navbatda</div></div>' +
+        '</div>' +
+        '<div class="admin-svc-meta">' +
+        'Oʻtkazib yuborilgan: <b>' + r.noShow + '</b> · ' +
+        'Bekor qilingan: <b>' + (r.cancelled || 0) + '</b> · ' +
+        'Oʻrtacha kutish: <b>' + r.avgWaitMin + '</b> daq · ' +
+        'Oʻrtacha xizmat: <b>' + r.avgServeMin + '</b> daq' +
+        '</div>';
+      tb.appendChild(card);
     });
 
     // operators status — who's serving which ticket right now

@@ -1895,48 +1895,59 @@ body.admin {
   font-weight: 800;
 }
 
-/* ---- Per-service stats table ---- */
-.admin-card .admin-table-wrap {
-  padding: 0;
-  overflow-x: auto;
+/* ---- Per-service stats cards ---- */
+.svc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
 }
-table.admin-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 760px;
-}
-table.admin-table th,
-table.admin-table td {
-  text-align: right;
-  padding: 12px 10px;
-  border-bottom: 1px solid var(--line);
-}
-table.admin-table th:first-child,
-table.admin-table td:first-child {
-  text-align: left;
-}
-table.admin-table th {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-table.admin-table tbody tr:hover {
+.admin-svc-card {
   background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
 }
-table.admin-table td.num {
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-}
-table.admin-table .svc-tag {
-  display: inline-flex;
+.admin-svc-head {
+  display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 700;
+  margin-bottom: 10px;
 }
-table.admin-table .swatch {
+.admin-svc-name {
+  font-weight: 700;
+  color: var(--ink);
+}
+.swatch {
   width: 12px;
   height: 12px;
   border-radius: 3px;
+  flex: none;
+}
+.admin-svc-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+.admin-svc-stat .v {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--navy);
+  font-variant-numeric: tabular-nums;
+}
+.admin-svc-stat .k {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.admin-svc-meta {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.admin-svc-meta b {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---- Operator status cards ---- */
