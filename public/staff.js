@@ -160,31 +160,33 @@
     box.innerHTML = '';
     var me = myOp(view);
     var mine = me ? me.serviceIds : [];
-    view.services.forEach(function (s) {
-      var assigned = mine.indexOf(s.id) !== -1;
-      var row = document.createElement('div');
-      row.className = 's2-qrow' + (assigned ? '' : ' s2-qrow-unassigned');
-      row.innerHTML =
-        '<span class="dot" style="background:' +
-        s.color +
-        '"></span>' +
-        '<span class="s2-qname">' +
-        s.icon +
-        ' ' +
-        s.name +
-        '</span>' +
-        '<span class="s2-qn tabnum">' +
-        s.waiting +
-        '</span>' +
-        '<button class="s2-qcall">Chaqirish</button>';
-      var btn = row.querySelector('button');
-      btn.disabled = busy || s.waiting === 0 || !assigned;
-      btn.title = assigned ? '' : 'Bu xizmat turi sizga biriktirilmagan';
-      btn.addEventListener('click', function () {
-        action('/api/call-next', { serviceId: s.id });
+    view.services
+      .filter(function (s) {
+        return mine.indexOf(s.id) !== -1;
+      })
+      .forEach(function (s) {
+        var row = document.createElement('div');
+        row.className = 's2-qrow';
+        row.innerHTML =
+          '<span class="dot" style="background:' +
+          s.color +
+          '"></span>' +
+          '<span class="s2-qname">' +
+          s.icon +
+          ' ' +
+          s.name +
+          '</span>' +
+          '<span class="s2-qn tabnum">' +
+          s.waiting +
+          '</span>' +
+          '<button class="s2-qcall">Chaqirish</button>';
+        var btn = row.querySelector('button');
+        btn.disabled = busy || s.waiting === 0;
+        btn.addEventListener('click', function () {
+          action('/api/call-next', { serviceId: s.id });
+        });
+        box.appendChild(row);
       });
-      box.appendChild(row);
-    });
   }
 
   // ---- "Operatorlar holati" — who's serving which ticket right now ----
@@ -321,10 +323,11 @@
       $('btnSkip').disabled = !me.current;
     }
 
-    // waiting total + per-queue rows
+    // waiting total (own assigned services only, matching the filtered
+    // list below) + per-queue rows
     var total = 0;
     view.services.forEach(function (s) {
-      total += s.waiting;
+      if (me.serviceIds.indexOf(s.id) !== -1) total += s.waiting;
     });
     $('waitTotal').textContent = total;
     buildQueues(view);

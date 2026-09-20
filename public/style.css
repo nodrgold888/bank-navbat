@@ -1496,10 +1496,6 @@ body.staff {
 .s2-qrow .s2-qcall:disabled {
   opacity: 0.3;
 }
-.s2-qrow-unassigned {
-  opacity: 0.45;
-}
-
 .s2-ops {
   padding: 0 12px 10px;
 }
