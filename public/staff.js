@@ -188,10 +188,24 @@
   }
 
   // ---- "Operatorlar holati" — who's serving which ticket right now ----
+  // Same service assignment (order-independent) as the logged-in operator —
+  // i.e. their "pair" (1&6, 2&5, 3&4, or Valyuta alone), derived from the
+  // live serviceIds rather than hardcoded, so it stays correct if the
+  // server's operator/service assignments ever change.
+  function svcKey(ids) {
+    return ids.slice().sort().join(',');
+  }
+
   function buildOpsStatus(view) {
     var box = $('opsStatus');
     box.innerHTML = '';
-    (view.operators || []).forEach(function (o) {
+    var me = myOp(view);
+    var myKey = me ? svcKey(me.serviceIds) : null;
+    (view.operators || [])
+      .filter(function (o) {
+        return !myKey || svcKey(o.serviceIds) === myKey;
+      })
+      .forEach(function (o) {
       var row = document.createElement('div');
       row.className = 's2-oprow' + (o.id === opId ? ' s2-oprow-me' : '');
       var statusHtml;
