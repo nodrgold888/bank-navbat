@@ -1457,44 +1457,90 @@ body.staff {
   font-size: 0.9rem;
 }
 
-.s2-queues {
-  padding: 0 12px 10px;
+/* "Navbatda kutayotganlar" — always-visible panel (not a collapsible
+   <details> like the sections below it): now that it only lists the
+   logged-in operator's own 1-3 services, it's short enough to always show
+   fully, and it's the thing an operator glances at most often. */
+.s2-panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  margin-top: 12px;
+  padding: 15px 16px;
 }
-.s2-qrow {
+.s2-panel-head {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  padding: 11px 6px;
-  border-top: 1px solid var(--line);
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 12px;
 }
-.s2-qrow .dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+.s2-queues {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.s2-qcard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+.s2-qcard-active {
+  background: var(--blue-soft);
+  border-color: var(--blue);
+}
+.s2-qcard-icon {
+  width: 40px;
+  height: 40px;
   flex: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #fff;
 }
-.s2-qrow .s2-qname {
+.s2-qcard-body {
   flex: 1;
-  font-weight: 600;
-  font-size: 0.95rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
-.s2-qrow .s2-qn {
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  color: var(--navy);
-  min-width: 22px;
-  text-align: right;
+.s2-qcard-name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--ink);
 }
-.s2-qrow .s2-qcall {
+.s2-qcard-count {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.s2-qcard-active .s2-qcard-count {
+  color: var(--blue-dark);
+  font-weight: 700;
+}
+.s2-qcard-btn {
   background: var(--blue-soft);
   color: var(--blue-dark);
   font-weight: 700;
-  padding: 8px 15px;
+  padding: 10px 16px;
   border-radius: 9px;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
+  flex: none;
 }
-.s2-qrow .s2-qcall:disabled {
-  opacity: 0.3;
+.s2-qcard-active .s2-qcard-btn {
+  background: var(--blue);
+  color: #fff;
+}
+.s2-qcard-btn:disabled {
+  opacity: 0.35;
 }
 .s2-ops {
   padding: 0 12px 10px;

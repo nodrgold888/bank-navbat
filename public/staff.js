@@ -166,20 +166,22 @@
       })
       .forEach(function (s) {
         var row = document.createElement('div');
-        row.className = 's2-qrow';
+        row.className = 's2-qcard' + (s.waiting > 0 ? ' s2-qcard-active' : '');
         row.innerHTML =
-          '<span class="dot" style="background:' +
+          '<span class="s2-qcard-icon" style="background:' +
           s.color +
-          '"></span>' +
-          '<span class="s2-qname">' +
+          '">' +
           s.icon +
-          ' ' +
+          '</span>' +
+          '<span class="s2-qcard-body">' +
+          '<span class="s2-qcard-name">' +
           s.name +
           '</span>' +
-          '<span class="s2-qn tabnum">' +
-          s.waiting +
+          '<span class="s2-qcard-count">' +
+          (s.waiting > 0 ? s.waiting + ' kishi kutmoqda' : 'Navbat boʻsh') +
           '</span>' +
-          '<button class="s2-qcall">Chaqirish</button>';
+          '</span>' +
+          '<button class="s2-qcard-btn">Chaqirish</button>';
         var btn = row.querySelector('button');
         btn.disabled = busy || s.waiting === 0;
         btn.addEventListener('click', function () {
