@@ -793,7 +793,7 @@ body.tv {
   overflow: hidden;
 }
 .op-cell {
-  background: rgba(111, 230, 160, 0.12);
+  background: linear-gradient(120deg, rgba(28, 127, 208, 0.22) 0%, rgba(34, 162, 79, 0.22) 100%);
   border: 2px solid rgba(111, 230, 160, 0.35);
   border-radius: 14px;
   padding: clamp(4px, 0.9vh, 16px) 16px;
