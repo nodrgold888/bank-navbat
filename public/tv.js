@@ -158,9 +158,8 @@
       var vCell = document.createElement('div');
       vCell.className = 'op-cell valyuta-cell';
       if (!valyuta.ticketCode) vCell.classList.add('idle');
-      if (call && call.operatorId === valyuta.id && valyuta.ticketCode === call.code) {
-        vCell.classList.add('just-called');
-      }
+      var vJustCalled = call && call.operatorId === valyuta.id && valyuta.ticketCode === call.code;
+      if (vJustCalled) vCell.classList.add('just-called');
       vCell.innerHTML = opCellHtml(valyuta);
       valyutaWrap.appendChild(vCell);
     }
@@ -178,9 +177,12 @@
         var cell = document.createElement('div');
         cell.className = 'op-cell';
         if (!b.ticketCode) cell.classList.add('idle');
-        if (call && call.operatorId === b.id && b.ticketCode === call.code) {
-          cell.classList.add('just-called');
-        }
+        var justCalled = call && call.operatorId === b.id && b.ticketCode === call.code;
+        if (justCalled) cell.classList.add('just-called');
+        // Border picks up the active service's own color — same idea as
+        // Valyuta's gold border, just driven by whichever service the
+        // operator is actually serving right now.
+        if (b.ticketCode && !justCalled) cell.style.borderColor = b.serviceColor || '#eab308';
         cell.innerHTML = opCellHtml(b);
         grid.appendChild(cell);
       });
