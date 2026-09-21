@@ -889,7 +889,7 @@ body.tv {
 }
 .op-cell {
   background: rgba(255, 255, 255, 0.07);
-  border: 2px solid rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(111, 230, 160, 0.35);
   border-radius: 14px;
   padding: clamp(4px, 0.9vh, 16px) 16px;
   display: flex;
@@ -902,7 +902,7 @@ body.tv {
   overflow: hidden;
 }
 .op-cell.idle {
-  opacity: 0.42;
+  opacity: 0.6;
 }
 .op-cell.just-called {
   background: linear-gradient(120deg, #1c7fd0 0%, #22a24f 100%);
