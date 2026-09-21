@@ -810,9 +810,9 @@ body.tv {
   opacity: 0.6;
 }
 .op-cell.just-called {
-  background: linear-gradient(120deg, #1c7fd0 0%, #22a24f 100%);
+  background: linear-gradient(120deg, #2196f3 0%, #2fd66d 100%);
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.6);
   animation: op-cell-pulse 1s ease 0s 3;
   /* Pop visually above its neighbors instead of just changing color — makes
      it unmistakable which box is being called, even at a glance. Kept
@@ -822,7 +822,7 @@ body.tv {
   position: relative;
   z-index: 2;
   transform: scale(1.06);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), 0 0 46px rgba(111, 230, 160, 0.65);
 }
 /* The called operator's own text goes a bit bigger than every other box on
    the board — capped so it still fits inside the cell (overflow: hidden is
@@ -842,7 +842,7 @@ body.tv {
     box-shadow: 0 0 0 0 rgba(111, 230, 160, 0);
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(111, 230, 160, 0.45);
+    box-shadow: 0 0 0 16px rgba(111, 230, 160, 0.65);
   }
 }
 .op-cell.just-called .op-name,
