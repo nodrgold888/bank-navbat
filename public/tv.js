@@ -73,50 +73,20 @@
   tickClock();
 
   // ---- Announcement ----
+  // The headline banner that used to show this text is gone (operators now
+  // get more screen space) — the full-screen boom flash plus each operator
+  // box's own highlight/pulse (see render() below) carry the announcement.
   function announce(call) {
     if (soundOn) Navbat.chime(call.recall ? 'recall' : 'call');
-    var hl = $('headline');
-    hl.classList.remove('flash');
-    void hl.offsetWidth;
-    hl.classList.add('flash');
-
-    var bell = $('hlBell');
-    bell.classList.remove('ring');
-    void bell.offsetWidth;
-    bell.classList.add('ring');
-
-    // Big, hard-to-miss full-screen flash + headline pop — the bell/pulse
-    // alone were too subtle to notice from across a room.
     var boom = $('tvBoom');
     boom.classList.remove('boom');
     void boom.offsetWidth;
     boom.classList.add('boom');
-
-    hl.classList.remove('pop');
-    void hl.offsetWidth;
-    hl.classList.add('pop');
   }
 
   // ---- Render ----
   function render(view) {
     var call = view.lastCall;
-    if (call) {
-      var opName = call.operatorName || call.operatorId + '-operator';
-      $('hlCode').textContent = call.code;
-      $('hlOp').textContent = opName.toUpperCase();
-      $('hlGoto').textContent =
-        (call.serviceIcon ? call.serviceIcon + ' ' : '') +
-        call.serviceName +
-        ' — Iltimos, ' +
-        opName +
-        'ga murojaat qiling';
-      $('hlNote').textContent = call.recall ? 'Qayta chaqirilmoqda' : '';
-    } else {
-      $('hlCode').textContent = '—';
-      $('hlOp').textContent = '—';
-      $('hlGoto').textContent = 'Navbat kutilmoqda';
-      $('hlNote').textContent = '';
-    }
 
     // Shared markup builder for both the regular grid cells and the
     // featured Valyuta box below.
