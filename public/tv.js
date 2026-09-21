@@ -101,10 +101,9 @@
         : '';
       return (
         '<div class="op-name">' +
-        b.name +
-        ' <small>' +
-        statusTxt +
-        '</small></div>' +
+        '<span class="op-name-text">' + b.name + '</span>' +
+        (statusTxt ? '<small>' + statusTxt + '</small>' : '') +
+        '</div>' +
         '<div class="op-code">' +
         (b.ticketCode || '—') +
         '</div>' +

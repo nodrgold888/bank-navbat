@@ -828,13 +828,13 @@ body.tv {
    the board — capped so it still fits inside the cell (overflow: hidden is
    inherited from .op-cell), rather than resizing to whatever felt biggest. */
 .op-cell.just-called .op-name {
-  font-size: clamp(1.4rem, 2.8vh, 2.35rem);
+  font-size: clamp(1.7rem, 3.6vh, 2.85rem);
 }
 .op-cell.just-called .op-code {
-  font-size: clamp(2.35rem, 5.1vh, 4.85rem);
+  font-size: clamp(2.75rem, 6.1vh, 5.85rem);
 }
 .op-cell.just-called .op-svc {
-  font-size: clamp(1.05rem, 1.9vh, 1.55rem);
+  font-size: clamp(1.2rem, 2.3vh, 1.9rem);
 }
 @keyframes op-cell-pulse {
   0%,
@@ -850,23 +850,26 @@ body.tv {
   opacity: 1;
 }
 .op-cell .op-name {
-  font-size: clamp(1.3rem, 2.6vh, 2.2rem);
+  font-size: clamp(1.6rem, 3.4vh, 2.7rem);
   font-weight: 700;
   opacity: 0.85;
   display: flex;
   justify-content: center;
   align-items: baseline;
-  gap: 8px;
+  gap: 10px;
   line-height: 1.1;
   max-width: 100%;
 }
+.op-cell .op-name-text {
+  display: inline-block;
+}
 .op-cell .op-name small {
-  font-size: clamp(0.95rem, 1.6vh, 1.3rem);
+  font-size: clamp(1.05rem, 1.9vh, 1.5rem);
   font-weight: 600;
   opacity: 0.75;
 }
 .op-cell .op-code {
-  font-size: clamp(2.2rem, 4.8vh, 4.6rem);
+  font-size: clamp(2.6rem, 5.8vh, 5.6rem);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   line-height: 1.05;
@@ -879,7 +882,7 @@ body.tv {
   color: #fff;
 }
 .op-cell .op-svc {
-  font-size: clamp(1rem, 1.8vh, 1.5rem);
+  font-size: clamp(1.15rem, 2.2vh, 1.85rem);
   opacity: 0.85;
   display: flex;
   justify-content: center;
@@ -909,13 +912,13 @@ body.tv {
   background: rgba(234, 179, 8, 0.1);
 }
 .valyuta-cell .op-name {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
 }
 .valyuta-cell .op-code {
-  font-size: 3.6rem;
+  font-size: 4.2rem;
 }
 .valyuta-cell .op-svc {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
 }
 .valyuta-cell.just-called {
   border-color: rgba(255, 255, 255, 0.6);
