@@ -181,9 +181,14 @@ window.Navbat = (function () {
 
   // --- Notification sound ----------------------------------------------------
   // Plays /audio/notify.mp3. Falls back to a synthesised bell if the file
-  // can't be loaded or played. Needs one user gesture first to unlock audio
-  // (the TV's Signal / Sinash button provides it).
-
+  // can't be loaded or played. Browsers block audio until the page has had a
+  // real user gesture, so on an unattended TV the very first automatic call
+  // (nobody touched the Signal/Sinash button yet) can silently fail — that's
+  // the "sometimes works, sometimes doesn't" symptom. To make the unlock as
+  // likely as possible, ANY click/tap/keypress anywhere on the page primes
+  // both the audio element and the WebAudio context, not just the dedicated
+  // buttons, and the context is re-resumed whenever the tab regains
+  // visibility (some browsers suspend it while backgrounded).
   const NOTIFY_SRC = '/audio/notify.mp3';
   let notifyEl = null;
   function notifyAudio() {
@@ -195,14 +200,56 @@ window.Navbat = (function () {
   }
 
   function playFile(volume) {
-    const a = notifyAudio();
-    a.pause();
-    a.currentTime = 0;
-    a.volume = volume;
-    const p = a.play();
-    if (p && typeof p.catch === 'function') p.catch(function () {});
-    return p;
+    // A fresh clone per call, instead of reusing/resetting one shared
+    // element: two chimes fired close together (e.g. two calls landing
+    // within the same second, or the recall's own double-beep) used to
+    // race on the shared element's pause()/currentTime reset, which can
+    // throw and silently drop the second sound.
+    try {
+      const a = notifyAudio().cloneNode(true);
+      a.volume = volume;
+      const p = a.play();
+      if (p && typeof p.catch === 'function') p.catch(function () {});
+      return p;
+    } catch (e) {
+      return null;
+    }
   }
+
+  function unlockAudio() {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx) {
+        const ctx = synthBell._ctx || (synthBell._ctx = new Ctx());
+        if (ctx.state === 'suspended') ctx.resume();
+      }
+    } catch (e) {
+      /* ignore */
+    }
+    try {
+      const a = notifyAudio();
+      a.volume = 0;
+      const p = a.play();
+      if (p && typeof p.then === 'function') {
+        p.then(
+          function () {
+            a.pause();
+            a.currentTime = 0;
+            a.volume = 1;
+          },
+          function () {}
+        );
+      }
+    } catch (e) {
+      /* ignore */
+    }
+  }
+  ['pointerdown', 'keydown', 'touchstart'].forEach(function (evt) {
+    document.addEventListener(evt, unlockAudio, { passive: true });
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) unlockAudio();
+  });
 
   function synthBell(kind) {
     try {
