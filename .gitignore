@@ -3,3 +3,5 @@ data/
 .impeccable/
 *.log
 .DS_Store
+dist/
+build-tmp/

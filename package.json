@@ -5,7 +5,8 @@
   "type": "commonjs",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build:exe": "bash desktop/build-windows.sh"
   },
   "engines": {
     "node": ">=18"

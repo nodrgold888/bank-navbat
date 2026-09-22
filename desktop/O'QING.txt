@@ -1,0 +1,46 @@
+DAVR BANK NAVBAT TIZIMI — Windows PC ilovasi
+=============================================
+
+Bu papkada 4 ta tayyor .exe fayl bor, Node.js oʻrnatilmagan har qanday
+Windows kompyuterda ishlaydi (kerakli hammasi shu papkada — node.exe ham).
+
+  DavrBank-Server.exe     — asosiy server. Serverni ishga tushiradigan
+                            kompyuterda ISHGA TUSHIRING VA OYNANI YOPMANG.
+                            Konsol oynasida server logi koʻrinadi.
+
+  DavrBank-Operator.exe   — operator (kassir) paneli. Har bir operator
+                            kompyuterida ishga tushiring.
+
+  DavrBank-Admin.exe      — admin panel.
+
+  DavrBank-TV.exe         — televizor ekrani (toʻliq ekran rejimida
+                            avtomatik ochiladi).
+
+QANDAY ISHGA TUSHIRISH
+-----------------------
+1. Bitta kompyuterda (yoki serverga ajratilgan kompyuterda)
+   DavrBank-Server.exe ni ishga tushiring. Konsol oynasi ochiladi va
+   "Bank navbat tizimi ishga tushdi" deb yozadi — shu oyna doim ochiq
+   turishi kerak.
+
+2. Server qaysi kompyuterda ishlayotgan boʻlsa, oʻsha kompyuterning
+   IP-manzilini bilib oling (masalan, cmd da "ipconfig" buyrugʻi bilan).
+
+3. Operator, Admin va TV kompyuterlarida "davrbank-server.txt" faylini
+   Notepad bilan oching va serverning manzilini yozing, masalan:
+
+       http://192.168.1.10:4123
+
+   Agar operator/admin/TV dasturi SERVER bilan BIR XIL kompyuterda
+   ishlasa, hech narsani oʻzgartirish shart emas — standart qiymat
+   (http://localhost:4123) toʻgʻri ishlaydi.
+
+4. DavrBank-Operator.exe / DavrBank-Admin.exe / DavrBank-TV.exe ni ishga
+   tushiring — standart brauzeringizda kerakli panel avtomatik ochiladi
+   (TV uchun — toʻliq ekranda).
+
+ESLATMA
+-------
+Butun "DavrBank-PC" papkasini boshqa kompyuterga koʻchirishda ichidagi
+barcha fayl va papkalarni (node.exe, public, desktop, node_modules va h.k.)
+birga koʻchiring — ular bir-biriga bogʻliq.
