@@ -2,7 +2,9 @@ DAVR BANK NAVBAT TIZIMI — Windows PC ilovasi
 =============================================
 
 Bu papkada 4 ta tayyor .exe fayl bor, Node.js oʻrnatilmagan har qanday
-Windows kompyuterda ishlaydi (kerakli hammasi shu papkada — node.exe ham).
+Windows kompyuterda ishlaydi (kerakli hammasi shu papkada — node.exe ham,
+agar "1-Avval-shuni-bosing.bat" orqali tarqatilgan boʻlsa, birinchi marta
+shu faylni ishga tushiring — internetdan node.exe ni yuklab oladi).
 
   DavrBank-Server.exe     — asosiy server. Serverni ishga tushiradigan
                             kompyuterda ISHGA TUSHIRING VA OYNANI YOPMANG.

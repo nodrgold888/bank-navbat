@@ -57,6 +57,7 @@ cat > "$OUT/package.json" <<'EOF'
 EOF
 (cd "$OUT" && npm install --omit=dev --no-audit --no-fund)
 cp "desktop/O'QING.txt" "$OUT/O'QING.txt" 2>/dev/null || true
+cp "desktop/1-Avval-shuni-bosing.bat" "$OUT/1-Avval-shuni-bosing.bat" 2>/dev/null || true
 
 rm -rf "$TMP"
 echo "== Done: $OUT =="
