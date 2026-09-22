@@ -71,6 +71,8 @@
       var res = await Navbat.post(url, Object.assign({ operatorId: opId }, body || {}));
       if (url === '/api/call-next') {
         toast(res.called ? 'Chaqirildi: ' + res.called.code : 'Navbatda kutayotganlar yoʻq');
+      } else if (url === '/api/call-ticket') {
+        toast(res.called ? 'Chaqirildi: ' + res.called.code : 'Chipta topilmadi');
       } else if (url === '/api/skip') {
         toast(
           res.called
@@ -146,6 +148,11 @@
       .forEach(function (b) {
         b.disabled = v;
       });
+    $('skipped')
+      .querySelectorAll('button')
+      .forEach(function (b) {
+        b.disabled = v;
+      });
   }
 
   function myOp(view) {
@@ -154,12 +161,14 @@
     });
   }
 
-  // ---- "Navbatda kutayotganlar" rows (also: call from a specific queue) ----
+  // ---- "Navbatda kutayotganlar" rows (also: call from a specific queue, or
+  // pull out one particular waiting ticket instead of just "next") ----
   function buildQueues(view) {
     var box = $('queues');
     box.innerHTML = '';
     var me = myOp(view);
     var mine = me ? me.serviceIds : [];
+    var queue = view.queue || [];
     view.services
       .filter(function (s) {
         return mine.indexOf(s.id) !== -1;
@@ -188,28 +197,70 @@
           action('/api/call-next', { serviceId: s.id });
         });
         box.appendChild(row);
+
+        // Individual waiting tickets for this service — lets the operator
+        // pick a specific one instead of only the FIFO "next".
+        var mineTickets = queue.filter(function (t) {
+          return t.serviceId === s.id;
+        });
+        if (mineTickets.length) {
+          var chips = document.createElement('div');
+          chips.className = 's2-ticket-chips';
+          mineTickets.slice(0, 12).forEach(function (t) {
+            chips.appendChild(ticketChip(t, false));
+          });
+          box.appendChild(chips);
+        }
       });
   }
 
-  // ---- "Operatorlar holati" — who's serving which ticket right now ----
-  // Same service assignment (order-independent) as the logged-in operator —
-  // i.e. their "pair" (1&6, 2&5, 3&4, or Valyuta alone), derived from the
-  // live serviceIds rather than hardcoded, so it stays correct if the
-  // server's operator/service assignments ever change.
-  function svcKey(ids) {
-    return ids.slice().sort().join(',');
+  // A single clickable ticket code — used for both the per-service waiting
+  // list and the skipped-tickets panel below.
+  function ticketChip(t, isSkipped) {
+    var chip = document.createElement('button');
+    chip.className = 's2-chip' + (isSkipped ? ' s2-chip-skipped' : '');
+    chip.innerHTML =
+      '<span class="tabnum">' +
+      t.code +
+      '</span><small>' +
+      (t.serviceIcon ? t.serviceIcon + ' ' : '') +
+      t.serviceName +
+      '</small>';
+    chip.disabled = busy;
+    chip.addEventListener('click', function () {
+      action('/api/call-ticket', { code: t.code });
+    });
+    return chip;
   }
 
+  // ---- "Oʻtkazib yuborilganlar" — tickets a skip left behind; recallable ----
+  function buildSkipped(view) {
+    var section = $('skippedSection');
+    var box = $('skipped');
+    var me = myOp(view);
+    var mine = me ? me.serviceIds : [];
+    var list = (view.skipped || []).filter(function (t) {
+      return mine.indexOf(t.serviceId) !== -1;
+    });
+    if (!list.length) {
+      section.hidden = true;
+      return;
+    }
+    section.hidden = false;
+    box.innerHTML = '';
+    list.forEach(function (t) {
+      box.appendChild(ticketChip(t, true));
+    });
+  }
+
+  // ---- "Operatorlar holati" — who's serving which ticket right now.
+  // Shows every operator on the board, not just the ones sharing this
+  // station's own service assignment — staff need to see each other to
+  // coordinate, not just their own pair.
   function buildOpsStatus(view) {
     var box = $('opsStatus');
     box.innerHTML = '';
-    var me = myOp(view);
-    var myKey = me ? svcKey(me.serviceIds) : null;
-    (view.operators || [])
-      .filter(function (o) {
-        return !myKey || svcKey(o.serviceIds) === myKey;
-      })
-      .forEach(function (o) {
+    (view.operators || []).forEach(function (o) {
       var row = document.createElement('div');
       row.className = 's2-oprow' + (o.id === opId ? ' s2-oprow-me' : '');
       var statusHtml;
@@ -333,6 +384,7 @@
     });
     $('waitTotal').textContent = total;
     buildQueues(view);
+    buildSkipped(view);
     buildSvcChecks(view);
     buildOpsStatus(view);
   }

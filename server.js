@@ -431,6 +431,43 @@ function skipCurrent(operatorId) {
   return { skipped: had, called: next };
 }
 
+/**
+ * Call a specific ticket by code, instead of just "next in line" — used to
+ * pull a particular waiting ticket out of order, or to bring back one that
+ * was previously skipped (status 'no_show') and try it again.
+ */
+function callTicket(operatorId, code) {
+  checkRollover();
+  const op = getOp(operatorId);
+  if (!op) throw new HttpError(400, 'Nomaʼlum operator');
+  const t = state.tickets.find(
+    (x) => x.code === code && (x.status === 'waiting' || x.status === 'no_show')
+  );
+  if (!t) throw new HttpError(404, 'Chipta topilmadi yoki allaqachon yakunlangan');
+  if (!op.serviceIds.includes(t.serviceId)) {
+    throw new HttpError(403, 'Bu xizmat turi sizga biriktirilmagan');
+  }
+  completeCurrent(op, 'served');
+  t.status = 'called';
+  t.operatorId = op.id;
+  t.calledAt = Date.now();
+  t.endedAt = null;
+  op.currentTicketId = t.id;
+  op.online = true;
+
+  state.callSeq += 1;
+  state.lastCall = {
+    ticketId: t.id,
+    code: t.code,
+    operatorId: op.id,
+    serviceId: t.serviceId,
+    ts: Date.now(),
+    recall: false,
+    seq: state.callSeq,
+  };
+  return { called: t };
+}
+
 function recall(operatorId) {
   checkRollover();
   const op = getOp(operatorId);
@@ -563,6 +600,14 @@ function buildView() {
   const waitingList = waitingSorted.slice(0, 120).map(mapWaiting);
   // Full waiting queue for the admin cancel UI — capped for payload size.
   const fullQueue = waitingSorted.slice(0, 120).map(mapWaiting);
+  // Skipped ("oʻtkazib yuborilgan") tickets — kept visible and callable so an
+  // operator can bring one back instead of it vanishing once skipped. Most
+  // recently skipped first.
+  const skippedList = state.tickets
+    .filter((t) => t.status === 'no_show')
+    .sort((a, b) => (b.endedAt || 0) - (a.endedAt || 0))
+    .slice(0, 60)
+    .map(mapWaiting);
 
   const operators = state.operators.map((o) => {
     const cur = o.currentTicketId ? getTicket(o.currentTicketId) : null;
@@ -620,6 +665,7 @@ function buildView() {
     board,
     waitingList,
     queue: fullQueue,
+    skipped: skippedList,
     operators,
     lastCall,
     stats: {
@@ -858,6 +904,17 @@ const API_HANDLERS = {
 
   'POST /api/call-next': async (body) => {
     const { called } = callNext(body.operatorId, body.serviceId || null);
+    commit();
+    return {
+      ok: true,
+      called: called
+        ? { code: called.code, serviceName: serviceMeta(called.serviceId).name }
+        : null,
+    };
+  },
+
+  'POST /api/call-ticket': async (body) => {
+    const { called } = callTicket(body.operatorId, String(body.code || '').trim());
     commit();
     return {
       ok: true,
