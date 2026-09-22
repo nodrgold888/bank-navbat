@@ -4,28 +4,41 @@
    ========================================================================== */
 
 :root {
+  /* Modern fintech palette — indigo primary (Stripe/Linear-adjacent),
+     a true accent green kept for "money/success" contexts, warm neutrals
+     instead of flat gray so cards read as "soft," not clinical. */
   --navy: #0f2d52;
   --navy-700: #0c2444;
   --navy-600: #143a6b;
-  --blue: #1f6fd6;
-  --blue-dark: #175bb0;
-  --blue-soft: #e7f0f9;
-  --green: #2f9e42;
-  --green-dark: #237a33;
-  --green-soft: #e6f4e8;
-  --ink: #13233f;
-  --muted: #64748b;
-  --bg: #eef2f8;
+  --blue: #4f46e5;
+  --blue-dark: #3f37c9;
+  --blue-soft: #eef0ff;
+  --indigo: #6366f1;
+  --violet: #7c3aed;
+  --green: #16a34a;
+  --green-dark: #0f8038;
+  --green-soft: #e9f9ef;
+  --ink: #14152b;
+  --muted: #6b7086;
+  --bg: #f5f6fb;
   --card: #ffffff;
-  --line: #dbe3ef;
+  --line: #e6e8f2;
   --ok: #15803d;
   --ok-dark: #126630;
   --warn: #b45309;
-  --danger: #b91c1c;
-  --danger-dark: #991b1b;
-  --radius: 14px;
-  --shadow: 0 1px 2px rgba(15, 45, 82, 0.06), 0 10px 28px rgba(15, 45, 82, 0.08);
-  --font: "Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue",
+  --danger: #dc2626;
+  --danger-dark: #b91c1c;
+  --radius: 16px;
+  --radius-sm: 12px;
+  --radius-lg: 22px;
+  /* Layered elevation: a hairline + a soft ambient shadow, the pattern
+     behind most modern SaaS card systems (Stripe Dashboard, Linear). */
+  --shadow-sm: 0 1px 2px rgba(20, 21, 43, 0.05);
+  --shadow: 0 1px 1px rgba(20, 21, 43, 0.04), 0 8px 24px -4px rgba(20, 21, 43, 0.1);
+  --shadow-lg: 0 4px 6px -2px rgba(20, 21, 43, 0.06), 0 20px 48px -8px rgba(20, 21, 43, 0.16);
+  --grad-brand: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --grad-money: linear-gradient(135deg, #16a34a 0%, #0d9488 100%);
+  --font: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue",
     Arial, "Noto Sans", sans-serif;
 }
 
@@ -66,10 +79,23 @@ button {
   border: none;
   border-radius: 10px;
   color: inherit;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease,
+    background-color 0.12s ease, filter 0.12s ease;
 }
 button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
+}
+button:not(:disabled):active {
+  transform: scale(0.98);
+}
+/* Keyboard-focus ring only (not on mouse click) — modern accessible default
+   instead of either an invisible focus state or a permanent outline. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2.5px solid var(--indigo);
+  outline-offset: 2px;
 }
 
 a {
@@ -238,9 +264,13 @@ body.hub {
    ========================================================================== */
 
 body.kiosk {
-  /* Davr Bank blue -> green, matching the QR poster and the TV screen */
+  /* Davr Bank blue -> green, matching the QR poster and the TV screen —
+     layered with soft radial highlights for depth instead of a flat
+     diagonal wash (a "mesh gradient," the current fintech-app default). */
   background: #0f3f7a;
-  background: linear-gradient(150deg, #14589c 0%, #1a7a5a 55%, #2f9e42 100%);
+  background: radial-gradient(1200px 800px at 8% -10%, rgba(124, 58, 237, 0.35), transparent 60%),
+    radial-gradient(1000px 700px at 100% 0%, rgba(79, 70, 229, 0.3), transparent 55%),
+    linear-gradient(150deg, #14589c 0%, #1a7a5a 55%, #2f9e42 100%);
   background-attachment: fixed;
   min-height: 100vh;
 }
@@ -445,25 +475,34 @@ body.kiosk {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 16px 16px;
-  box-shadow: var(--shadow);
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.16s ease,
+    border-color 0.16s ease;
   width: 100%;
+  position: relative;
 }
 .svc-card:active {
   transform: scale(0.985);
 }
 .svc-card:hover {
-  box-shadow: 0 10px 24px rgba(15, 45, 82, 0.14);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: color-mix(in srgb, var(--c) 35%, var(--line));
 }
 .svc-card .svc-ic {
   width: 56px;
   height: 56px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   display: grid;
   place-items: center;
   font-size: 1.7rem;
-  background: #eef2f8;
-  background: color-mix(in srgb, var(--c) 14%, white);
+  color: #fff;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--c) 92%, white) 0%,
+    var(--c) 100%
+  );
+  box-shadow: 0 4px 10px -2px color-mix(in srgb, var(--c) 45%, transparent);
 }
 .svc-card .svc-txt {
   min-width: 0;
@@ -1056,7 +1095,9 @@ body.staff {
   min-height: 100vh;
   /* Davr Bank blue -> green, matching the kiosk, admin, QR poster and TV */
   background: #0f3f7a;
-  background: linear-gradient(150deg, #14589c 0%, #1a7a5a 55%, #2f9e42 100%);
+  background: radial-gradient(1200px 800px at 8% -10%, rgba(124, 58, 237, 0.35), transparent 60%),
+    radial-gradient(1000px 700px at 100% 0%, rgba(79, 70, 229, 0.3), transparent 55%),
+    linear-gradient(150deg, #14589c 0%, #1a7a5a 55%, #2f9e42 100%);
   background-attachment: fixed;
 }
 .staff-wrap {
@@ -1149,14 +1190,14 @@ body.staff {
   width: 48px;
   height: 48px;
   flex: none;
-  background: var(--navy);
+  background: var(--grad-brand);
   color: #fff;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   display: grid;
   place-items: center;
   font-size: 1.7rem;
   font-weight: 800;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 14px -2px rgba(79, 70, 229, 0.5);
 }
 .s2-opwrap {
   display: flex;
@@ -1265,13 +1306,16 @@ body.staff {
   align-items: center;
   width: 100%;
   margin-top: 14px;
-  background: var(--navy);
+  background: var(--grad-brand);
   color: #fff;
   padding: 20px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 22px -6px rgba(79, 70, 229, 0.55);
 }
 .s2-call:hover:not(:disabled) {
-  background: var(--navy-600);
+  filter: brightness(1.06);
+  box-shadow: 0 10px 26px -6px rgba(79, 70, 229, 0.65);
+  transform: translateY(-1px);
 }
 .s2-call:active:not(:disabled) {
   transform: scale(0.99);
@@ -1713,7 +1757,9 @@ body.admin {
   min-height: 100vh;
   /* Davr Bank blue -> green, matching the kiosk, QR poster and TV screen */
   background: #0f3f7a;
-  background: linear-gradient(150deg, #14589c 0%, #1a7a5a 55%, #2f9e42 100%);
+  background: radial-gradient(1200px 800px at 8% -10%, rgba(124, 58, 237, 0.35), transparent 60%),
+    radial-gradient(1000px 700px at 100% 0%, rgba(79, 70, 229, 0.3), transparent 55%),
+    linear-gradient(150deg, #14589c 0%, #1a7a5a 55%, #2f9e42 100%);
   background-attachment: fixed;
 }
 .admin-wrap {
@@ -1788,15 +1834,19 @@ body.admin {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+  padding: 18px 20px;
   display: flex;
   align-items: center;
   gap: 14px;
-  border-left: 4px solid var(--kpi-c, var(--blue));
+  transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.16s ease;
+}
+.kpi:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
 }
 .kpi-blue {
-  --kpi-c: #1f6fd6;
+  --kpi-c: #4f46e5;
 }
 .kpi-green {
   --kpi-c: #16a34a;
@@ -1808,15 +1858,21 @@ body.admin {
   --kpi-c: #7c3aed;
 }
 .kpi-ic {
-  font-size: 1.7rem;
+  font-size: 1.5rem;
   width: 48px;
   height: 48px;
   flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--kpi-c) 14%, white);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--kpi-c) 88%, white) 0%,
+    var(--kpi-c) 100%
+  );
+  box-shadow: 0 4px 10px -2px color-mix(in srgb, var(--kpi-c) 45%, transparent);
 }
 .kpi-body {
   min-width: 0;
@@ -1884,8 +1940,13 @@ body.admin {
 .admin-svc-card {
   background: var(--bg);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   padding: 14px 16px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.admin-svc-card:hover {
+  border-color: var(--line);
+  box-shadow: var(--shadow-sm);
 }
 .admin-svc-head {
   display: flex;
