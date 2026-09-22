@@ -254,13 +254,27 @@
   }
 
   // ---- "Operatorlar holati" — who's serving which ticket right now.
-  // Shows every operator on the board, not just the ones sharing this
-  // station's own service assignment — staff need to see each other to
-  // coordinate, not just their own pair.
+  // Only the operators assigned to the same service(s) as this station —
+  // an exact-set match used to miss operators who share most but not all
+  // of their assigned services (e.g. one was reassigned an extra service
+  // type), making them wrongly invisible to each other. Any overlap is
+  // now enough to count as "the same group".
+  function sharesService(idsA, idsB) {
+    return idsA.some(function (id) {
+      return idsB.indexOf(id) !== -1;
+    });
+  }
+
   function buildOpsStatus(view) {
     var box = $('opsStatus');
     box.innerHTML = '';
-    (view.operators || []).forEach(function (o) {
+    var me = myOp(view);
+    var mine = me ? me.serviceIds : [];
+    (view.operators || [])
+      .filter(function (o) {
+        return !me || o.id === opId || sharesService(o.serviceIds, mine);
+      })
+      .forEach(function (o) {
       var row = document.createElement('div');
       row.className = 's2-oprow' + (o.id === opId ? ' s2-oprow-me' : '');
       var statusHtml;
