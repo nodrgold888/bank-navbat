@@ -777,6 +777,21 @@ body.tv {
   min-height: 0;
   gap: 12px;
 }
+.now-serving > h2,
+.waiting-panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.now-serving > h2::before,
+.waiting-panel h2::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 0.85em;
+  border-radius: 999px;
+  background: var(--grad-brand);
+}
 .now-serving > h2 {
   font-size: 1.7rem;
   text-transform: uppercase;
@@ -1012,9 +1027,11 @@ body.tv {
   align-items: center;
   gap: 14px;
   background: rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
   padding: 14px 18px;
   flex-shrink: 0;
+  transition: background-color 0.15s ease;
 }
 .wait-item .wi-code {
   font-size: 3.4rem;
@@ -1022,8 +1039,13 @@ body.tv {
   font-variant-numeric: tabular-nums;
 }
 .wait-item .wi-svc {
-  font-size: 1.5rem;
-  opacity: 0.82;
+  font-size: 1.3rem;
+  font-weight: 600;
+  opacity: 0.9;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-left: auto;
 }
 .wait-empty {
   opacity: 0.5;
