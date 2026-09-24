@@ -471,13 +471,17 @@ body.kiosk {
   align-items: center;
   gap: 14px;
   text-align: left;
-  background: var(--card);
-  border: 1px solid var(--line);
+  /* Frosted glass over the colorful kiosk background, instead of a flat
+     opaque card — the same real backdrop-filter blur used on the TV. */
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: var(--radius);
   padding: 16px 16px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), var(--shadow-sm);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.16s ease,
-    border-color 0.16s ease;
+    border-color 0.16s ease, background-color 0.16s ease;
   width: 100%;
   position: relative;
 }
@@ -486,8 +490,9 @@ body.kiosk {
 }
 .svc-card:hover {
   transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
-  border-color: color-mix(in srgb, var(--c) 35%, var(--line));
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), var(--shadow-lg);
+  border-color: color-mix(in srgb, var(--c) 35%, rgba(255, 255, 255, 0.6));
 }
 .svc-card .svc-ic {
   width: 56px;
@@ -532,10 +537,16 @@ body.kiosk {
 
 /* Ticket screen */
 .ticket {
-  background: var(--card);
+  /* Kept nearly opaque (unlike the lighter svc-card glass) — this card
+     carries the customer's actual ticket number, so legibility wins over
+     the glass effect; still gets the same blur + highlight treatment for
+     visual consistency with the rest of the kiosk. */
+  background: rgba(255, 255, 255, 0.94);
   border-radius: 20px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--line);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), var(--shadow);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   padding: 28px 24px 24px;
   text-align: center;
   margin-top: 8px;
@@ -1246,14 +1257,16 @@ body.staff {
   max-width: 420px;
 }
 .op-pick .grid button {
-  background: var(--card);
-  border: 2px solid var(--line);
+  background: rgba(255, 255, 255, 0.82);
+  border: 2px solid rgba(255, 255, 255, 0.55);
   color: var(--navy);
   padding: 28px 14px;
   font-size: 1.3rem;
   font-weight: 700;
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), var(--shadow);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
 }
 .op-pick .grid button:active {
   border-color: var(--blue);
@@ -1334,10 +1347,15 @@ body.staff {
 
 /* now serving */
 .s2-now {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  box-shadow: var(--shadow);
+  /* Nearly opaque, like the kiosk ticket card — this is the code the
+     operator reads aloud, so legibility wins over transparency — but
+     still blurred/highlighted for the same glass look as the rest. */
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), var(--shadow);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   padding: 20px 18px 24px;
   text-align: center;
 }
@@ -1449,10 +1467,12 @@ body.staff {
 
 /* collapsible sections */
 .s2-drop {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: var(--shadow);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), var(--shadow);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   margin-top: 12px;
   overflow: hidden;
 }
@@ -1469,7 +1489,7 @@ body.staff {
   transition: background-color 0.12s ease;
 }
 .s2-drop > summary:hover {
-  background: var(--bg);
+  background: rgba(0, 0, 0, 0.03);
 }
 .s2-drop > summary::-webkit-details-marker {
   display: none;
@@ -1514,10 +1534,12 @@ body.staff {
    logged-in operator's own 1-3 services, it's short enough to always show
    fully, and it's the thing an operator glances at most often. */
 .s2-panel {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: var(--shadow);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), var(--shadow);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   margin-top: 12px;
   padding: 15px 16px;
 }
