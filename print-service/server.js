@@ -84,10 +84,6 @@ function boxRow(printer, label, value) {
   printer.println(line);
 }
 
-function starRule(printer) {
-  printer.println('* '.repeat(Math.floor(BOX_WIDTH / 2)).trim());
-}
-
 app.post('/print', async (req, res) => {
   try {
     const { service, number, ahead, date, time, position, etaMin } = req.body || {};
@@ -121,8 +117,7 @@ app.post('/print', async (req, res) => {
     printer.bold(true);
     printer.println('"DAVR BANK" XATB');
     printer.bold(false);
-    printer.println('Uchtepa filiali');
-    printer.println('Xush kelibsiz!');
+    printer.println('Uchtepa filiali - Xush kelibsiz!');
 
     // ---- Ticket number: the focal point — big & bold, plain (no invert) ----
     printer.println('Navbat raqami');
@@ -143,8 +138,8 @@ app.post('/print', async (req, res) => {
 
     // ---- Details: same 4 fields as before, without the decorative box
     // border (2 lines of pure "+---+" framing, no information of its own) ----
-    starRule(printer);
-
+    // and without a separator rule — the font-size step-down from the
+    // service name already marks the transition clearly enough.
     printer.alignLeft();
     boxRow(printer, 'Sana', `${date || ''}  ${time || ''}`);
     boxRow(printer, 'Navbatdagi tartibingiz', position != null ? `${position}-o'rin` : '-');
