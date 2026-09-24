@@ -31,12 +31,30 @@
   --radius: 20px;
   --radius-sm: 14px;
   --radius-lg: 28px;
-  /* Shared "liquid glass" recipe (iOS-style frosted panels): a top sheen
-     that fades out, stronger blur + saturation than the earlier glass
-     pass, and a soft all-around glow instead of a hard drop shadow. */
-  --glass-blur: blur(28px) saturate(180%);
-  --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 45%);
-  --glass-sheen-dark: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 45%);
+  /* Shared "liquid glass" recipe (iOS-style frosted panels): a concentrated
+     top-left "catch light" highlight (like a light source hitting a curved
+     glass surface) blended with a wider top sheen, heavier blur/saturation
+     so color behind the glass reads vividly, and a diagonal glass-edge
+     border that's brightest where the light hits. */
+  --glass-blur: blur(36px) saturate(220%);
+  --glass-sheen: radial-gradient(140% 70% at 12% -10%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(165deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 50%);
+  --glass-sheen-dark: radial-gradient(140% 70% at 12% -10%, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(165deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 50%);
+  --glass-border-light: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.25) 35%,
+    rgba(255, 255, 255, 0.15) 65%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
+  --glass-border-dark: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(255, 255, 255, 0.08) 35%,
+    rgba(255, 255, 255, 0.05) 65%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
   /* Layered elevation: a hairline + a soft ambient shadow, the pattern
      behind most modern SaaS card systems (Stripe Dashboard, Linear). */
   --shadow-sm: 0 1px 2px rgba(20, 21, 43, 0.05);
@@ -486,7 +504,7 @@ body.kiosk {
   border: 1px solid rgba(255, 255, 255, 0.65);
   border-radius: var(--radius);
   padding: 16px 16px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), var(--shadow-sm);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.8), inset -1px -1px 1px rgba(0, 0, 0, 0.07), var(--shadow-sm);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.16s ease,
@@ -500,7 +518,7 @@ body.kiosk {
 .svc-card:hover {
   transform: translateY(-3px);
   background: var(--glass-sheen), rgba(255, 255, 255, 0.9);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), var(--shadow-lg);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.9), inset -1px -1px 1px rgba(0, 0, 0, 0.07), var(--shadow-lg);
   border-color: color-mix(in srgb, var(--c) 35%, rgba(255, 255, 255, 0.6));
 }
 .svc-card .svc-ic {
@@ -552,7 +570,7 @@ body.kiosk {
      visual consistency with the rest of the kiosk. */
   background: var(--glass-sheen), rgba(255, 255, 255, 0.94);
   border-radius: var(--radius-lg);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), var(--shadow);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.9), inset -1px -1px 1px rgba(0, 0, 0, 0.07), var(--shadow);
   border: 1px solid rgba(255, 255, 255, 0.7);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
@@ -722,7 +740,7 @@ body.tv {
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: var(--radius-lg);
   padding: 14px 22px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 10px 30px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.22), inset -1px -1px 1px rgba(0, 0, 0, 0.07), 0 10px 30px -12px rgba(0, 0, 0, 0.5);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
 }
@@ -899,7 +917,7 @@ body.tv {
      real glassmorphism, not just a tinted flat panel. */
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -20px 30px -22px rgba(0, 0, 0, 0.45),
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.28), inset -1px -1px 1px rgba(0, 0, 0, 0.07), inset 0 -20px 30px -22px rgba(0, 0, 0, 0.45),
     0 8px 24px -12px rgba(0, 0, 0, 0.5);
 }
 .op-cell.idle {
@@ -1006,7 +1024,7 @@ body.tv {
   border-width: 2px;
   border-color: #eab308;
   background: var(--glass-sheen-dark), rgba(234, 179, 8, 0.1);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 26px -8px rgba(234, 179, 8, 0.45);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.2), inset -1px -1px 1px rgba(0, 0, 0, 0.07), 0 0 26px -8px rgba(234, 179, 8, 0.45);
 }
 .valyuta-cell .op-name {
   font-size: 1.8rem;
@@ -1042,7 +1060,7 @@ body.tv {
   overflow: hidden;
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.2), inset -1px -1px 1px rgba(0, 0, 0, 0.07), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
 }
 .waiting-panel h2 {
   font-size: 2.1rem;
@@ -1077,7 +1095,7 @@ body.tv {
   padding: 14px 18px;
   flex-shrink: 0;
   transition: background-color 0.15s ease;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.14), inset -1px -1px 1px rgba(0, 0, 0, 0.07);
 }
 .wait-item .wi-code {
   font-size: 3.4rem;
@@ -1123,7 +1141,7 @@ body.tv {
   padding: 6px 12px;
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.2), inset -1px -1px 1px rgba(0, 0, 0, 0.07);
 }
 .tvf-stat .tvf-ic {
   width: 28px;
@@ -1277,7 +1295,7 @@ body.staff {
   font-size: 1.3rem;
   font-weight: 700;
   border-radius: var(--radius);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), var(--shadow);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.8), inset -1px -1px 1px rgba(0, 0, 0, 0.07), var(--shadow);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
 }
@@ -1366,7 +1384,7 @@ body.staff {
   background: var(--glass-sheen), rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: var(--radius-lg);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), var(--shadow);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.9), inset -1px -1px 1px rgba(0, 0, 0, 0.07), var(--shadow);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   padding: 20px 18px 24px;
@@ -1483,7 +1501,7 @@ body.staff {
   background: var(--glass-sheen), rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: var(--radius);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), var(--shadow);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.8), inset -1px -1px 1px rgba(0, 0, 0, 0.07), var(--shadow);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   margin-top: 12px;
@@ -1550,7 +1568,7 @@ body.staff {
   background: var(--glass-sheen), rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: var(--radius);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), var(--shadow);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.8), inset -1px -1px 1px rgba(0, 0, 0, 0.07), var(--shadow);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   margin-top: 12px;
@@ -1918,7 +1936,7 @@ body.admin {
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: var(--radius);
   padding: 16px 20px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.22), inset -1px -1px 1px rgba(0, 0, 0, 0.07);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
 }
