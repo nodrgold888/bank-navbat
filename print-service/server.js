@@ -62,15 +62,7 @@ async function copyToShare(tempFile) {
 
 // ---- ASCII-safe decorative helpers (Unicode box-drawing chars are risky —
 // thermal codepages already mangle non-ASCII like "oʻ", so stick to +,-,|,*) ----
-const BOX_WIDTH = 46; // ichki kenglik; +---+  chegara bilan jami 48 ustunga teng
-
-function boxTop(printer) {
-  printer.println('+' + '-'.repeat(BOX_WIDTH) + '+');
-}
-
-function boxBottom(printer) {
-  printer.println('+' + '-'.repeat(BOX_WIDTH) + '+');
-}
+const BOX_WIDTH = 46; // detail rows wrap/pad to this width
 
 // Printer codepage can't encode the Uzbek modifier-letter apostrophe (ʻ/ʼ) or
 // curly quotes — node-thermal-printer silently drops in "?" per character
@@ -83,10 +75,13 @@ function asciiSafe(text) {
     .replace(/[“”]/g, '"');
 }
 
+// Plain "Label: value" row — used to be framed in a "|...|" box, but that
+// border was 2 extra lines of pure "+---+" paper with no information of its
+// own, so it's gone; the same 4 fields print in the same order either way.
 function boxRow(printer, label, value) {
-  const text = ` ${asciiSafe(label)}: ${asciiSafe(value)}`;
-  const line = text.length > BOX_WIDTH ? text.slice(0, BOX_WIDTH) : text.padEnd(BOX_WIDTH, ' ');
-  printer.println('|' + line + '|');
+  const text = `${asciiSafe(label)}: ${asciiSafe(value)}`;
+  const line = text.length > BOX_WIDTH ? text.slice(0, BOX_WIDTH) : text;
+  printer.println(line);
 }
 
 function starRule(printer) {
@@ -120,12 +115,14 @@ app.post('/print', async (req, res) => {
     }
 
     // ---- Header ----
+    // (no trailing blank line here — every removed blank/rule/border line
+    // below is pure whitespace paper, not information, so trimming them
+    // shortens the receipt without dropping a single field from it.)
     printer.bold(true);
     printer.println('"DAVR BANK" XATB');
     printer.bold(false);
     printer.println('Uchtepa filiali');
     printer.println('Xush kelibsiz!');
-    printer.newLine();
 
     // ---- Ticket number: the focal point — big & bold, plain (no invert) ----
     printer.println('Navbat raqami');
@@ -137,7 +134,6 @@ app.post('/print', async (req, res) => {
 
     // ---- Service: its own big, bold section — not buried in the card ----
     printer.alignCenter();
-    starRule(printer);
     printer.println('Xizmat turi');
     printer.bold(true);
     printer.setTextSize(1, 1);
@@ -145,16 +141,15 @@ app.post('/print', async (req, res) => {
     printer.setTextSize(0, 0);
     printer.bold(false);
 
-    // ---- Details: boxed card instead of loose lines ----
+    // ---- Details: same 4 fields as before, without the decorative box
+    // border (2 lines of pure "+---+" framing, no information of its own) ----
     starRule(printer);
 
     printer.alignLeft();
-    boxTop(printer);
     boxRow(printer, 'Sana', `${date || ''}  ${time || ''}`);
     boxRow(printer, 'Navbatdagi tartibingiz', position != null ? `${position}-o'rin` : '-');
     boxRow(printer, 'Sizdan oldin', ahead != null ? `${ahead} kishi` : '-');
     boxRow(printer, 'Taxminiy kutish', etaMin != null ? `~${etaMin} daqiqa` : '-');
-    boxBottom(printer);
     printer.alignCenter();
 
     // ---- Branch contact info ----
@@ -162,8 +157,6 @@ app.post('/print', async (req, res) => {
     printer.bold(true);
     printer.println(`Yagona axborot xizmati: ${BRANCH_PHONE}`);
     printer.bold(false);
-
-    starRule(printer);
 
     // ---- Footer: inverted black bar, like the "thank you" line on the sample ----
     printer.bold(true);
