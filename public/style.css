@@ -301,6 +301,34 @@ body.kiosk {
   background-attachment: fixed;
   min-height: 100vh;
 }
+/* Diagnostic tag confirming whether this load was detected as the physical
+   shared terminal — deliberately always visible (not hidden in devtools)
+   so on-site staff can catch a wrong URL/proxy setup at a glance, instead
+   of it being an invisible failure that only shows up as "doesn't reset
+   itself." Small and low-contrast enough to not distract a customer. */
+.kiosk-badge {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  z-index: 999;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  pointer-events: none;
+  font-family: monospace;
+}
+.kiosk-badge.on {
+  background: rgba(34, 197, 94, 0.18);
+  color: #bbf7d0;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+.kiosk-badge.off {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
 .k-wrap {
   max-width: 560px;
   margin: 0 auto;

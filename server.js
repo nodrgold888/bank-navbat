@@ -793,6 +793,12 @@ QRCode.toDataURL(KIOSK_URL, { width: 512, margin: 2, errorCorrectionLevel: 'M' }
 const PAGE_ROUTES = {
   '/': 'index.html',
   '/kiosk': 'kiosk.html',
+  // Dedicated path for the physical shared terminal, in addition to
+  // "/kiosk?shared=1" — a URL *path* survives far more domain-forwarding/
+  // proxy setups than a query string does (many strip query strings on
+  // forwarding but preserve the path), so this is the reliable signal;
+  // the query flag is kept only as a secondary fallback. See kiosk.js.
+  '/kiosk-terminal': 'kiosk.html',
   '/tv': 'tv.html',
   '/staff': 'staff.html',
   '/qr': 'qr.html',

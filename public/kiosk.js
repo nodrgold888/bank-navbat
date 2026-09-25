@@ -16,21 +16,30 @@
   var lastView = null;
   var myTicket = null; // { code, serviceId, serviceName, serviceIcon, serviceColor }
 
-  // ---- Auto-return to the main menu after a ticket is issued ----
-  // Used to be gated on IS_SHARED_KIOSK (only the physical terminal, launched
-  // with "?shared=1", would reset itself) so a customer watching their own
-  // ticket on their phone via the QR code wouldn't get yanked back to the
-  // menu. That gate depended on an external, unmanaged file (Desktop\
-  // kiosk.bat on the kiosk PC) actually passing the flag — when it didn't,
-  // auto-return silently never fired, with no visible error, just "not going
-  // back." Auto-return now always runs, on every /kiosk load, so it no
-  // longer depends on that flag at all; the trade-off is a personal-phone
-  // visitor also gets returned to the service list ~3s after printing
-  // instead of being able to keep watching their live position indefinitely.
+  // ---- Detecting the physical shared kiosk terminal ----
+  // Gates two things: the full-screen kiosk-scale layout, and auto-return
+  // to the main menu after a ticket is issued (a personal phone visitor,
+  // via the QR code, should keep watching their live ticket status instead
+  // of getting yanked back to the menu after 3s).
   //
-  // IS_SHARED_KIOSK itself is kept for the full-screen kiosk-scale layout
-  // below, which still only makes sense on the physical terminal.
+  // This used to be a URL *query string* only ("/kiosk?shared=1"), cached to
+  // localStorage as a fallback. That broke in the field: a domain-forwarding
+  // setup in front of the real site can rewrite/proxy the URL while
+  // preserving the path but dropping the query string, so the flag silently
+  // never arrived — no error, the page just quietly ran in "personal phone"
+  // mode forever. A URL *path* survives that class of proxy far more
+  // reliably, so "/kiosk-terminal" (see server.js) is now the primary
+  // signal; the query flag and localStorage cache are kept only as
+  // fallbacks for setups that still use the old URL.
   var IS_SHARED_KIOSK = (function () {
+    if (location.pathname === '/kiosk-terminal') {
+      try {
+        localStorage.setItem('kioskShared', '1');
+      } catch (e) {
+        /* private mode / storage disabled — flag just won't persist */
+      }
+      return true;
+    }
     if (new URLSearchParams(location.search).get('shared') === '1') {
       try {
         localStorage.setItem('kioskShared', '1');
@@ -49,14 +58,22 @@
   var autoReturnDeadline = 0; // 0 = no return scheduled
   var autoReturnCheckTimer = null;
 
-  // Same flag also gates the full-screen "album" layout in style.css. Sizing
-  // that up purely from viewport width/orientation would misfire on a large
-  // phone held sideways (iPhone Pro Max / many Samsung Galaxy models hit
-  // ~926px landscape width, over a naive 900px breakpoint) — a personal
-  // phone must never get the giant kiosk-scale cards.
   if (IS_SHARED_KIOSK) {
     document.body.classList.add('shared-kiosk');
   }
+  // Small always-visible on-screen tag, so this detection is never a
+  // silent failure again: if a kiosk terminal in the field is NOT showing
+  // this badge, that alone tells on-site staff (without a developer)
+  // exactly what's wrong — no "KIOSK" tag means the URL isn't
+  // "/kiosk-terminal" and the page is running as if it were someone's
+  // personal phone.
+  (function renderKioskBadge() {
+    var badge = document.createElement('div');
+    badge.id = 'kioskModeBadge';
+    badge.textContent = IS_SHARED_KIOSK ? 'KIOSK REJIMI' : 'ODDIY REJIM (shaxsiy telefon)';
+    badge.className = IS_SHARED_KIOSK ? 'kiosk-badge on' : 'kiosk-badge off';
+    document.body.appendChild(badge);
+  })();
 
   function clearAutoReturn() {
     autoReturnDeadline = 0;
@@ -72,6 +89,7 @@
   // visible, via the visibilitychange listener below) instead of depending
   // on a background timer firing on schedule.
   function scheduleAutoReturn() {
+    if (!IS_SHARED_KIOSK) return;
     autoReturnDeadline = Date.now() + AUTO_RETURN_MS;
     if (autoReturnCheckTimer) return;
     autoReturnCheckTimer = setInterval(function () {
