@@ -1123,66 +1123,6 @@ body.tv {
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   padding-top: 14px;
 }
-.tvf-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-}
-/* Same gradient icon-badge card language as the admin KPI row, adapted
-   for the TV's dark background — keeps the whole app feeling like one
-   product instead of the TV being visually disconnected from the rest. */
-.tvf-stat {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--glass-sheen-dark), rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: var(--radius-sm);
-  padding: 6px 12px;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.2), inset -1px -1px 1px rgba(0, 0, 0, 0.07);
-}
-.tvf-stat .tvf-ic {
-  width: 28px;
-  height: 28px;
-  flex: none;
-  display: grid;
-  place-items: center;
-  font-size: 0.95rem;
-  border-radius: 8px;
-  color: #fff;
-}
-.tvf-blue .tvf-ic {
-  background: linear-gradient(145deg, #6366f1, #4f46e5);
-}
-.tvf-green .tvf-ic {
-  background: linear-gradient(145deg, #22c55e, #16a34a);
-}
-.tvf-amber .tvf-ic {
-  background: linear-gradient(145deg, #f59e0b, #d97706);
-}
-.tvf-purple .tvf-ic {
-  background: linear-gradient(145deg, #a78bfa, #7c3aed);
-}
-.tvf-body {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-  min-width: 0;
-}
-.tvf-body b {
-  color: #fff;
-  font-size: 1.15rem;
-  font-variant-numeric: tabular-nums;
-}
-.tvf-body small {
-  opacity: 0.75;
-  font-size: 0.76rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 .tvf-branch {
   font-size: 1.15rem;
   opacity: 0.55;

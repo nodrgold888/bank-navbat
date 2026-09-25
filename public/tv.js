@@ -191,12 +191,6 @@
     }
     manageWaitingScroll(wl);
 
-    // Footer stats
-    $('stIssued').textContent = view.stats.issued;
-    $('stServed').textContent = view.stats.served;
-    $('stWaiting').textContent = view.stats.waiting;
-    $('stAvg').textContent = view.stats.avgServiceMin;
-
     // Detect a fresh call
     if (call) {
       if (initialised && call.seq !== lastSeq) announce(call);
