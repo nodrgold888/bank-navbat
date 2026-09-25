@@ -17,19 +17,19 @@
   var myTicket = null; // { code, serviceId, serviceName, serviceIcon, serviceColor }
 
   // ---- Auto-return to the main menu after a ticket is issued ----
-  // Only makes sense on the shared physical kiosk terminal — it needs to
-  // reset itself for the next customer. Someone who scanned the QR code on
-  // their own phone should keep watching their live ticket status instead
-  // of getting yanked back to the menu. Distinguished by a URL flag that
-  // only the physical kiosk's Chrome shortcut passes (see kiosk.bat:
-  // ".../kiosk?shared=1"); a plain "/kiosk" link (the QR poster) does not.
+  // Used to be gated on IS_SHARED_KIOSK (only the physical terminal, launched
+  // with "?shared=1", would reset itself) so a customer watching their own
+  // ticket on their phone via the QR code wouldn't get yanked back to the
+  // menu. That gate depended on an external, unmanaged file (Desktop\
+  // kiosk.bat on the kiosk PC) actually passing the flag — when it didn't,
+  // auto-return silently never fired, with no visible error, just "not going
+  // back." Auto-return now always runs, on every /kiosk load, so it no
+  // longer depends on that flag at all; the trade-off is a personal-phone
+  // visitor also gets returned to the service list ~3s after printing
+  // instead of being able to keep watching their live position indefinitely.
   //
-  // The flag is also cached in localStorage the first time it's seen: some
-  // domain-forwarding/proxy setups drop query strings on later navigations
-  // (e.g. Chrome kiosk mode reloading, or a bookmarked/history URL missing
-  // it), which would otherwise silently turn the shared kiosk back into
-  // "personal phone" mode — no auto-return, no kiosk-scale layout — with no
-  // visible error, just it "not going back."
+  // IS_SHARED_KIOSK itself is kept for the full-screen kiosk-scale layout
+  // below, which still only makes sense on the physical terminal.
   var IS_SHARED_KIOSK = (function () {
     if (new URLSearchParams(location.search).get('shared') === '1') {
       try {
@@ -72,7 +72,6 @@
   // visible, via the visibilitychange listener below) instead of depending
   // on a background timer firing on schedule.
   function scheduleAutoReturn() {
-    if (!IS_SHARED_KIOSK) return;
     autoReturnDeadline = Date.now() + AUTO_RETURN_MS;
     if (autoReturnCheckTimer) return;
     autoReturnCheckTimer = setInterval(function () {
