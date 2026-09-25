@@ -254,7 +254,12 @@
         serviceColor: t.serviceColor,
       };
       showTicket(t.position, t.peopleAhead, null);
-      printTicket(myTicket, t.peopleAhead, t.position, t.etaMin);
+      // Wait for the print attempt (including its retry) to actually finish
+      // before starting the return-to-menu countdown — it used to fire
+      // immediately alongside printing, so on a slow/retrying printer the
+      // kiosk could reset itself mid-print, before the receipt was even
+      // done (or before a failed-print notice had a chance to show).
+      await printTicket(myTicket, t.peopleAhead, t.position, t.etaMin);
       scheduleAutoReturn();
     } catch (err) {
       alert('Xatolik: ' + err.message);
