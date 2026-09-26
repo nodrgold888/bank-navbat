@@ -22,7 +22,7 @@ rem  sifatida qo'ysangiz, foydalanuvchi kirganda Chrome o'zi ochiladi.
 rem ==========================================================================
 setlocal
 
-if "%KIOSK_URL%"=="" set "KIOSK_URL=https://davrbank-uchtepa.online/kiosk-terminal"
+if "%KIOSK_URL%"=="" set "KIOSK_URL=https://bank-navbat.onrender.com/kiosk-terminal"
 
 echo Print-servis (Windows xizmati) tayyor boʻlishini kutyapmiz...
 set /a tries=0
