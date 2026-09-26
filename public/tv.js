@@ -193,10 +193,16 @@
     // showing a dimmed "dam olishda" box that just takes up space.
     var grid = $('opGrid');
     grid.innerHTML = '';
-    onlineBoard
-      .filter(function (b) {
-        return b.name !== 'Valyuta';
-      })
+    var gridOperators = onlineBoard.filter(function (b) {
+      return b.name !== 'Valyuta';
+    });
+    // Pick a column count that keeps each box close to square instead of a
+    // wide strip — big, blocky cells read from across the room far better
+    // than a long thin row. ceil(sqrt(n)) gives the squarest grid that still
+    // fits everyone without empty leftover slots for common counts.
+    var cols = Math.max(1, Math.ceil(Math.sqrt(gridOperators.length || 1)));
+    grid.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+    gridOperators
       .forEach(function (b) {
         var cell = document.createElement('div');
         cell.className = 'op-cell';

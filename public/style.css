@@ -935,7 +935,9 @@ select.sound-toggle option {
 .op-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* Column count is set from JS (tv.js) so cells land close to square —
+     the ideal count depends on how many operators are online right now. */
+  grid-template-columns: repeat(3, 1fr);
   grid-auto-rows: 1fr;
   gap: 20px;
   min-height: 0;
