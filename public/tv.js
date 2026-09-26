@@ -140,7 +140,9 @@
   }
 
   // ---- Render ----
+  var lastView = null;
   function render(view) {
+    lastView = view;
     var call = view.lastCall;
 
     // Shared markup builder for both the regular grid cells and the
@@ -196,12 +198,23 @@
     var gridOperators = onlineBoard.filter(function (b) {
       return b.name !== 'Valyuta';
     });
-    // Pick a column count that keeps each box close to square instead of a
-    // wide strip — big, blocky cells read from across the room far better
-    // than a long thin row. ceil(sqrt(n)) gives the squarest grid that still
-    // fits everyone without empty leftover slots for common counts.
-    var cols = Math.max(1, Math.ceil(Math.sqrt(gridOperators.length || 1)));
-    grid.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+    // Pick a column/row count that keeps the grid close to square, then size
+    // each cell in actual pixels so every box is a true 1:1 square (not just
+    // "roughly" square) — computed from the space really available, so it
+    // still fits without clipping instead of overflowing off-screen.
+    var n = gridOperators.length || 1;
+    var cols = Math.max(1, Math.ceil(Math.sqrt(n)));
+    var rows = Math.max(1, Math.ceil(n / cols));
+    var gap = 20;
+    var availW = grid.clientWidth;
+    var availH = grid.clientHeight;
+    var cellSize = Math.max(
+      80,
+      Math.floor(Math.min((availW - gap * (cols - 1)) / cols, (availH - gap * (rows - 1)) / rows))
+    );
+    grid.style.gridTemplateColumns = 'repeat(' + cols + ', ' + cellSize + 'px)';
+    grid.style.gridAutoRows = cellSize + 'px';
+    grid.style.setProperty('--op-cell-size', cellSize + 'px');
     gridOperators
       .forEach(function (b) {
         var cell = document.createElement('div');
@@ -266,4 +279,14 @@
   }
 
   Navbat.connect(render, onConn);
+
+  // Cell size is computed in pixels from available space (see render()), so
+  // it needs recomputing whenever the window/screen size actually changes.
+  var resizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      if (lastView) render(lastView);
+    }, 150);
+  });
 })();

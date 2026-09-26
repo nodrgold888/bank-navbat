@@ -935,11 +935,14 @@ select.sound-toggle option {
 .op-grid {
   flex: 1;
   display: grid;
-  /* Column count is set from JS (tv.js) so cells land close to square —
-     the ideal count depends on how many operators are online right now. */
+  /* Column/row count and exact cell size (px) are set from JS (tv.js) so
+     every box is a true 1:1 square — the ideal size depends on how many
+     operators are online and how much space is actually available. */
   grid-template-columns: repeat(3, 1fr);
   grid-auto-rows: 1fr;
   gap: 20px;
+  justify-content: center;
+  align-content: center;
   min-height: 0;
   overflow: hidden;
 }
@@ -1052,6 +1055,21 @@ select.sound-toggle option {
   gap: 4px 8px;
   line-height: 1.1;
   max-width: 100%;
+}
+
+/* The regular grid cells are true squares whose pixel size (--op-cell-size)
+   is computed in tv.js from the space actually available — text there needs
+   to scale with that real size, not just viewport height, or it clips at
+   small cell sizes / floats tiny at large ones. Valyuta's featured box below
+   keeps the vh-based sizing above since it isn't part of that square grid. */
+#opGrid .op-cell .op-name {
+  font-size: clamp(1.1rem, calc(var(--op-cell-size, 20vh) * 0.115), 3.6rem);
+}
+#opGrid .op-cell .op-code {
+  font-size: clamp(1.6rem, calc(var(--op-cell-size, 20vh) * 0.3), 10rem);
+}
+#opGrid .op-cell .op-svc {
+  font-size: clamp(0.85rem, calc(var(--op-cell-size, 20vh) * 0.075), 2.2rem);
 }
 
 /* Valyuta's featured box isn't constrained by a grid row's 1fr height like
