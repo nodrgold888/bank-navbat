@@ -937,7 +937,7 @@ select.sound-toggle option {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-auto-rows: 1fr;
-  gap: 14px;
+  gap: 20px;
   min-height: 0;
   overflow: hidden;
 }
@@ -946,7 +946,7 @@ select.sound-toggle option {
     linear-gradient(120deg, rgba(28, 127, 208, 0.22) 0%, rgba(34, 162, 79, 0.22) 100%);
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: var(--radius-lg);
-  padding: clamp(4px, 0.9vh, 16px) 16px;
+  padding: clamp(6px, 1.6vh, 26px) 20px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1009,7 +1009,7 @@ select.sound-toggle option {
   opacity: 1;
 }
 .op-cell .op-name {
-  font-size: clamp(1.6rem, 3.4vh, 2.7rem);
+  font-size: clamp(1.8rem, 4.2vh, 3.2rem);
   font-weight: 700;
   opacity: 0.85;
   display: flex;
@@ -1028,7 +1028,7 @@ select.sound-toggle option {
   opacity: 0.75;
 }
 .op-cell .op-code {
-  font-size: clamp(2.6rem, 5.8vh, 5.6rem);
+  font-size: clamp(3rem, 7.2vh, 7rem);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   line-height: 1.05;
@@ -1041,7 +1041,7 @@ select.sound-toggle option {
   color: #fff;
 }
 .op-cell .op-svc {
-  font-size: clamp(1.15rem, 2.2vh, 1.85rem);
+  font-size: clamp(1.3rem, 2.8vh, 2.2rem);
   opacity: 0.85;
   display: flex;
   justify-content: center;

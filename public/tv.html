@@ -22,10 +22,13 @@
           <div class="voice-controls">
             <button class="sound-toggle" id="soundToggle">🔊 Signal: yoniq</button>
             <button class="sound-toggle" id="soundTest" title="Signalni sinash">🔔 Sinash</button>
-            <select class="sound-toggle" id="voiceSelect" title="Chaqiruv ovozi">
+            <!-- Hidden for now (per request) — code/functionality kept as-is
+                 for whenever a good voice is actually found; just remove
+                 "hidden" to show these controls again. -->
+            <select class="sound-toggle" id="voiceSelect" title="Chaqiruv ovozi" hidden>
               <option value="">🗣️ Ovoz: tanlanmagan</option>
             </select>
-            <button class="sound-toggle" id="voiceTest" title="Ovozda o'qishni sinash">▶️ Ovozni sinash</button>
+            <button class="sound-toggle" id="voiceTest" title="Ovozda o'qishni sinash" hidden>▶️ Ovozni sinash</button>
           </div>
           <div>
             <div class="clock tabnum" id="clock">00:00:00</div>
