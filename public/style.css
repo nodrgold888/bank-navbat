@@ -913,75 +913,14 @@ select.sound-toggle option {
     opacity: 0;
   }
 }
-/* Valyuta gets pulled out of the regular grid into its own centered,
-   featured box — :empty (when offline) collapses to nothing so it doesn't
-   leave a gap. */
-.valyuta-wrap {
-  display: flex;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.valyuta-wrap:empty {
-  display: none;
-}
-/* Busy operators: one emphasized, full-width row each — reads top to
-   bottom like a real branch board ("CODE → operator"), instead of hunting
-   across a grid for which tile changed. */
-.op-busy-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex-shrink: 0;
-}
-.op-row {
-  display: flex;
-  align-items: baseline;
-  gap: 18px;
-  flex-wrap: wrap;
-  background: #0a1730;
-  border: 2px solid rgba(255, 255, 255, 0.25);
-  border-radius: var(--radius-lg);
-  padding: 14px 26px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.op-row-label {
-  font-size: 1.05rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  opacity: 0.65;
-  flex-basis: 100%;
-}
-.op-row-main {
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-  font-size: clamp(1.8rem, 5vh, 3.4rem);
-}
-.op-row-arrow {
-  opacity: 0.55;
-  font-weight: 700;
-}
-.op-row-sub {
-  font-size: clamp(1rem, 2vh, 1.4rem);
-  opacity: 0.85;
-  margin-left: auto;
-}
-.op-row.just-called {
-  animation: op-cell-pulse 1s ease 0s 3;
-  transform: scale(1.02);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 50px rgba(111, 230, 160, 0.85);
-}
-
-/* Idle operators: plain compact tiles below the busy rows — nothing is
-   happening there, so they get less visual weight and less space. */
+/* Every operator (Valyuta included) gets an equal-size box in one grid —
+   column/row count and exact cell size (px) are set from JS (tv.js) so no
+   operator gets more or less space than any other. */
 .op-grid {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: minmax(70px, 1fr);
+  grid-auto-rows: 1fr;
   gap: 14px;
   min-height: 0;
   overflow: hidden;
@@ -1098,62 +1037,27 @@ select.sound-toggle option {
   max-width: 100%;
 }
 
-/* The regular grid cells are true squares whose pixel size (--op-cell-size)
-   is computed in tv.js from the space actually available — text there needs
-   to scale with that real size, not just viewport height, or it clips at
-   small cell sizes / floats tiny at large ones. Valyuta's featured box below
-   keeps the vh-based sizing above since it isn't part of that square grid. */
-/* These idle tiles are compact and plain by design — nothing to emphasize,
-   so sizes are small and fixed rather than scaling up with cell size. */
+/* Every grid cell is a true square whose pixel size (--op-cell-size) is
+   computed in tv.js from the space actually available — text scales with
+   that real size, not just viewport height, so it keeps fitting cleanly
+   whether the box ends up small (7 operators) or large (fewer online). */
 #opGrid .op-cell .op-name {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  max-width: calc(100% - 20px);
+  top: 14px;
+  left: 14px;
+  max-width: calc(100% - 28px);
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 999px;
-  padding: 3px 12px;
+  padding: 4px 14px;
   gap: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: clamp(0.75rem, 1.7vh, 1.2rem);
+  font-size: clamp(0.75rem, calc(var(--op-cell-size, 20vh) * 0.095), 1.7rem);
 }
 #opGrid .op-cell .op-code {
-  font-size: clamp(1.2rem, 3vh, 2.2rem);
-}
-
-/* Valyuta's featured box isn't constrained by a grid row's 1fr height like
-   the regular cells, so it can safely afford bigger, fixed text sizes. */
-.valyuta-wrap {
-  display: flex;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.valyuta-wrap:empty {
-  display: none;
-}
-.valyuta-cell {
-  width: 100%;
-  margin: 4px 0 14px;
-  padding: 16px 28px;
-  border-width: 2px;
-  border-color: #eab308;
-  background: var(--glass-sheen-dark), rgba(234, 179, 8, 0.1);
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.2), inset -1px -1px 1px rgba(0, 0, 0, 0.07), 0 0 26px -8px rgba(234, 179, 8, 0.45);
-}
-.valyuta-cell .op-name {
-  font-size: 1.8rem;
-}
-.valyuta-cell .op-code {
-  font-size: 4.2rem;
-}
-.valyuta-cell .op-svc {
-  font-size: 1.4rem;
-}
-.valyuta-cell.just-called {
-  border-color: rgba(255, 255, 255, 0.6);
+  font-size: clamp(1.4rem, calc(var(--op-cell-size, 20vh) * 0.36), 11.5rem);
 }
 
 .op-cell .op-svc .dot,

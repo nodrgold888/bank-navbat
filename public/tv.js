@@ -145,10 +145,10 @@
     lastView = view;
     var call = view.lastCall;
 
-    // Shared markup builder for both the regular grid cells and the
-    // featured Valyuta box below. Service type is intentionally left off —
-    // just the operator and the ticket number, sized to fill the space that
-    // used to go to the service line.
+    // Shared markup builder for every operator cell, Valyuta included —
+    // every operator gets the same amount of space, no one gets a bigger
+    // or smaller box than anyone else. Service type is intentionally left
+    // off — just the operator and the ticket number.
     function opCellHtml(b) {
       var statusTxt = b.ticketCode ? '' : 'boʻsh';
       return (
@@ -162,82 +162,45 @@
       );
     }
 
-    // Valyuta gets its own featured, centered box instead of sitting in the
-    // regular grid — pulled out here, before the grid loop below.
+    // Every online operator (Valyuta included) sits in one equal-size grid
+    // — paused/offline operators are left off the board entirely (a
+    // customer has nowhere to go for one anyway).
     var onlineBoard = view.board.filter(function (b) {
       return b.online;
     });
-    var valyutaWrap = $('valyutaWrap');
-    valyutaWrap.innerHTML = '';
-    var valyuta = onlineBoard.find(function (b) {
-      return b.name === 'Valyuta';
-    });
-    if (valyuta) {
-      var vCell = document.createElement('div');
-      vCell.className = 'op-cell valyuta-cell';
-      if (!valyuta.ticketCode) vCell.classList.add('idle');
-      var vJustCalled = call && call.operatorId === valyuta.id && valyuta.ticketCode === call.code;
-      if (vJustCalled) vCell.classList.add('just-called');
-      vCell.innerHTML = opCellHtml(valyuta);
-      valyutaWrap.appendChild(vCell);
-    }
-
-    // Operators split in two: busy ones get a full-width emphasized row
-    // (easy to scan top-to-bottom, "CODE → operator" reads like a real
-    // branch board), idle ones get compact tiles below since there's
-    // nothing urgent to show for them. Paused/offline operators are left
-    // off the board entirely (a customer has nowhere to go for one anyway).
-    var allOperators = onlineBoard.filter(function (b) {
-      return b.name !== 'Valyuta';
-    });
-    var busyOperators = allOperators.filter(function (b) {
-      return b.ticketCode;
-    });
-    var idleOperators = allOperators.filter(function (b) {
-      return !b.ticketCode;
-    });
-
-    var busyList = $('opBusyList');
-    busyList.innerHTML = '';
-    busyOperators.forEach(function (b) {
-      var row = document.createElement('div');
-      row.className = 'op-row';
-      var justCalled = call && call.operatorId === b.id && b.ticketCode === call.code;
-      if (justCalled) row.classList.add('just-called');
-      var accent = b.serviceColor || '#6fe6a0';
-      row.style.borderColor = accent;
-      row.style.background = 'linear-gradient(120deg, ' + accent + '2e 0%, ' + accent + '10 100%)';
-      var svcHtml = (b.serviceIcon ? b.serviceIcon + ' ' : '') + (b.serviceName || '');
-      row.innerHTML =
-        '<div class="op-row-label">' + b.name + '</div>' +
-        '<div class="op-row-main">' +
-        '<span class="op-row-code">' + b.ticketCode + '</span>' +
-        '<span class="op-row-arrow">→</span>' +
-        '<span class="op-row-dest">' + b.name + '</span>' +
-        '</div>' +
-        '<div class="op-row-sub">' + svcHtml + '</div>';
-      busyList.appendChild(row);
-    });
-
     var grid = $('opGrid');
     grid.innerHTML = '';
-    // Compact idle tiles: a plain grid of same-size boxes, sized to fit the
-    // space left after the busy rows above — no need to be square here,
-    // they just need to be readable and not take more room than they must.
-    var n = idleOperators.length || 1;
-    // Keep idle tiles on a single row whenever reasonable — wrapping to a
-    // second row risks it getting clipped under the busy rows above on
-    // shorter screens, and a wide single row reads fine either way.
-    var cols = n <= 6 ? n : Math.ceil(Math.sqrt(n) * 1.4);
-    grid.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
-    grid.style.gridAutoRows = 'minmax(70px, 1fr)';
-    idleOperators
-      .forEach(function (b) {
-        var cell = document.createElement('div');
-        cell.className = 'op-cell idle';
-        cell.innerHTML = opCellHtml(b);
-        grid.appendChild(cell);
-      });
+    // Pick a column/row count that keeps the grid close to square, then size
+    // each cell in actual pixels so every box is the same true size —
+    // computed from the space really available, so it still fits without
+    // clipping instead of overflowing off-screen.
+    var n = onlineBoard.length || 1;
+    var cols = Math.max(1, Math.ceil(Math.sqrt(n)));
+    var rows = Math.max(1, Math.ceil(n / cols));
+    var gap = 20;
+    var availW = grid.clientWidth;
+    var availH = grid.clientHeight;
+    var cellW = Math.floor((availW - gap * (cols - 1)) / cols);
+    var cellH = Math.floor((availH - gap * (rows - 1)) / rows);
+    grid.style.gridTemplateColumns = 'repeat(' + cols + ', ' + cellW + 'px)';
+    grid.style.gridAutoRows = cellH + 'px';
+    grid.style.setProperty('--op-cell-size', Math.min(cellW, cellH) + 'px');
+    onlineBoard.forEach(function (b) {
+      var cell = document.createElement('div');
+      cell.className = 'op-cell';
+      if (!b.ticketCode) cell.classList.add('idle');
+      var justCalled = call && call.operatorId === b.id && b.ticketCode === call.code;
+      if (justCalled) cell.classList.add('just-called');
+      // Border (and its glow) picks up the active service's own color, so
+      // busy boxes are easy to tell apart at a glance.
+      if (b.ticketCode && !justCalled) {
+        var glowColor = b.serviceColor || '#eab308';
+        cell.style.borderColor = glowColor;
+        cell.style.boxShadow = '0 0 18px ' + glowColor + '80, inset 0 0 24px ' + glowColor + '22';
+      }
+      cell.innerHTML = opCellHtml(b);
+      grid.appendChild(cell);
+    });
 
     // Waiting list — every queue, not just the first few. Only rebuild the
     // DOM when the actual set of waiting tickets changes, so an in-progress
