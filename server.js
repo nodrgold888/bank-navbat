@@ -44,6 +44,14 @@ const PORT = Number(process.env.PORT) || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const DATA_FILE = path.join(__dirname, 'data', 'state.json');
 
+// Bumped every process start (i.e. every deploy/restart) and appended as
+// "?v=" on every script/stylesheet reference in served HTML pages below.
+// A CDN or intermediate proxy in front of a custom domain can cache static
+// assets by extension regardless of Cache-Control (a very common default),
+// which would otherwise mean a JS/CSS fix never actually reaches a browser
+// after deploying it — the URL itself has to change to force a fresh fetch.
+const ASSET_VERSION = Date.now();
+
 const OPERATOR_COUNT = 7;
 // Each operator is dedicated to a fixed subset of services, instead of the
 // "handles every service" default.
@@ -822,6 +830,16 @@ const MIME = {
   '.woff2': 'font/woff2',
 };
 
+// Appends "?v=<ASSET_VERSION>" to same-origin script/stylesheet references
+// (src="/x.js", href="/x.css") in served HTML — never touches absolute
+// URLs (Google Fonts etc.), since those already have their own cache story.
+function withAssetVersion(html) {
+  return html.replace(
+    /((?:src|href)=")(\/[^"]+\.(?:js|css))(")/g,
+    (m, pre, url, post) => `${pre}${url}?v=${ASSET_VERSION}${post}`
+  );
+}
+
 function serveStatic(req, res, urlPath) {
   let rel = PAGE_ROUTES[urlPath] || urlPath.replace(/^\/+/, '');
   if (!rel) rel = 'index.html';
@@ -837,9 +855,19 @@ function serveStatic(req, res, urlPath) {
       res.end('404 — sahifa topilmadi');
       return;
     }
+    const ext = path.extname(full).toLowerCase();
+    if (ext === '.html') {
+      data = Buffer.from(withAssetVersion(data.toString('utf8')), 'utf8');
+    }
     res.writeHead(200, {
-      'Content-Type': MIME[path.extname(full).toLowerCase()] || 'application/octet-stream',
-      'Cache-Control': 'no-cache',
+      'Content-Type': MIME[ext] || 'application/octet-stream',
+      // "no-cache" alone still lets a misbehaving proxy/CDN cache the
+      // response as long as it wants (some ignore weak validators
+      // entirely) — "no-store" plus the "?v=" cache-buster on every asset
+      // URL above is the belt-and-suspenders fix: even a cache that
+      // ignores this header outright still can't serve a stale file under
+      // a URL that changed.
+      'Cache-Control': 'no-store',
     });
     res.end(data);
   });
@@ -882,7 +910,7 @@ function readJsonBody(req) {
 function sendJson(res, status, obj) {
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
-    'Cache-Control': 'no-cache',
+    'Cache-Control': 'no-store',
   });
   res.end(JSON.stringify(obj));
 }
@@ -979,7 +1007,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && pathname === '/api/state') {
       res.writeHead(200, {
         'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': 'no-cache',
+        'Cache-Control': 'no-store',
       });
       return res.end(viewJson());
     }
