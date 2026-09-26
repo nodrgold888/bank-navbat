@@ -748,9 +748,13 @@ body.kiosk {
    ========================================================================== */
 
 body.tv {
-  /* Solid navy — the classic bank "now serving" board look (reference
-     photo the branch sent over), not the glassmorphism used elsewhere. */
-  background: #0b1730;
+  /* Davr Bank palette: blue flowing into green, like the logo — layered
+     with soft radial highlights (the same "mesh gradient" treatment used
+     on kiosk/admin/staff) instead of a flat diagonal wash, for depth
+     without sacrificing the dark, high-contrast base a TV needs. */
+  background: radial-gradient(1400px 900px at 6% -12%, rgba(124, 58, 237, 0.28), transparent 58%),
+    radial-gradient(1100px 800px at 102% 6%, rgba(34, 211, 153, 0.16), transparent 55%),
+    linear-gradient(140deg, #071d38 0%, #052a20 100%);
   color: #fff;
   height: 100vh;
   overflow: hidden;
@@ -766,10 +770,14 @@ body.tv {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #101f42;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: var(--glass-sheen-dark),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: var(--radius-lg);
   padding: 14px 22px;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.22), inset -1px -1px 1px rgba(0, 0, 0, 0.07), 0 10px 30px -12px rgba(0, 0, 0, 0.5);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 .tv-head .title {
   font-size: 3.1rem;
@@ -808,7 +816,7 @@ body.tv {
   gap: 24px;
 }
 .tv-head .clock {
-  font-size: 3.6rem;
+  font-size: 3rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   text-align: right;
@@ -913,25 +921,30 @@ select.sound-toggle option {
     opacity: 0;
   }
 }
-/* Every operator (Valyuta included) gets an equal-size box in one grid —
-   column/row count and exact cell size (px) are set from JS (tv.js) so no
-   operator gets more or less space than any other. */
+/* Valyuta gets pulled out of the regular grid into its own centered,
+   featured box — :empty (when offline) collapses to nothing so it doesn't
+   leave a gap. */
+.valyuta-wrap {
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.valyuta-wrap:empty {
+  display: none;
+}
 .op-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   grid-auto-rows: 1fr;
-  gap: 14px;
+  gap: 20px;
   min-height: 0;
   overflow: hidden;
 }
 .op-cell {
-  /* Neon / digital-signage look: near-black tile, bright glowing border and
-     numerals, closer to the classic LED "now serving" board than the glass
-     look used elsewhere on the site — chosen because it reads better from
-     across a room. */
-  background: #05090c;
-  border: 2px solid rgba(255, 255, 255, 0.16);
+  background: var(--glass-sheen-dark),
+    linear-gradient(120deg, rgba(28, 127, 208, 0.22) 0%, rgba(34, 162, 79, 0.22) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: var(--radius-lg);
   padding: clamp(6px, 1.6vh, 26px) 20px;
   display: flex;
@@ -943,18 +956,22 @@ select.sound-toggle option {
   min-height: 0;
   overflow: hidden;
   position: relative;
-  transition: opacity 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: none;
+  transition: opacity 0.2s ease;
+  /* True frosted-glass: blur whatever sits behind the card (the operator
+     grid background) plus a soft top-edge highlight and ambient shadow —
+     real glassmorphism, not just a tinted flat panel. */
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.28), inset -1px -1px 1px rgba(0, 0, 0, 0.07), inset 0 -20px 30px -22px rgba(0, 0, 0, 0.45),
+    0 8px 24px -12px rgba(0, 0, 0, 0.5);
 }
 .op-cell.idle {
-  opacity: 0.6;
+  opacity: 0.55;
 }
 .op-cell.just-called {
-  background: #05090c;
+  background: linear-gradient(120deg, #2196f3 0%, #2fd66d 100%);
   color: #fff;
-  border-color: #6fe6a0;
+  border-color: rgba(255, 255, 255, 0.6);
   animation: op-cell-pulse 1s ease 0s 3;
   /* Pop visually above its neighbors instead of just changing color — makes
      it unmistakable which box is being called, even at a glance. Kept
@@ -964,7 +981,7 @@ select.sound-toggle option {
   position: relative;
   z-index: 2;
   transform: scale(1.06);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 50px rgba(111, 230, 160, 0.85), inset 0 0 30px rgba(111, 230, 160, 0.2);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), 0 0 46px rgba(111, 230, 160, 0.65);
 }
 /* The called operator's own text goes a bit bigger than every other box on
    the board — capped so it still fits inside the cell (overflow: hidden is
@@ -992,7 +1009,7 @@ select.sound-toggle option {
   opacity: 1;
 }
 .op-cell .op-name {
-  font-size: clamp(2rem, 4.6vh, 3.6rem);
+  font-size: clamp(1.8rem, 4.2vh, 3.2rem);
   font-weight: 700;
   opacity: 0.85;
   display: flex;
@@ -1011,19 +1028,17 @@ select.sound-toggle option {
   opacity: 0.75;
 }
 .op-cell .op-code {
-  font-size: clamp(4rem, 10vh, 10rem);
+  font-size: clamp(3rem, 7.2vh, 7rem);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   line-height: 1.05;
-  color: rgba(255, 255, 255, 0.22);
+  color: #6fe6a0;
 }
-.op-cell:not(.idle) .op-code {
-  color: #6fe6ff;
-  text-shadow: 0 0 14px rgba(111, 230, 255, 0.85), 0 0 30px rgba(111, 230, 255, 0.5);
+.op-cell.idle .op-code {
+  color: #fff;
 }
 .op-cell.just-called .op-code {
-  color: #6fe6a0;
-  text-shadow: 0 0 16px rgba(111, 230, 160, 1), 0 0 34px rgba(111, 230, 160, 0.7);
+  color: #fff;
 }
 .op-cell .op-svc {
   font-size: clamp(1.3rem, 2.8vh, 2.2rem);
@@ -1037,27 +1052,36 @@ select.sound-toggle option {
   max-width: 100%;
 }
 
-/* Every grid cell is a true square whose pixel size (--op-cell-size) is
-   computed in tv.js from the space actually available — text scales with
-   that real size, not just viewport height, so it keeps fitting cleanly
-   whether the box ends up small (7 operators) or large (fewer online). */
-#opGrid .op-cell .op-name {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  max-width: calc(100% - 28px);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 999px;
-  padding: 4px 14px;
-  gap: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: clamp(0.75rem, calc(var(--op-cell-size, 20vh) * 0.095), 1.7rem);
+/* Valyuta's featured box isn't constrained by a grid row's 1fr height like
+   the regular cells, so it can safely afford bigger, fixed text sizes. */
+.valyuta-wrap {
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
 }
-#opGrid .op-cell .op-code {
-  font-size: clamp(1.4rem, calc(var(--op-cell-size, 20vh) * 0.36), 11.5rem);
+.valyuta-wrap:empty {
+  display: none;
+}
+.valyuta-cell {
+  width: 100%;
+  margin: 4px 0 14px;
+  padding: 16px 28px;
+  border-width: 2px;
+  border-color: #eab308;
+  background: var(--glass-sheen-dark), rgba(234, 179, 8, 0.1);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.2), inset -1px -1px 1px rgba(0, 0, 0, 0.07), 0 0 26px -8px rgba(234, 179, 8, 0.45);
+}
+.valyuta-cell .op-name {
+  font-size: 1.8rem;
+}
+.valyuta-cell .op-code {
+  font-size: 4.2rem;
+}
+.valyuta-cell .op-svc {
+  font-size: 1.4rem;
+}
+.valyuta-cell.just-called {
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 .op-cell .op-svc .dot,
@@ -1070,14 +1094,18 @@ select.sound-toggle option {
 }
 
 .waiting-panel {
-  background: #101f42;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: var(--glass-sheen-dark),
+    linear-gradient(165deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: var(--radius-lg);
   padding: 20px 22px;
   display: flex;
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.2), inset -1px -1px 1px rgba(0, 0, 0, 0.07), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
 }
 .waiting-panel h2 {
   font-size: 2.1rem;
@@ -1105,22 +1133,22 @@ select.sound-toggle option {
 .wait-item {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--radius-sm);
-  padding: 18px 22px;
+  padding: 14px 18px;
   flex-shrink: 0;
   transition: background-color 0.15s ease;
   box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.14), inset -1px -1px 1px rgba(0, 0, 0, 0.07);
 }
 .wait-item .wi-code {
-  font-size: 4.2rem;
+  font-size: 3.4rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
 .wait-item .wi-svc {
-  font-size: 1.55rem;
+  font-size: 1.3rem;
   font-weight: 600;
   opacity: 0.9;
   padding: 5px 14px;

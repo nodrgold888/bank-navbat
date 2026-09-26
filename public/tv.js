@@ -140,17 +140,20 @@
   }
 
   // ---- Render ----
-  var lastView = null;
   function render(view) {
-    lastView = view;
     var call = view.lastCall;
 
-    // Shared markup builder for every operator cell, Valyuta included —
-    // every operator gets the same amount of space, no one gets a bigger
-    // or smaller box than anyone else. Service type is intentionally left
-    // off — just the operator and the ticket number.
+    // Shared markup builder for both the regular grid cells and the
+    // featured Valyuta box below.
     function opCellHtml(b) {
       var statusTxt = b.ticketCode ? '' : 'boʻsh';
+      var svcHtml = b.ticketCode
+        ? '<span class="dot" style="background:' +
+          (b.serviceColor || '#789') +
+          '"></span>' +
+          (b.serviceIcon ? b.serviceIcon + ' ' : '') +
+          (b.serviceName || '')
+        : '';
       return (
         '<div class="op-name">' +
         '<span class="op-name-text">' + b.name + '</span>' +
@@ -158,49 +161,55 @@
         '</div>' +
         '<div class="op-code">' +
         (b.ticketCode || '—') +
+        '</div>' +
+        '<div class="op-svc">' +
+        svcHtml +
         '</div>'
       );
     }
 
-    // Every online operator (Valyuta included) sits in one equal-size grid
-    // — paused/offline operators are left off the board entirely (a
-    // customer has nowhere to go for one anyway).
+    // Valyuta gets its own featured, centered box instead of sitting in the
+    // regular grid — pulled out here, before the grid loop below.
     var onlineBoard = view.board.filter(function (b) {
       return b.online;
     });
+    var valyutaWrap = $('valyutaWrap');
+    valyutaWrap.innerHTML = '';
+    var valyuta = onlineBoard.find(function (b) {
+      return b.name === 'Valyuta';
+    });
+    if (valyuta) {
+      var vCell = document.createElement('div');
+      vCell.className = 'op-cell valyuta-cell';
+      if (!valyuta.ticketCode) vCell.classList.add('idle');
+      var vJustCalled = call && call.operatorId === valyuta.id && valyuta.ticketCode === call.code;
+      if (vJustCalled) vCell.classList.add('just-called');
+      vCell.innerHTML = opCellHtml(valyuta);
+      valyutaWrap.appendChild(vCell);
+    }
+
+    // Operator grid — paused/offline operators are left off the board
+    // entirely (a customer has nowhere to go for one anyway), instead of
+    // showing a dimmed "dam olishda" box that just takes up space.
     var grid = $('opGrid');
     grid.innerHTML = '';
-    // Pick a column/row count that keeps the grid close to square, then size
-    // each cell in actual pixels so every box is the same true size —
-    // computed from the space really available, so it still fits without
-    // clipping instead of overflowing off-screen.
-    var n = onlineBoard.length || 1;
-    var cols = Math.max(1, Math.ceil(Math.sqrt(n)));
-    var rows = Math.max(1, Math.ceil(n / cols));
-    var gap = 20;
-    var availW = grid.clientWidth;
-    var availH = grid.clientHeight;
-    var cellW = Math.floor((availW - gap * (cols - 1)) / cols);
-    var cellH = Math.floor((availH - gap * (rows - 1)) / rows);
-    grid.style.gridTemplateColumns = 'repeat(' + cols + ', ' + cellW + 'px)';
-    grid.style.gridAutoRows = cellH + 'px';
-    grid.style.setProperty('--op-cell-size', Math.min(cellW, cellH) + 'px');
-    onlineBoard.forEach(function (b) {
-      var cell = document.createElement('div');
-      cell.className = 'op-cell';
-      if (!b.ticketCode) cell.classList.add('idle');
-      var justCalled = call && call.operatorId === b.id && b.ticketCode === call.code;
-      if (justCalled) cell.classList.add('just-called');
-      // Border (and its glow) picks up the active service's own color, so
-      // busy boxes are easy to tell apart at a glance.
-      if (b.ticketCode && !justCalled) {
-        var glowColor = b.serviceColor || '#eab308';
-        cell.style.borderColor = glowColor;
-        cell.style.boxShadow = '0 0 18px ' + glowColor + '80, inset 0 0 24px ' + glowColor + '22';
-      }
-      cell.innerHTML = opCellHtml(b);
-      grid.appendChild(cell);
-    });
+    onlineBoard
+      .filter(function (b) {
+        return b.name !== 'Valyuta';
+      })
+      .forEach(function (b) {
+        var cell = document.createElement('div');
+        cell.className = 'op-cell';
+        if (!b.ticketCode) cell.classList.add('idle');
+        var justCalled = call && call.operatorId === b.id && b.ticketCode === call.code;
+        if (justCalled) cell.classList.add('just-called');
+        // Border picks up the active service's own color — same idea as
+        // Valyuta's gold border, just driven by whichever service the
+        // operator is actually serving right now.
+        if (b.ticketCode && !justCalled) cell.style.borderColor = b.serviceColor || '#eab308';
+        cell.innerHTML = opCellHtml(b);
+        grid.appendChild(cell);
+      });
 
     // Waiting list — every queue, not just the first few. Only rebuild the
     // DOM when the actual set of waiting tickets changes, so an in-progress
@@ -251,14 +260,4 @@
   }
 
   Navbat.connect(render, onConn);
-
-  // Cell size is computed in pixels from available space (see render()), so
-  // it needs recomputing whenever the window/screen size actually changes.
-  var resizeTimer = null;
-  window.addEventListener('resize', function () {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () {
-      if (lastView) render(lastView);
-    }, 150);
-  });
 })();
