@@ -63,6 +63,57 @@
     Navbat.chime('call');
   });
 
+  // ---- Voice announcement setup ----
+  // No voice is bundled or auto-picked: quality varies wildly by device
+  // (Chrome only offers a real Uzbek voice when it can reach Google's
+  // online voice list; Windows' own offline voices usually have none at
+  // all), so whoever sets up this TV picks whichever installed voice
+  // actually sounds acceptable, once, and it's remembered on this device.
+  var voiceSelect = $('voiceSelect');
+  if (Navbat.hasTTS) {
+    Navbat.onVoicesReady(function (voices) {
+      var saved = Navbat.getSelectedVoiceURI();
+      var sorted = voices.slice().sort(function (a, b) {
+        var aUz = /^uz/i.test(a.lang) ? 0 : 1;
+        var bUz = /^uz/i.test(b.lang) ? 0 : 1;
+        if (aUz !== bUz) return aUz - bUz;
+        return a.name.localeCompare(b.name);
+      });
+      voiceSelect.innerHTML = '<option value="">🗣️ Ovoz: tanlanmagan</option>';
+      sorted.forEach(function (v) {
+        var opt = document.createElement('option');
+        opt.value = v.voiceURI;
+        opt.textContent = (/^uz/i.test(v.lang) ? '⭐ ' : '') + v.name + ' (' + v.lang + ')';
+        if (v.voiceURI === saved) opt.selected = true;
+        voiceSelect.appendChild(opt);
+      });
+    });
+  } else {
+    voiceSelect.disabled = true;
+    voiceSelect.title = 'Bu brauzer ovozda oʻoqishni qoʻllab-quvvatlamaydi';
+  }
+  voiceSelect.addEventListener('change', function () {
+    Navbat.setSelectedVoiceURI(voiceSelect.value);
+  });
+  $('voiceTest').addEventListener('click', function () {
+    if (!voiceSelect.value) {
+      voiceToast("Avval ro'yxatdan ovoz tanlang");
+      return;
+    }
+    Navbat.speak('B001 raqamli mijoz, 6-operatorga murojaat qiling.');
+  });
+  var voiceToastTimer = null;
+  function voiceToast(msg) {
+    var el = $('voiceToast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(voiceToastTimer);
+    voiceToastTimer = setTimeout(function () {
+      el.classList.remove('show');
+    }, 2200);
+  }
+
   // ---- Clock ----
   function tickClock() {
     var d = new Date();
@@ -82,6 +133,10 @@
     boom.classList.remove('boom');
     void boom.offsetWidth;
     boom.classList.add('boom');
+    if (soundOn) {
+      var prefix = call.recall ? 'Qayta chaqiruv. ' : '';
+      Navbat.speak(prefix + call.code + ' raqamli mijoz, ' + call.operatorName + 'ga murojaat qiling.');
+    }
   }
 
   // ---- Render ----

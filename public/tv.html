@@ -22,6 +22,10 @@
           <div class="voice-controls">
             <button class="sound-toggle" id="soundToggle">🔊 Signal: yoniq</button>
             <button class="sound-toggle" id="soundTest" title="Signalni sinash">🔔 Sinash</button>
+            <select class="sound-toggle" id="voiceSelect" title="Chaqiruv ovozi">
+              <option value="">🗣️ Ovoz: tanlanmagan</option>
+            </select>
+            <button class="sound-toggle" id="voiceTest" title="Ovozda o'qishni sinash">▶️ Ovozni sinash</button>
           </div>
           <div>
             <div class="clock tabnum" id="clock">00:00:00</div>
@@ -55,6 +59,7 @@
     </div>
 
     <div class="offline-banner" id="offline">Server bilan aloqa uzildi — qayta ulanmoqda…</div>
+    <div class="toast" id="voiceToast"></div>
 
     <script src="/common.js"></script>
     <script src="/tv.js"></script>

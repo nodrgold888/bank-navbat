@@ -835,6 +835,16 @@ body.tv {
   font-weight: 600;
   border-radius: 10px;
 }
+select.sound-toggle {
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  max-width: 220px;
+  text-overflow: ellipsis;
+}
+select.sound-toggle option {
+  color: #111;
+}
 .voice-controls {
   display: flex;
   align-items: center;

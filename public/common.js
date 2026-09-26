@@ -319,6 +319,77 @@ window.Navbat = (function () {
     }
   }
 
+  // --- Voice announcement (Web Speech API) ---------------------------------
+  // There is no bundled voice audio here — this speaks through whatever
+  // text-to-speech voice is installed on the device/browser. Quality and
+  // even Uzbek availability depend entirely on that: Chrome typically only
+  // ships a real "uz-UZ" voice when it can reach Google's online voice
+  // service, and Windows' own built-in (offline) SAPI voices usually don't
+  // include Uzbek at all. Because of that, the operator explicitly picks
+  // a voice (persisted per device) rather than us silently guessing one —
+  // picking the least-bad available voice is a per-machine judgment call.
+  const TTS_VOICE_KEY = 'navbatTtsVoiceURI';
+  const hasTTS = typeof window.speechSynthesis !== 'undefined';
+
+  function listVoices() {
+    if (!hasTTS) return [];
+    return window.speechSynthesis.getVoices();
+  }
+
+  // Voice lists load asynchronously in most browsers — callback fires once
+  // they're ready (immediately if already cached).
+  function onVoicesReady(cb) {
+    if (!hasTTS) return;
+    const existing = window.speechSynthesis.getVoices();
+    if (existing.length) return cb(existing);
+    window.speechSynthesis.addEventListener('voiceschanged', function once() {
+      window.speechSynthesis.removeEventListener('voiceschanged', once);
+      cb(window.speechSynthesis.getVoices());
+    });
+  }
+
+  function getSelectedVoiceURI() {
+    try {
+      return localStorage.getItem(TTS_VOICE_KEY) || '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function setSelectedVoiceURI(uri) {
+    try {
+      localStorage.setItem(TTS_VOICE_KEY, uri || '');
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  /**
+   * Speak text aloud using the operator-selected voice. No-ops quietly if
+   * speech synthesis isn't supported or no voice has been chosen yet — the
+   * chime alone still plays either way, so this is a pure enhancement.
+   */
+  function speak(text) {
+    if (!hasTTS || !text) return;
+    const uri = getSelectedVoiceURI();
+    if (!uri) return; // nobody has picked a voice on this device yet
+    const voice = listVoices().find(function (v) {
+      return v.voiceURI === uri;
+    });
+    if (!voice) return; // previously-picked voice no longer available
+    try {
+      window.speechSynthesis.cancel(); // don't queue/overlap announcements
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.voice = voice;
+      utter.lang = voice.lang;
+      utter.rate = 0.95;
+      utter.pitch = 1;
+      window.speechSynthesis.speak(utter);
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
   return {
     connect: connect,
     post: post,
@@ -326,5 +397,11 @@ window.Navbat = (function () {
     fmtDate: fmtDate,
     elapsed: elapsed,
     chime: chime,
+    hasTTS: hasTTS,
+    listVoices: listVoices,
+    onVoicesReady: onVoicesReady,
+    getSelectedVoiceURI: getSelectedVoiceURI,
+    setSelectedVoiceURI: setSelectedVoiceURI,
+    speak: speak,
   };
 })();
