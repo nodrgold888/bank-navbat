@@ -182,46 +182,59 @@
       valyutaWrap.appendChild(vCell);
     }
 
-    // Operator grid — paused/offline operators are left off the board
-    // entirely (a customer has nowhere to go for one anyway), instead of
-    // showing a dimmed "dam olishda" box that just takes up space.
-    var grid = $('opGrid');
-    grid.innerHTML = '';
-    var gridOperators = onlineBoard.filter(function (b) {
+    // Operators split in two: busy ones get a full-width emphasized row
+    // (easy to scan top-to-bottom, "CODE → operator" reads like a real
+    // branch board), idle ones get compact tiles below since there's
+    // nothing urgent to show for them. Paused/offline operators are left
+    // off the board entirely (a customer has nowhere to go for one anyway).
+    var allOperators = onlineBoard.filter(function (b) {
       return b.name !== 'Valyuta';
     });
-    // Pick a column/row count that keeps the grid close to square, then size
-    // each cell in actual pixels so every box is a true 1:1 square (not just
-    // "roughly" square) — computed from the space really available, so it
-    // still fits without clipping instead of overflowing off-screen.
-    var n = gridOperators.length || 1;
-    var cols = Math.max(1, Math.ceil(Math.sqrt(n)));
-    var rows = Math.max(1, Math.ceil(n / cols));
-    var gap = 20;
-    var availW = grid.clientWidth;
-    var availH = grid.clientHeight;
-    var cellSize = Math.max(
-      80,
-      Math.floor(Math.min((availW - gap * (cols - 1)) / cols, (availH - gap * (rows - 1)) / rows))
-    );
-    grid.style.gridTemplateColumns = 'repeat(' + cols + ', ' + cellSize + 'px)';
-    grid.style.gridAutoRows = cellSize + 'px';
-    grid.style.setProperty('--op-cell-size', cellSize + 'px');
-    gridOperators
+    var busyOperators = allOperators.filter(function (b) {
+      return b.ticketCode;
+    });
+    var idleOperators = allOperators.filter(function (b) {
+      return !b.ticketCode;
+    });
+
+    var busyList = $('opBusyList');
+    busyList.innerHTML = '';
+    busyOperators.forEach(function (b) {
+      var row = document.createElement('div');
+      row.className = 'op-row';
+      var justCalled = call && call.operatorId === b.id && b.ticketCode === call.code;
+      if (justCalled) row.classList.add('just-called');
+      var accent = b.serviceColor || '#6fe6a0';
+      row.style.borderColor = accent;
+      row.style.background = 'linear-gradient(120deg, ' + accent + '2e 0%, ' + accent + '10 100%)';
+      var svcHtml = (b.serviceIcon ? b.serviceIcon + ' ' : '') + (b.serviceName || '');
+      row.innerHTML =
+        '<div class="op-row-label">' + b.name + '</div>' +
+        '<div class="op-row-main">' +
+        '<span class="op-row-code">' + b.ticketCode + '</span>' +
+        '<span class="op-row-arrow">→</span>' +
+        '<span class="op-row-dest">' + b.name + '</span>' +
+        '</div>' +
+        '<div class="op-row-sub">' + svcHtml + '</div>';
+      busyList.appendChild(row);
+    });
+
+    var grid = $('opGrid');
+    grid.innerHTML = '';
+    // Compact idle tiles: a plain grid of same-size boxes, sized to fit the
+    // space left after the busy rows above — no need to be square here,
+    // they just need to be readable and not take more room than they must.
+    var n = idleOperators.length || 1;
+    // Keep idle tiles on a single row whenever reasonable — wrapping to a
+    // second row risks it getting clipped under the busy rows above on
+    // shorter screens, and a wide single row reads fine either way.
+    var cols = n <= 6 ? n : Math.ceil(Math.sqrt(n) * 1.4);
+    grid.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+    grid.style.gridAutoRows = 'minmax(70px, 1fr)';
+    idleOperators
       .forEach(function (b) {
         var cell = document.createElement('div');
-        cell.className = 'op-cell';
-        if (!b.ticketCode) cell.classList.add('idle');
-        var justCalled = call && call.operatorId === b.id && b.ticketCode === call.code;
-        if (justCalled) cell.classList.add('just-called');
-        // Border (and its glow) picks up the active service's own color —
-        // same idea as Valyuta's gold border, just driven by whichever
-        // service the operator is actually serving right now.
-        if (b.ticketCode && !justCalled) {
-          var glowColor = b.serviceColor || '#eab308';
-          cell.style.borderColor = glowColor;
-          cell.style.boxShadow = '0 0 18px ' + glowColor + '80, inset 0 0 24px ' + glowColor + '22';
-        }
+        cell.className = 'op-cell idle';
         cell.innerHTML = opCellHtml(b);
         grid.appendChild(cell);
       });

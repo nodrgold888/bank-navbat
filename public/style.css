@@ -748,13 +748,9 @@ body.kiosk {
    ========================================================================== */
 
 body.tv {
-  /* Davr Bank palette: blue flowing into green, like the logo — layered
-     with soft radial highlights (the same "mesh gradient" treatment used
-     on kiosk/admin/staff) instead of a flat diagonal wash, for depth
-     without sacrificing the dark, high-contrast base a TV needs. */
-  background: radial-gradient(1400px 900px at 6% -12%, rgba(124, 58, 237, 0.28), transparent 58%),
-    radial-gradient(1100px 800px at 102% 6%, rgba(34, 211, 153, 0.16), transparent 55%),
-    linear-gradient(140deg, #071d38 0%, #052a20 100%);
+  /* Solid navy — the classic bank "now serving" board look (reference
+     photo the branch sent over), not the glassmorphism used elsewhere. */
+  background: #0b1730;
   color: #fff;
   height: 100vh;
   overflow: hidden;
@@ -770,14 +766,10 @@ body.tv {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--glass-sheen-dark),
-    linear-gradient(120deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #101f42;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--radius-lg);
   padding: 14px 22px;
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.22), inset -1px -1px 1px rgba(0, 0, 0, 0.07), 0 10px 30px -12px rgba(0, 0, 0, 0.5);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
 }
 .tv-head .title {
   font-size: 3.1rem;
@@ -932,17 +924,65 @@ select.sound-toggle option {
 .valyuta-wrap:empty {
   display: none;
 }
+/* Busy operators: one emphasized, full-width row each — reads top to
+   bottom like a real branch board ("CODE → operator"), instead of hunting
+   across a grid for which tile changed. */
+.op-busy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.op-row {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  flex-wrap: wrap;
+  background: #0a1730;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 14px 26px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.op-row-label {
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.65;
+  flex-basis: 100%;
+}
+.op-row-main {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  font-size: clamp(1.8rem, 5vh, 3.4rem);
+}
+.op-row-arrow {
+  opacity: 0.55;
+  font-weight: 700;
+}
+.op-row-sub {
+  font-size: clamp(1rem, 2vh, 1.4rem);
+  opacity: 0.85;
+  margin-left: auto;
+}
+.op-row.just-called {
+  animation: op-cell-pulse 1s ease 0s 3;
+  transform: scale(1.02);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 50px rgba(111, 230, 160, 0.85);
+}
+
+/* Idle operators: plain compact tiles below the busy rows — nothing is
+   happening there, so they get less visual weight and less space. */
 .op-grid {
   flex: 1;
   display: grid;
-  /* Column/row count and exact cell size (px) are set from JS (tv.js) so
-     every box is a true 1:1 square — the ideal size depends on how many
-     operators are online and how much space is actually available. */
   grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: 1fr;
-  gap: 20px;
-  justify-content: center;
-  align-content: center;
+  grid-auto-rows: minmax(70px, 1fr);
+  gap: 14px;
   min-height: 0;
   overflow: hidden;
 }
@@ -1063,23 +1103,25 @@ select.sound-toggle option {
    to scale with that real size, not just viewport height, or it clips at
    small cell sizes / floats tiny at large ones. Valyuta's featured box below
    keeps the vh-based sizing above since it isn't part of that square grid. */
+/* These idle tiles are compact and plain by design — nothing to emphasize,
+   so sizes are small and fixed rather than scaling up with cell size. */
 #opGrid .op-cell .op-name {
   position: absolute;
-  top: 14px;
-  left: 14px;
-  max-width: calc(100% - 28px);
+  top: 10px;
+  left: 10px;
+  max-width: calc(100% - 20px);
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 999px;
-  padding: 4px 14px;
+  padding: 3px 12px;
   gap: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: clamp(0.85rem, calc(var(--op-cell-size, 20vh) * 0.095), 1.7rem);
+  font-size: clamp(0.75rem, 1.7vh, 1.2rem);
 }
 #opGrid .op-cell .op-code {
-  font-size: clamp(1.8rem, calc(var(--op-cell-size, 20vh) * 0.36), 11.5rem);
+  font-size: clamp(1.2rem, 3vh, 2.2rem);
 }
 
 /* Valyuta's featured box isn't constrained by a grid row's 1fr height like
@@ -1124,18 +1166,14 @@ select.sound-toggle option {
 }
 
 .waiting-panel {
-  background: var(--glass-sheen-dark),
-    linear-gradient(165deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #101f42;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--radius-lg);
   padding: 20px 22px;
   display: flex;
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.2), inset -1px -1px 1px rgba(0, 0, 0, 0.07), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
 }
 .waiting-panel h2 {
   font-size: 2.1rem;
