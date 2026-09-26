@@ -214,10 +214,14 @@
         if (!b.ticketCode) cell.classList.add('idle');
         var justCalled = call && call.operatorId === b.id && b.ticketCode === call.code;
         if (justCalled) cell.classList.add('just-called');
-        // Border picks up the active service's own color — same idea as
-        // Valyuta's gold border, just driven by whichever service the
-        // operator is actually serving right now.
-        if (b.ticketCode && !justCalled) cell.style.borderColor = b.serviceColor || '#eab308';
+        // Border (and its glow) picks up the active service's own color —
+        // same idea as Valyuta's gold border, just driven by whichever
+        // service the operator is actually serving right now.
+        if (b.ticketCode && !justCalled) {
+          var glowColor = b.serviceColor || '#eab308';
+          cell.style.borderColor = glowColor;
+          cell.style.boxShadow = '0 0 18px ' + glowColor + '80, inset 0 0 24px ' + glowColor + '22';
+        }
         cell.innerHTML = opCellHtml(b);
         grid.appendChild(cell);
       });
