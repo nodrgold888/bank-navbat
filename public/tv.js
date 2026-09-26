@@ -146,16 +146,11 @@
     var call = view.lastCall;
 
     // Shared markup builder for both the regular grid cells and the
-    // featured Valyuta box below.
+    // featured Valyuta box below. Service type is intentionally left off —
+    // just the operator and the ticket number, sized to fill the space that
+    // used to go to the service line.
     function opCellHtml(b) {
       var statusTxt = b.ticketCode ? '' : 'boʻsh';
-      var svcHtml = b.ticketCode
-        ? '<span class="dot" style="background:' +
-          (b.serviceColor || '#789') +
-          '"></span>' +
-          (b.serviceIcon ? b.serviceIcon + ' ' : '') +
-          (b.serviceName || '')
-        : '';
       return (
         '<div class="op-name">' +
         '<span class="op-name-text">' + b.name + '</span>' +
@@ -163,9 +158,6 @@
         '</div>' +
         '<div class="op-code">' +
         (b.ticketCode || '—') +
-        '</div>' +
-        '<div class="op-svc">' +
-        svcHtml +
         '</div>'
       );
     }

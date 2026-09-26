@@ -1063,13 +1063,10 @@ select.sound-toggle option {
    small cell sizes / floats tiny at large ones. Valyuta's featured box below
    keeps the vh-based sizing above since it isn't part of that square grid. */
 #opGrid .op-cell .op-name {
-  font-size: clamp(1.1rem, calc(var(--op-cell-size, 20vh) * 0.115), 3.6rem);
+  font-size: clamp(1.2rem, calc(var(--op-cell-size, 20vh) * 0.135), 4rem);
 }
 #opGrid .op-cell .op-code {
-  font-size: clamp(1.6rem, calc(var(--op-cell-size, 20vh) * 0.3), 10rem);
-}
-#opGrid .op-cell .op-svc {
-  font-size: clamp(0.85rem, calc(var(--op-cell-size, 20vh) * 0.075), 2.2rem);
+  font-size: clamp(1.8rem, calc(var(--op-cell-size, 20vh) * 0.36), 11.5rem);
 }
 
 /* Valyuta's featured box isn't constrained by a grid row's 1fr height like
