@@ -1011,7 +1011,7 @@ select.sound-toggle option {
   opacity: 1;
 }
 .op-cell .op-name {
-  font-size: clamp(1.8rem, 4.2vh, 3.2rem);
+  font-size: clamp(2rem, 4.6vh, 3.6rem);
   font-weight: 700;
   opacity: 0.85;
   display: flex;
@@ -1030,7 +1030,7 @@ select.sound-toggle option {
   opacity: 0.75;
 }
 .op-cell .op-code {
-  font-size: clamp(3rem, 7.2vh, 7rem);
+  font-size: clamp(4rem, 10vh, 10rem);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   line-height: 1.05;
