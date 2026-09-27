@@ -224,7 +224,7 @@
       if (!view.waitingList.length) {
         var e = document.createElement('div');
         e.className = 'wait-empty';
-        e.textContent = 'Hozircha navbatda hech kim yoʻq';
+        e.innerHTML = '<span class="wait-empty-icon">✓</span>Hozircha navbatda hech kim yoʻq';
         wl.appendChild(e);
       } else {
         view.waitingList.forEach(function (w) {

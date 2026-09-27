@@ -921,17 +921,6 @@ select.sound-toggle option {
     opacity: 0;
   }
 }
-/* Valyuta gets pulled out of the regular grid into its own centered,
-   featured box — :empty (when offline) collapses to nothing so it doesn't
-   leave a gap. */
-.valyuta-wrap {
-  display: flex;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.valyuta-wrap:empty {
-  display: none;
-}
 .op-grid {
   flex: 1;
   display: grid;
@@ -1157,8 +1146,27 @@ select.sound-toggle option {
   margin-left: auto;
 }
 .wait-empty {
-  opacity: 0.5;
+  opacity: 0.55;
   font-size: 1.6rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+}
+.wait-empty-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  background: rgba(111, 230, 160, 0.15);
+  border: 2px solid rgba(111, 230, 160, 0.4);
+  color: #6fe6a0;
 }
 
 .tv-foot {
