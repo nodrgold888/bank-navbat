@@ -71,6 +71,7 @@ body.kiosk {
 @media (min-width: 700px) {
   .kiosk .k-wrap { max-width: 1320px; }
   .kiosk .svc-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kiosk .svc-card:last-child { grid-column: 1 / -1; }
 }
 @media (min-width: 900px) and (orientation: landscape) {
   body.shared-kiosk .k-wrap { max-width: 1500px; padding: 40px 54px 48px; }
