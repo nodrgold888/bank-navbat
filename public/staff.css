@@ -116,51 +116,57 @@ body.staff {
 .staff .op-pick .grid button { color: var(--navy); min-height: 92px; }
 .staff .op-pick .grid button:active { background: var(--blue-soft); }
 
-/* Dark mode follows the same hierarchy: the active ticket and call button stay dominant. */
+/* Dark mode uses restrained navy surfaces with clear functional contrast. */
 body.staff.staff-dark {
-  --ink: #edf4fb;
-  --navy: #edf4fb;
-  --muted: #aab9c9;
-  --blue: #72a9e0;
-  --blue-dark: #b8d7f5;
-  --blue-soft: #1d3957;
-  --line: #2c4055;
-  background: #111b28;
+  --ink: #f2f6fb;
+  --navy: #f2f6fb;
+  --muted: #9eafc1;
+  --blue: #80b8e7;
+  --blue-dark: #c9e0f5;
+  --blue-soft: #16304a;
+  --line: #263b51;
+  background:
+    radial-gradient(900px 540px at 5% -15%, rgba(42, 110, 170, 0.2), transparent 62%),
+    radial-gradient(760px 520px at 100% 12%, rgba(29, 139, 111, 0.11), transparent 60%),
+    #0b1420;
   color: var(--ink);
 }
 .staff-dark :is(.s2-head, .s2-now, .s2-panel, .s2-drop, .op-pick .grid button) {
-  background: #182635;
-  border-color: #2c4055;
-  box-shadow: 0 8px 20px -14px rgba(0, 0, 0, 0.78);
+  background: linear-gradient(145deg, rgba(23, 39, 56, 0.98), rgba(17, 31, 46, 0.98));
+  border-color: #263d54;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035), 0 12px 28px -22px rgba(0, 0, 0, 0.96);
 }
+.staff-dark .s2-head { background: linear-gradient(105deg, #14283c, #102435); }
+.staff-dark .s2-now { background: linear-gradient(145deg, #172a3c, #122335); }
 .staff-dark .s2-opwrap b, .staff-dark .s2-now-label, .staff-dark .s2-panel-head,
-.staff-dark .s2-drop > summary, .staff-dark .s2-qcard-name, .staff-dark .op-pick h1 { color: #edf4fb; }
-.staff-dark .s2-opbadge { background: #233b55; color: #e7f2fe; }
-.staff-dark .s2-change { color: #d5e8fa; background: #233b55; border-color: #35516d; }
-.staff-dark .s2-change:hover { background: #2b4967; }
+.staff-dark .s2-drop > summary, .staff-dark .s2-qcard-name, .staff-dark .op-pick h1 { color: #f2f6fb; }
+.staff-dark .s2-opbadge { background: #1c3854; color: #e8f4ff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07); }
+.staff-dark .s2-change { color: #d9ebfb; background: #1a3854; border-color: #31526f; }
+.staff-dark .s2-change:hover { background: #214765; }
 .staff-dark .page-credit { color: #aab9c9; }
 .staff-dark .page-credit b { color: #d6e5f3; }
-.staff-dark .theme-toggle { color: #dceaf7; background: #23384e; border-color: #35516d; }
-.staff-dark .s2-status.online { color: #a8e7c5; background: #193d34; }
-.staff-dark .s2-status.paused { color: #ffd49b; background: #49351e; border-color: #775737; }
-.staff-dark .s2-now-empty { color: #9dacc0; }
-.staff-dark .s2-svc { background: #213446; color: #e8f2fc; }
-.staff-dark .s2-call { background: #2d6fac; box-shadow: 0 8px 18px -12px #02070d; }
-.staff-dark .s2-call:hover:not(:disabled) { background: #397dbb; }
-.staff-dark .s2-btn.recall { background: #233b55; color: #d3e8fb; }
-.staff-dark .s2-btn.skip { background: #442832; color: #ffd0d6; border-color: #70404d; }
-.staff-dark .s2-btn.skip:hover:not(:disabled) { background: #53313d; }
-.staff-dark .s2-cancel { color: #efabb6; }
-.staff-dark .s2-cancel:hover:not(:disabled) { background: #392530; }
-.staff-dark .s2-qcard { background: #1c2d3e; border-color: #293f55; }
-.staff-dark .s2-qcard-active { background: #203b57; border-color: #3b6790; }
-.staff-dark .s2-qcard-btn { background: #2a435d; color: #d6e9fb; }
-.staff-dark .s2-qcard-active .s2-qcard-btn { background: #3a7db8; }
-.staff-dark .s2-drop-n, .staff-dark .s2-oprow-me { background: #233b55; color: #e5f0fc; }
-.staff-dark .s2-oprow { border-color: #2d4359; }
-.staff-dark .s2-chip { background: #203b57; border-color: #3b6790; color: #e3f0fc; }
-.staff-dark .s2-chip-skipped { background: #47391f; border-color: #705b31; color: #ffe0a4; }
-.staff-dark .s2-drop > summary:hover { background: #1d2e3f; }
+.staff-dark .theme-toggle { color: #dceaf7; background: #173149; border-color: #2e506d; }
+.staff-dark .s2-status.online { color: #b6f0d1; background: #123a32; border-color: #215c4e; }
+.staff-dark .s2-status.paused { color: #ffdaa2; background: #48331d; border-color: #755333; }
+.staff-dark .s2-now-empty { color: #a8b7c7; }
+.staff-dark .s2-svc { background: #18364e; color: #e9f5ff; }
+.staff-dark .s2-timer-wrap { color: #9fb1c2; }
+.staff-dark .s2-call { background: linear-gradient(135deg, #23669f, #267f9e); border: 1px solid rgba(147, 212, 246, 0.18); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 12px 24px -15px #030a12; }
+.staff-dark .s2-call:hover:not(:disabled) { background: linear-gradient(135deg, #2b73af, #2d8dab); }
+.staff-dark .s2-btn.recall { background: #19344e; color: #d7ebfb; border-color: #2d506d; }
+.staff-dark .s2-btn.skip { background: #432630; color: #ffd2d8; border-color: #70404c; }
+.staff-dark .s2-btn.skip:hover:not(:disabled) { background: #54313d; }
+.staff-dark .s2-cancel { color: #f0aebb; }
+.staff-dark .s2-cancel:hover:not(:disabled) { background: #3c2731; }
+.staff-dark .s2-qcard { background: #14293c; border-color: #243f56; }
+.staff-dark .s2-qcard-active { background: #18364f; border-color: #3a678a; }
+.staff-dark .s2-qcard-btn { background: #1e405c; color: #dceefd; }
+.staff-dark .s2-qcard-active .s2-qcard-btn { background: #2b76ae; }
+.staff-dark .s2-drop-n, .staff-dark .s2-oprow-me { background: #1a3854; color: #e4f1fc; }
+.staff-dark .s2-oprow { border-color: #29445a; }
+.staff-dark .s2-chip { background: #18364f; border-color: #39658a; color: #e3f1fc; }
+.staff-dark .s2-chip-skipped { background: #49391d; border-color: #725b2d; color: #ffe2a4; }
+.staff-dark .s2-drop > summary:hover { background: #193147; }
 .staff-dark .s2-hint { color: #aab9c9; }
 @media (min-width: 820px) {
   .staff .s2-body { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; }
