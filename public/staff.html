@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/staff.css" />
     <link rel="icon" href="/img/logo.jpg" />
   </head>
   <body class="staff">
@@ -31,7 +32,13 @@
               <button class="s2-change" id="switchOp">Almashtirish</button>
             </span>
           </div>
-          <button class="s2-status online" id="statusToggle">● Onlayn</button>
+          <div class="s2-head-actions">
+            <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" title="Tungi rejimga o‘tish">
+              <span class="theme-toggle-icon" aria-hidden="true">☾</span>
+              <span id="themeToggleLabel">Tungi rejim</span>
+            </button>
+            <button class="s2-status online" id="statusToggle">● Onlayn</button>
+          </div>
         </div>
 
         <div class="s2-body">
