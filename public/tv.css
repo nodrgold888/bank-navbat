@@ -1,0 +1,110 @@
+/* TV broadcast refinement: retain the bank's teal-blue glass look while
+   making the called ticket and operator assignment readable from a distance. */
+body.tv {
+  background: radial-gradient(1150px 700px at 3% -10%, rgba(63, 102, 205, 0.3), transparent 58%),
+    radial-gradient(1000px 650px at 100% 0%, rgba(39, 204, 151, 0.16), transparent 58%),
+    linear-gradient(140deg, #061b34 0%, #063229 100%);
+}
+
+.tv-wrap {
+  padding: clamp(14px, 1.8vw, 28px);
+  gap: clamp(10px, 1.2vw, 18px);
+}
+
+.tv-head {
+  min-height: 78px;
+  padding: clamp(12px, 1.35vw, 20px) clamp(16px, 1.8vw, 28px);
+  border-radius: 24px;
+}
+.tv-head .title {
+  font-size: clamp(1.25rem, 2.15vw, 2.45rem);
+  gap: clamp(10px, 1vw, 16px);
+}
+.tv-head .title .brand-logo {
+  width: clamp(46px, 4vw, 68px);
+  height: clamp(46px, 4vw, 68px);
+}
+.tv-live { font-size: clamp(0.78rem, 1vw, 1.05rem); }
+.tv-live .live-dot { width: 10px; height: 10px; }
+.tv-head .right { gap: clamp(12px, 1.6vw, 24px); }
+.tv-head .clock { font-size: clamp(1.55rem, 2.5vw, 2.8rem); }
+.tv-head .date { font-size: clamp(0.72rem, 1.2vw, 1.25rem); }
+.voice-controls .sound-toggle {
+  padding: 9px 12px;
+  font-size: clamp(0.72rem, 0.95vw, 1rem);
+  border-radius: 12px;
+}
+
+.tv-body { grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.85fr); gap: clamp(14px, 1.4vw, 22px); }
+.now-serving { gap: clamp(8px, 1vh, 12px); }
+.now-serving > h2, .waiting-panel h2 { font-size: clamp(1rem, 1.5vw, 1.65rem); }
+.waiting-panel h2 { margin-bottom: clamp(10px, 1.3vw, 16px); }
+
+/* Featured currency service remains separate from the six regular operator boxes. */
+.valyuta-cell {
+  min-height: 86px;
+  margin: 0 0 clamp(8px, 1.1vw, 14px);
+  padding: clamp(10px, 1vw, 16px) 24px;
+  border-radius: 20px;
+}
+.valyuta-cell .op-name { font-size: clamp(1rem, 1.8vw, 1.7rem); }
+.valyuta-cell .op-code { font-size: clamp(2.2rem, 4.2vw, 4.35rem); }
+.valyuta-cell .op-svc { font-size: clamp(0.9rem, 1.35vw, 1.3rem); }
+
+.op-grid { gap: clamp(10px, 1.2vw, 18px); }
+.op-cell {
+  padding: clamp(8px, 1.3vh, 20px) clamp(10px, 1.5vw, 22px);
+  border-radius: 22px;
+  border-color: rgba(255, 255, 255, 0.24);
+}
+.op-cell .op-name { font-size: clamp(1.15rem, 2vw, 2.55rem); }
+.op-cell .op-name small { font-size: clamp(0.8rem, 1.25vw, 1.25rem); }
+.op-cell .op-code { font-size: clamp(2.5rem, 5.5vh, 6rem); }
+.op-cell .op-svc {
+  font-size: clamp(0.86rem, 1.35vw, 1.55rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+/* A brighter edge and glow are enough to identify a new call; scaling used to clip text. */
+.op-cell.just-called {
+  transform: none;
+  border-width: 2px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.56), 0 0 0 3px rgba(111, 230, 160, 0.22),
+    0 0 36px rgba(111, 230, 160, 0.42);
+}
+.op-cell.just-called .op-name { font-size: clamp(1.25rem, 2.2vw, 2.65rem); }
+.op-cell.just-called .op-code { font-size: clamp(2.7rem, 5.7vh, 6.2rem); }
+.op-cell.just-called .op-svc { font-size: clamp(0.92rem, 1.45vw, 1.6rem); }
+
+.waiting-panel { padding: clamp(15px, 1.8vw, 24px); border-radius: 24px; }
+.waiting-list { gap: 9px; }
+.wait-item { padding: clamp(10px, 1.2vw, 16px); border-radius: 16px; gap: 10px; }
+.wait-item .wi-code { font-size: clamp(1.5rem, 2.5vw, 3rem); }
+.wait-item .wi-svc { font-size: clamp(0.75rem, 1.05vw, 1.2rem); padding: 5px 9px; overflow-wrap: anywhere; }
+.wait-empty { font-size: clamp(1rem, 1.45vw, 1.5rem); }
+.tv-foot { padding-top: 10px; }
+.tvf-branch { font-size: clamp(0.64rem, 0.85vw, 1rem); }
+
+@media (max-width: 1150px) {
+  body.tv { height: auto; min-height: 100vh; overflow: auto; }
+  .tv-wrap { height: auto; min-height: 100vh; }
+  .tv-body { grid-template-columns: 1fr; }
+  .op-grid { min-height: 510px; }
+  .waiting-panel { min-height: 250px; }
+}
+
+@media (max-width: 680px) {
+  .tv-head { align-items: flex-start; gap: 12px; }
+  .tv-head .right { margin-left: auto; gap: 8px; }
+  .voice-controls { display: none; }
+  .tv-head .title { max-width: 64%; }
+  .tv-head .date { max-width: 130px; }
+  .op-grid { grid-template-columns: 1fr; min-height: auto; }
+  .op-cell { min-height: 145px; }
+  .valyuta-cell { min-height: 120px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .op-cell.just-called, .tv-boom.boom { animation: none; }
+}
