@@ -58,6 +58,13 @@ body.tv {
   border-radius: 22px;
   border-color: rgba(255, 255, 255, 0.24);
 }
+.op-cell.idle {
+  opacity: 0.74;
+  background: var(--glass-sheen-dark),
+    linear-gradient(120deg, rgba(35, 121, 191, 0.28), rgba(28, 148, 88, 0.24));
+}
+.op-cell.idle .op-name { opacity: 0.8; }
+.op-cell.idle .op-code { color: rgba(255, 255, 255, 0.85); }
 .op-cell .op-name { font-size: clamp(1.35rem, 2vw, 2.6rem); line-height: 1; }
 .op-cell .op-name small { font-size: clamp(0.9rem, 1.3vw, 1.4rem); }
 .op-cell .op-code { font-size: clamp(5rem, 11.2vh, 12.5rem); line-height: 1; }
