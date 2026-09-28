@@ -31,6 +31,13 @@ or real devices on the same Wi-Fi):
 
 Everything updates live — no manual refresh.
 
+**TV sound:** the TV never gets clicked or touched, so Chrome's autoplay
+policy silently blocks the call chime/voice announcement by default (it
+requires a user gesture before playing audio). Launch the TV with
+[`print-service/tv-autostart.bat`](print-service/tv-autostart.bat), which
+opens it with `--autoplay-policy=no-user-gesture-required` — without that
+flag the on-screen "Signal: yoniq" toggle looks on but nothing plays.
+
 Options:
 
 ```bash

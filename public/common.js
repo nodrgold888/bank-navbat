@@ -250,6 +250,15 @@ window.Navbat = (function () {
   document.addEventListener('visibilitychange', function () {
     if (!document.hidden) unlockAudio();
   });
+  // The TV display gets no clicks/taps/keys at all — it's an unattended
+  // screen — so those listeners above never fire there and every chime
+  // attempt is silently blocked by the browser's autoplay policy (no user
+  // gesture ever happened). Try unlocking right away too: harmless where a
+  // real gesture will unlock it anyway, and it's the only chance this page
+  // gets on a TV. (The browser still needs to be launched with
+  // --autoplay-policy=no-user-gesture-required for this to actually work —
+  // see print-service/tv-autostart.bat — this alone isn't a full fix.)
+  unlockAudio();
 
   function synthBell(kind) {
     try {

@@ -1282,13 +1282,13 @@ body.staff {
 }
 .op-pick .grid button {
   background: var(--glass-sheen), rgba(255, 255, 255, 0.55);
-  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
   color: var(--navy);
   padding: 28px 14px;
   font-size: 1.3rem;
   font-weight: 700;
   border-radius: var(--radius);
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.8), inset -1px -1px 1px rgba(0, 0, 0, 0.07), var(--shadow);
+  box-shadow: 0 0 0 1px rgba(15, 40, 30, 0.18), inset 1px 1px 0 rgba(255, 255, 255, 0.8), inset -1px -1px 1px rgba(0, 0, 0, 0.07), var(--shadow);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
 }
@@ -1375,9 +1375,12 @@ body.staff {
      operator reads aloud, so legibility wins over transparency — but
      still blurred/highlighted for the same glass look as the rest. */
   background: var(--glass-sheen), rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
   border-radius: var(--radius-lg);
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.9), inset -1px -1px 1px rgba(0, 0, 0, 0.07), var(--shadow);
+  /* The glass border alone barely reads against the colorful gradient
+     background — a thin dark outer ring gives every card a visible edge
+     regardless of what's behind it. */
+  box-shadow: 0 0 0 1px rgba(15, 40, 30, 0.18), inset 1px 1px 0 rgba(255, 255, 255, 0.9), inset -1px -1px 1px rgba(0, 0, 0, 0.07), var(--shadow);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   padding: 20px 18px 24px;
@@ -1492,9 +1495,9 @@ body.staff {
 /* collapsible sections */
 .s2-drop {
   background: var(--glass-sheen), rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
   border-radius: var(--radius);
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.8), inset -1px -1px 1px rgba(0, 0, 0, 0.07), var(--shadow);
+  box-shadow: 0 0 0 1px rgba(15, 40, 30, 0.18), inset 1px 1px 0 rgba(255, 255, 255, 0.8), inset -1px -1px 1px rgba(0, 0, 0, 0.07), var(--shadow);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   margin-top: 12px;
@@ -1559,9 +1562,9 @@ body.staff {
    fully, and it's the thing an operator glances at most often. */
 .s2-panel {
   background: var(--glass-sheen), rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
   border-radius: var(--radius);
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.8), inset -1px -1px 1px rgba(0, 0, 0, 0.07), var(--shadow);
+  box-shadow: 0 0 0 1px rgba(15, 40, 30, 0.18), inset 1px 1px 0 rgba(255, 255, 255, 0.8), inset -1px -1px 1px rgba(0, 0, 0, 0.07), var(--shadow);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   margin-top: 12px;
