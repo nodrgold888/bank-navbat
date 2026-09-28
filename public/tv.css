@@ -47,9 +47,8 @@ body.tv {
   padding: clamp(10px, 1vw, 16px) 24px;
   border-radius: 20px;
 }
-.valyuta-cell .op-name { font-size: clamp(1.3rem, 2.4vw, 2.2rem); }
-.valyuta-cell .op-code { font-size: clamp(2.8rem, 5.4vw, 5.6rem); }
-.valyuta-cell .op-svc { font-size: clamp(1.1rem, 1.7vw, 1.7rem); }
+.valyuta-cell .op-name { font-size: clamp(1.5rem, 2.7vw, 2.5rem); }
+.valyuta-cell .op-code { font-size: clamp(3.1rem, 6vw, 6.2rem); }
 
 .op-grid { gap: clamp(10px, 1.2vw, 18px); }
 .op-cell {
@@ -57,9 +56,9 @@ body.tv {
   border-radius: 22px;
   border-color: rgba(255, 255, 255, 0.24);
 }
-.op-cell .op-name { font-size: clamp(1.5rem, 2.8vw, 3.3rem); }
-.op-cell .op-name small { font-size: clamp(1rem, 1.6vw, 1.6rem); }
-.op-cell .op-code { font-size: clamp(3.4rem, 7.5vh, 8.2rem); }
+.op-cell .op-name { font-size: clamp(1.7rem, 3.2vw, 3.7rem); }
+.op-cell .op-name small { font-size: clamp(1.1rem, 1.8vw, 1.8rem); }
+.op-cell .op-code { font-size: clamp(3.8rem, 8.4vh, 9.2rem); }
 .op-cell .op-svc {
   font-size: clamp(1.1rem, 1.8vw, 2rem);
   line-height: 1.2;
@@ -73,9 +72,8 @@ body.tv {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.56), 0 0 0 3px rgba(111, 230, 160, 0.22),
     0 0 36px rgba(111, 230, 160, 0.42);
 }
-.op-cell.just-called .op-name { font-size: clamp(1.6rem, 3vw, 3.5rem); }
-.op-cell.just-called .op-code { font-size: clamp(3.6rem, 7.8vh, 8.6rem); }
-.op-cell.just-called .op-svc { font-size: clamp(1.15rem, 1.9vw, 2.1rem); }
+.op-cell.just-called .op-name { font-size: clamp(1.8rem, 3.4vw, 3.9rem); }
+.op-cell.just-called .op-code { font-size: clamp(4rem, 8.7vh, 9.6rem); }
 
 .waiting-panel { padding: clamp(15px, 1.8vw, 24px); border-radius: 24px; }
 .waiting-list { gap: 9px; }
