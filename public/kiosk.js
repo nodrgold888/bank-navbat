@@ -322,8 +322,31 @@
     screenTicket.hidden = true;
     screenSelect.hidden = false;
     renderCards(lastView);
+    // Belt-and-braces: takeTicket() re-enables these itself once printing
+    // finishes, but that "finally" can be left stranded if the tab was
+    // backgrounded/suspended mid-print (phone locked, browser back-forward
+    // cache, app switch) — a real, reported case of "I go back, but
+    // clicking a service does nothing" since the buttons were still
+    // disabled from the previous ticket. Every path back to this screen
+    // should guarantee it's actually usable.
+    cardsBox.querySelectorAll('button').forEach(function (b) {
+      b.disabled = false;
+    });
   }
   $('btnNew').addEventListener('click', backToSelect);
+
+  // A phone's back gesture often restores this exact page from the
+  // browser's back-forward cache instead of reloading it — same live DOM,
+  // including whatever disabled/hidden state it was in when the user
+  // navigated away (mid-print-wait, screen locked, etc.). Re-sync on that
+  // restore too, not just on an in-app "Yangi navbat olish" click.
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) {
+      cardsBox.querySelectorAll('button').forEach(function (b) {
+        b.disabled = false;
+      });
+    }
+  });
 
   function svcOf(view, id) {
     return view && (view.services || []).find(function (s) {
