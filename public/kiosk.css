@@ -1,0 +1,97 @@
+/* Kiosk B: full service information in Davr Bank's blue-teal palette. */
+body.kiosk {
+  background:
+    radial-gradient(950px 650px at 2% -12%, rgba(64, 104, 205, 0.78), transparent 62%),
+    radial-gradient(900px 620px at 100% 0%, rgba(48, 200, 139, 0.34), transparent 62%),
+    linear-gradient(135deg, #0c5e78 0%, #168463 100%);
+}
+.kiosk .k-wrap { max-width: 1320px; padding: clamp(18px, 3vw, 44px); }
+.kiosk .k-head { padding: 0 0 clamp(20px, 2.5vw, 32px); }
+.kiosk .k-brand { gap: 14px; font-size: clamp(1.15rem, 2vw, 1.6rem); }
+.kiosk .k-brand .brand-logo {
+  width: 60px;
+  height: 60px;
+  padding: 7px;
+  border-radius: 17px;
+  background: #fff;
+  box-shadow: 0 10px 22px -13px #062a35;
+}
+.kiosk .k-clock { font-size: clamp(1rem, 1.45vw, 1.35rem); font-weight: 700; }
+.kiosk .k-illus {
+  width: 86px;
+  height: 86px;
+  margin: clamp(8px, 1vw, 16px) 0 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.kiosk .k-title { font-size: clamp(2rem, 4vw, 3.35rem); margin-bottom: 9px; }
+.kiosk .k-sub { font-size: clamp(0.9rem, 1.35vw, 1.2rem); margin-bottom: clamp(22px, 2.5vw, 32px); }
+.kiosk .svc-cards { gap: clamp(14px, 1.7vw, 22px); }
+.kiosk .svc-card {
+  min-height: 150px;
+  padding: clamp(18px, 2vw, 28px);
+  grid-template-columns: clamp(54px, 5vw, 70px) minmax(0, 1fr) auto;
+  gap: clamp(14px, 1.5vw, 20px);
+  background: rgba(252, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 24px;
+  box-shadow: 0 12px 26px -20px #063e49;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.kiosk .svc-card:hover { box-shadow: 0 14px 25px -18px #062e38; }
+.kiosk .svc-card .svc-ic {
+  width: clamp(54px, 5vw, 70px);
+  height: clamp(54px, 5vw, 70px);
+  border-radius: 18px;
+  font-size: clamp(1.45rem, 2.2vw, 2.1rem);
+}
+.kiosk .svc-card .svc-title { font-size: clamp(1rem, 1.7vw, 1.4rem); }
+.kiosk .svc-card .svc-sub {
+  margin-top: 7px;
+  color: #607b93;
+  font-size: clamp(0.8rem, 1.2vw, 1.03rem);
+  line-height: 1.42;
+}
+.kiosk .svc-card .svc-meta { font-size: clamp(0.68rem, 1vw, 0.88rem); padding: 7px 10px; }
+.kiosk .k-info {
+  max-width: none;
+  margin: clamp(22px, 3vw, 36px) 0 0;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.34);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: clamp(0.72rem, 1vw, 0.92rem);
+  line-height: 1.65;
+}
+.kiosk .k-info .ib-branch, .kiosk .k-info b { color: #fff; }
+.kiosk .page-credit { color: rgba(255, 255, 255, 0.72); }
+.kiosk .page-credit b { color: #fff; }
+
+@media (min-width: 700px) {
+  .kiosk .k-wrap { max-width: 1320px; }
+  .kiosk .svc-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kiosk .svc-card:last-child { grid-column: 1 / -1; }
+  .kiosk .k-info {
+    display: grid;
+    grid-template-columns: 1.1fr 1.4fr 1fr;
+    align-items: center;
+    gap: 24px;
+    text-align: left;
+  }
+  .kiosk .k-info .ib-addr { margin: 0; }
+  .kiosk .k-info .ib-contacts { justify-content: flex-end; }
+}
+@media (min-width: 900px) and (orientation: landscape) {
+  body.shared-kiosk .k-wrap { max-width: 1500px; padding: 40px 54px 48px; }
+  body.shared-kiosk .k-brand .brand-logo { width: 96px; height: 96px; border-radius: 24px; padding: 10px; }
+  body.shared-kiosk .k-brand { gap: 18px; font-size: clamp(1.3rem, 2.25vw, 1.85rem); }
+  body.shared-kiosk .k-illus { width: 104px; height: 104px; border-radius: 24px; }
+  body.shared-kiosk .svc-card { min-height: 178px; }
+}
+@media (max-width: 520px) {
+  .kiosk .k-wrap { padding: 16px; }
+  .kiosk .k-brand .brand-logo { width: 50px; height: 50px; }
+  .kiosk .svc-card { min-height: 118px; padding: 16px; }
+  .kiosk .svc-card .svc-sub { font-size: 0.78rem; }
+}

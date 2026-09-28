@@ -71,7 +71,7 @@ const DEFAULT_SERVICES = [
   {
     id: 'kreditlash',
     name: 'Kreditlash',
-    subtitle: 'Isteʼmol, avtokredit, ipoteka, mikroqarz',
+    subtitle: 'Isteʼmol, avtokredit, ipoteka va mikroqarz bo‘yicha shartlar, foiz stavkalari, ariza topshirish hamda to‘lov jadvali yuzasidan xizmatlar.',
     prefix: 'A',
     icon: '🏦',
     color: '#6366f1',
@@ -80,7 +80,7 @@ const DEFAULT_SERVICES = [
     id: 'depozitlar',
     name: 'Depozitlar',
     subtitle:
-      "Omonat va jamg'arma hisoblari ochish, mablag'larni saqlash, chet davlatlarga safar uchun bank ma'lumotnomasini rasmiylashtirish",
+      "Omonat va jamg‘arma hisobini ochish, mablag‘larni saqlash, foiz hamda muddat shartlarini tanlash va chet el safarlari uchun bank ma’lumotnomasini olish.",
     prefix: 'B',
     icon: '💰',
     color: '#16a34a',
@@ -89,7 +89,7 @@ const DEFAULT_SERVICES = [
     id: 'tolovlar',
     name: 'Toʻlovlar va pul oʻtkazmalari',
     subtitle:
-      "Kontrakt toʻlovlari, kommunal xizmatlar haqi, jarima toʻlovlari va pul oʻtkazmalarini amalga oshirish",
+      "Kontrakt, kommunal xizmat, jarima va boshqa to‘lovlarni amalga oshirish, shuningdek ichki hamda xalqaro pul o‘tkazmalari bo‘yicha yordam.",
     prefix: 'C',
     icon: '💸',
     color: '#d97706',
@@ -98,7 +98,7 @@ const DEFAULT_SERVICES = [
     id: 'kartalar',
     name: 'Bank kartalari',
     subtitle:
-      "Visa/Uzcard/Humo: yangi karta ochish, qayta chiqarish (yo'qolgan/muddati tugagan), bloklash, PIN almashtirish, karta biriktirish",
+      "Visa, Uzcard va Humo kartalarini ochish, qayta chiqarish, bloklash, PIN-kodni almashtirish, hisobga biriktirish va karta bo‘yicha maslahatlar.",
     prefix: 'D',
     icon: '💳',
     color: '#0891b2',
@@ -107,7 +107,7 @@ const DEFAULT_SERVICES = [
     id: 'terminalar',
     name: 'Terminalar bilan ishlash',
     subtitle:
-      "POS-terminallarni ulash va sozlash, texnik xizmat koʻrsatish, ishlamay qolgan terminallar boʻyicha murojaatlar",
+      "POS-terminalni ulash va sozlash, texnik xizmat ko‘rsatish, ishlamay qolgan terminalni tekshirish va savdo nuqtalari bo‘yicha murojaatlar.",
     prefix: 'E',
     icon: '🖥️',
     color: '#0d9488',
@@ -115,7 +115,7 @@ const DEFAULT_SERVICES = [
   {
     id: 'escrow',
     name: 'Escrow xizmati',
-    subtitle: 'Uy 🏠 va avtomashina 🚗 oldi-sotdi bitimlari',
+    subtitle: "Uy 🏠 va avtomashina 🚗 oldi-sotdi bitimlarida mablag‘ni xavfsiz saqlash, shartlar bajarilgach to‘lovni o'tkazib berish xizmati.",
     prefix: 'F',
     icon: '🤝',
     color: '#7c3aed',
@@ -123,7 +123,7 @@ const DEFAULT_SERVICES = [
   {
     id: 'valyuta',
     name: 'Valyuta ayirboshlash',
-    subtitle: "Dollar, yevro va boshqa valyutalarni so'mga almashtirish",
+    subtitle: "Dollar, yevro va boshqa xorijiy valyutalarni so‘mga almashtirish, amaldagi kurslar va ayirboshlash tartibi bo‘yicha ma’lumot olish.",
     prefix: 'G',
     icon: '💱',
     color: '#dc2626',
