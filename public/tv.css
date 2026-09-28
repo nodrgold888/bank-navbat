@@ -52,13 +52,16 @@ body.tv {
 
 .op-grid { gap: clamp(10px, 1.2vw, 18px); }
 .op-cell {
-  padding: clamp(8px, 1.3vh, 20px) clamp(10px, 1.5vw, 22px);
+  /* Padding trimmed way down — with the service line gone, the name and
+     code are the only content, so nearly the whole box should go to them
+     rather than to breathing room. */
+  padding: clamp(3px, 0.5vh, 8px) clamp(8px, 1vw, 16px);
   border-radius: 22px;
   border-color: rgba(255, 255, 255, 0.24);
 }
-.op-cell .op-name { font-size: clamp(1.7rem, 3.2vw, 3.7rem); }
-.op-cell .op-name small { font-size: clamp(1.1rem, 1.8vw, 1.8rem); }
-.op-cell .op-code { font-size: clamp(3.8rem, 8.4vh, 9.2rem); }
+.op-cell .op-name { font-size: clamp(1.5rem, 2.3vw, 2.9rem); line-height: 1.05; }
+.op-cell .op-name small { font-size: clamp(1rem, 1.5vw, 1.6rem); }
+.op-cell .op-code { font-size: clamp(4.6rem, 10.2vh, 11.5rem); line-height: 1; }
 .op-cell .op-svc {
   font-size: clamp(1.1rem, 1.8vw, 2rem);
   line-height: 1.2;
@@ -72,8 +75,8 @@ body.tv {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.56), 0 0 0 3px rgba(111, 230, 160, 0.22),
     0 0 36px rgba(111, 230, 160, 0.42);
 }
-.op-cell.just-called .op-name { font-size: clamp(1.8rem, 3.4vw, 3.9rem); }
-.op-cell.just-called .op-code { font-size: clamp(4rem, 8.7vh, 9.6rem); }
+.op-cell.just-called .op-name { font-size: clamp(1.6rem, 2.45vw, 3.05rem); }
+.op-cell.just-called .op-code { font-size: clamp(4.8rem, 10.6vh, 11.9rem); }
 
 .waiting-panel { padding: clamp(15px, 1.8vw, 24px); border-radius: 24px; }
 .waiting-list { gap: 9px; }
