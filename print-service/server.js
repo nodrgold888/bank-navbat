@@ -90,7 +90,7 @@ function boxRow(printer, label, value) {
 
 app.post('/print', async (req, res) => {
   try {
-    const { service, number, ahead, date, time, position, etaMin } = req.body || {};
+    const { service, number, ahead, date, day, time, position, etaMin } = req.body || {};
 
     if (!number) {
       return res.status(400).json({ error: "'number' (chek raqami) majburiy" });
@@ -145,7 +145,9 @@ app.post('/print', async (req, res) => {
     // and without a separator rule — the font-size step-down from the
     // service name already marks the transition clearly enough.
     printer.alignLeft();
-    boxRow(printer, 'Sana', `${date || ''}  ${time || ''}`);
+    boxRow(printer, 'Sana', date || '-');
+    boxRow(printer, 'Kun', day || '-');
+    boxRow(printer, 'Vaqt', time || '-');
     boxRow(printer, 'Navbatdagi tartibingiz', position != null ? `${position}-o'rin` : '-');
     boxRow(printer, 'Sizdan oldin', ahead != null ? `${ahead} kishi` : '-');
     boxRow(printer, 'Taxminiy kutish', etaMin != null ? `~${etaMin} daqiqa` : '-');

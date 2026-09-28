@@ -177,6 +177,7 @@
 
   async function printTicket(ticket, peopleAhead, position, etaMin) {
     var now = new Date();
+    var weekdays = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
     var p = function (n) {
       return String(n).padStart(2, '0');
     };
@@ -187,6 +188,7 @@
       position: position,
       etaMin: etaMin,
       date: p(now.getDate()) + '.' + p(now.getMonth() + 1) + '.' + now.getFullYear(),
+      day: weekdays[now.getDay()],
       time: p(now.getHours()) + ':' + p(now.getMinutes()),
     };
     lastPrintPayload = payload;
