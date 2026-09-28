@@ -72,6 +72,15 @@ body.kiosk {
   .kiosk .k-wrap { max-width: 1320px; }
   .kiosk .svc-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .kiosk .svc-card:last-child { grid-column: 1 / -1; }
+  .kiosk .k-info {
+    display: grid;
+    grid-template-columns: 1.1fr 1.4fr 1fr;
+    align-items: center;
+    gap: 24px;
+    text-align: left;
+  }
+  .kiosk .k-info .ib-addr { margin: 0; }
+  .kiosk .k-info .ib-contacts { justify-content: flex-end; }
 }
 @media (min-width: 900px) and (orientation: landscape) {
   body.shared-kiosk .k-wrap { max-width: 1500px; padding: 40px 54px 48px; }
