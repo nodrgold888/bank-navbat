@@ -28,6 +28,22 @@
   var timerInt = null;
   var busy = false;
 
+  // Keep the chosen appearance on this workstation without affecting other operators.
+  function setTheme(theme) {
+    var isDark = theme === 'dark';
+    document.body.classList.toggle('staff-dark', isDark);
+    $('themeToggle').setAttribute('aria-pressed', String(isDark));
+    $('themeToggle').setAttribute('title', isDark ? 'Yorug‘ rejimga o‘tish' : 'Tungi rejimga o‘tish');
+    $('themeToggleLabel').textContent = isDark ? 'Yorug‘ rejim' : 'Tungi rejim';
+    $('themeToggle').querySelector('.theme-toggle-icon').textContent = isDark ? '☀' : '☾';
+    localStorage.setItem('staffTheme', isDark ? 'dark' : 'light');
+  }
+
+  setTheme(localStorage.getItem('staffTheme') === 'dark' ? 'dark' : 'light');
+  $('themeToggle').addEventListener('click', function () {
+    setTheme(document.body.classList.contains('staff-dark') ? 'light' : 'dark');
+  });
+
   // ---- Operator picker ----
   function buildPicker() {
     var grid = $('opGrid');
