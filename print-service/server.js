@@ -80,8 +80,11 @@ function asciiSafe(text) {
 // own, so it's gone; the same 4 fields print in the same order either way.
 function boxRow(printer, label, value) {
   const text = `${asciiSafe(label)}: ${asciiSafe(value)}`;
-  const line = text.length > BOX_WIDTH ? text.slice(0, BOX_WIDTH) : text;
-  printer.println(line);
+  // Actually wrap instead of truncating — a silent .slice() here would drop
+  // the tail of the value on paper with no sign anything was cut.
+  for (let i = 0; i < text.length; i += BOX_WIDTH) {
+    printer.println(text.slice(i, i + BOX_WIDTH));
+  }
 }
 
 app.post('/print', async (req, res) => {

@@ -428,7 +428,13 @@ function skipCurrent(operatorId) {
   let svcId = null;
   if (op.currentTicketId) {
     const c = getTicket(op.currentTicketId);
-    if (c) svcId = c.serviceId;
+    // Only reuse the ticket's service if the operator is still assigned to
+    // it — admin may have reassigned them while this ticket was in
+    // progress, and assignNext() trusts an explicit serviceId without
+    // re-checking op.serviceIds (unlike its auto-pull branch), so passing
+    // a now-unassigned id here would let them skip straight into a queue
+    // they're no longer configured for.
+    if (c && op.serviceIds.includes(c.serviceId)) svcId = c.serviceId;
   }
   const had = Boolean(op.currentTicketId);
   completeCurrent(op, 'no_show');
