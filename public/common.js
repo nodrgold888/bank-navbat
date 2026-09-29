@@ -111,12 +111,32 @@ window.Navbat = (function () {
   }
 
   /** JSON POST so'rov. */
+  const POST_TIMEOUT_MS = 10000;
   async function post(url, body) {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body || {}),
-    });
+    // Every caller (kiosk ticket-taking, staff call/recall/skip/cancel,
+    // admin cancel/reset) disables its buttons before this call and
+    // re-enables them once it settles — without a timeout, a stalled
+    // connection (dead proxy, server hiccup) left those buttons disabled
+    // for however long the browser's own TCP timeout takes (potentially
+    // minutes), with no error shown. This was already fixed for the print
+    // request specifically; every other action shares the same helper, so
+    // it belongs here instead.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), POST_TIMEOUT_MS);
+    let res;
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body || {}),
+        signal: controller.signal,
+      });
+    } catch (e) {
+      if (e.name === 'AbortError') throw new Error('Server javob bermadi');
+      throw e;
+    } finally {
+      clearTimeout(timer);
+    }
     let data = {};
     try {
       data = await res.json();

@@ -887,6 +887,12 @@ function readJsonBody(req) {
   return new Promise((resolve, reject) => {
     let raw = '';
     let tooLarge = false;
+    let done = false;
+    const settle = (fn, val) => {
+      if (done) return;
+      done = true;
+      fn(val);
+    };
     req.on('data', (chunk) => {
       if (tooLarge) return;
       raw += chunk;
@@ -897,18 +903,23 @@ function readJsonBody(req) {
     });
     req.on('end', () => {
       if (tooLarge) return; // 'close' below settles the promise instead
-      if (!raw) return resolve({});
+      if (!raw) return settle(resolve, {});
       try {
-        resolve(JSON.parse(raw));
+        settle(resolve, JSON.parse(raw));
       } catch {
-        resolve({});
+        settle(resolve, {});
       }
     });
-    req.on('error', () => reject(new HttpError(400, "So'rovni o'qib bo'lmadi")));
+    req.on('error', () => settle(reject, new HttpError(400, "So'rovni o'qib bo'lmadi")));
     // req.destroy() above fires 'close' (not 'end') — without this, the
     // request would hang forever waiting on an 'end' event that never comes.
+    // A plain early disconnect (flaky kiosk network) also fires 'close'
+    // without ever hitting the size cap — that used to leave this promise
+    // (and the request's whole async handler) pending forever instead of
+    // failing fast like the oversized-body path already did.
     req.on('close', () => {
-      if (tooLarge) reject(new HttpError(413, "So'rov hajmi juda katta"));
+      if (tooLarge) return settle(reject, new HttpError(413, "So'rov hajmi juda katta"));
+      settle(reject, new HttpError(400, "So'rov uzildi"));
     });
   });
 }
