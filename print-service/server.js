@@ -131,16 +131,18 @@ app.post('/print', async (req, res) => {
 
     // ---- Service: bold and readable, without a separate label line ----
     printer.alignCenter();
+    printer.println('TANLANGAN XIZMAT');
     printer.bold(true);
     printer.setTextSize(1, 1);
-    printer.println(`Xizmat: ${asciiSafe(service || '-').toUpperCase()}`);
+    printer.println(asciiSafe(service || '-').toUpperCase());
     printer.setTextSize(0, 0);
     printer.bold(false);
 
     // Date, weekday and time; then queue position and wait estimate. The
     // values are unchanged, only grouped to make the receipt about half as long.
     printer.println(`${date || '-'} | ${day || '-'} | ${time || '-'}`);
-    printer.println(`O'rningiz: ${position != null ? `${position}-o'rin` : '-'} | Oldinda: ${ahead != null ? ahead : '-'}`);
+    printer.println(`Navbatdagi o'rningiz: ${position != null ? `${position}-o'rin` : '-'}`);
+    printer.println(`Sizdan oldingilar: ${ahead != null ? ahead : '-'}`);
     printer.println(`Taxminiy kutish: ${etaMin != null ? `~${etaMin} daqiqa` : '-'}`);
     printer.alignCenter();
 
