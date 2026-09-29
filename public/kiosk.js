@@ -277,26 +277,21 @@
         serviceColor: t.serviceColor,
       };
       showTicket(t.position, t.peopleAhead, null);
+      // Return to the select screen right away so the next customer isn't
+      // stuck waiting behind this one — don't hold the countdown hostage to
+      // how long printing takes. Only the shared physical kiosk auto-returns
+      // at all (scheduleAutoReturn() no-ops on a personal phone).
+      scheduleAutoReturn();
       // Only the shared physical kiosk has a print-service to talk to
       // (localhost:9100 on that PC) — a personal phone via the QR code
       // has nothing listening there, so printing was always guaranteed to
-      // fail: it used to still try unconditionally, burning the full
-      // attempt+retry timeout (many seconds) and leaving a permanently
-      // dead "qayta chop etish" button on every personal-phone visit.
+      // fail. Fired without awaiting: printing (plus its retry) can take
+      // several seconds, and it must not delay the auto-return above or
+      // hold the take-ticket buttons disabled that whole time. A failed
+      // print still shows its toast and reprint button even after the
+      // screen has moved on — staff can reprint manually from there.
       if (IS_SHARED_KIOSK) {
-        // Wait for the print attempt (including its retry) to actually finish
-        // before starting the return-to-menu countdown — it used to fire
-        // immediately alongside printing, so on a slow/retrying printer the
-        // kiosk could reset itself mid-print, before the receipt was even
-        // done (or before a failed-print notice had a chance to show).
-        var printed = await printTicket(myTicket, t.peopleAhead, t.position, t.etaMin);
-        // Only auto-return on a successful print. On a failed one, the
-        // 3-second countdown used to wipe out the failure toast and the
-        // "Chekni qayta chop etish" button before the customer had any real
-        // chance to read either — the one screen (the physical kiosk) where
-        // that retry button actually matters was the one place it could
-        // never be used. Stay put instead; staff can send them back manually.
-        if (printed) scheduleAutoReturn();
+        printTicket(myTicket, t.peopleAhead, t.position, t.etaMin);
       }
     } catch (err) {
       alert('Xatolik: ' + err.message);
