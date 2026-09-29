@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ticket shablonlari — Davr Bank</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+      :root { font-family: Inter, Arial, sans-serif; color: #102b46; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; background: radial-gradient(800px 500px at 5% 0%, #396cc0 0%, transparent 65%), linear-gradient(135deg, #0a5f7a, #168562); padding: clamp(22px, 4vw, 58px); }
+      header { max-width: 1420px; margin: 0 auto 30px; color: white; }
+      header p { margin: 8px 0 0; color: rgba(255,255,255,.8); }
+      h1 { margin: 0; font-size: clamp(1.7rem, 3vw, 2.8rem); }
+      .samples { max-width: 1420px; margin: auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: start; }
+      .sample { background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.25); border-radius: 28px; padding: 16px; box-shadow: 0 24px 50px rgba(0,35,48,.18); }
+      .sample-label { color: #fff; font-size: 1.03rem; font-weight: 800; padding: 4px 6px 16px; }
+      .sample-label span { display:block; margin-top: 5px; color: rgba(255,255,255,.72); font-size: .75rem; font-weight: 500; }
+      .ticket { min-height: 560px; padding: 28px; background: #fff; border-radius: 21px; position: relative; overflow: hidden; box-shadow: 0 16px 26px rgba(0,45,57,.18); }
+      .brand { display:flex; align-items:center; justify-content:space-between; font-size:.78rem; font-weight:800; color:#0d5b76; }
+      .brand-mark { display:grid; place-items:center; width:34px; height:34px; border-radius:10px; background:#eaf5f2; color:#118465; font-size:1.1rem; }
+      .service { margin-top:30px; color:#557187; font-size:.83rem; font-weight:700; }
+      .service strong { display:block; margin-top:5px; color:#122f4b; font-size:1.1rem; }
+      .number-label { margin-top:42px; text-align:center; text-transform:uppercase; letter-spacing:.14em; color:#6d8395; font-size:.7rem; font-weight:800; }
+      .number { text-align:center; color:#102f4d; font-size:clamp(4.8rem, 8vw, 6.7rem); line-height:1; letter-spacing:-.07em; font-weight:900; }
+      .details { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:30px; }
+      .details div { padding:13px 10px; border-radius:12px; background:#eff6f6; text-align:center; color:#5f798a; font-size:.7rem; }
+      .details b { display:block; margin-bottom:4px; color:#173a56; font-size:1.35rem; }
+      .rule { border:0; border-top:1px dashed #b9cad4; margin:27px 0 16px; }
+      .hint { text-align:center; color:#6c8291; font-size:.75rem; line-height:1.5; }
+      .a .number { color:#144a77; }
+      .a::after { content:""; position:absolute; inset:auto 0 0; height:8px; background:linear-gradient(90deg,#1d6fa3,#1ca36d); }
+      .b { padding:0; background:#f6fbfa; }
+      .b .brand { padding:24px 28px; color:#fff; background:linear-gradient(110deg,#0c5b78,#0c916a); }
+      .b .brand-mark { color:#0b8266; background:#fff; }
+      .b .service { margin:26px 28px 0; }
+      .b .number-label { margin-top:38px; }
+      .b .number { font-size:clamp(5.5rem, 9.2vw, 7.5rem); color:#063f5b; }
+      .b .details { margin:30px 28px 0; }
+      .b .hint { margin:21px 30px; }
+      .b .ready { margin:18px 28px 28px; padding:13px; border-radius:12px; background:#e4f7ed; color:#087252; text-align:center; font-size:.78rem; font-weight:800; }
+      .c { border:1px solid #d9e6e5; border-radius:12px; box-shadow:none; }
+      .c .brand { padding-bottom:17px; border-bottom:1px solid #dfe9e8; }
+      .c .service { margin-top:22px; }
+      .c .number-label { margin-top:33px; }
+      .c .number { font-size:clamp(5rem, 8.5vw, 6.9rem); color:#118465; }
+      .c .details { margin-top:24px; }
+      .c .details div { background:#fff; border:1px solid #dce8e6; }
+      .c .receipt { margin-top:24px; padding:15px 0 0; border-top:1px dashed #9db5b3; color:#698180; font-size:.7rem; line-height:1.7; }
+      .c .receipt span { float:right; color:#193c55; font-weight:700; }
+      .d { min-height:430px; padding:24px; border-radius:8px; box-shadow:none; }
+      .d .brand { padding-bottom:12px; border-bottom:2px solid #193f58; }
+      .d .service { margin-top:18px; font-size:.73rem; }
+      .d .number-label { margin-top:27px; }
+      .d .number { font-size:5.3rem; color:#111f2a; }
+      .d .details { margin-top:20px; }
+      .d .details div { padding:9px 6px; border-radius:0; background:#fff; border-top:1px dashed #b5c4c6; }
+      .d .details b { font-size:1.1rem; }
+      .d .receipt { margin-top:18px; padding-top:12px; border-top:1px dashed #9db5b3; color:#61787d; font-size:.67rem; line-height:1.65; text-align:center; }
+      .e { min-height:430px; padding:0; background:#fff; }
+      .e .topband { padding:22px 28px 17px; background:#102f4d; color:#fff; }
+      .e .topband .brand { color:#fff; }
+      .e .topband .brand-mark { background:#35b58c; color:#fff; }
+      .e .service { margin:22px 28px 0; }
+      .e .number-label { margin-top:28px; }
+      .e .number { color:#0f5e79; font-size:6.2rem; }
+      .e .details { margin:23px 28px 0; }
+      .e .details div { background:#f5f8fb; }
+      .e .statusline { margin:20px 28px 26px; padding-top:12px; border-top:1px solid #d8e3e8; color:#138260; font-size:.76rem; font-weight:800; text-align:center; }
+      .f { min-height:430px; padding:25px; background:linear-gradient(150deg,#f8fffd,#e8f5f5); border:1px solid #cbe6df; }
+      .f .brand { color:#08765a; }
+      .f .brand-mark { background:#d6f2e6; }
+      .f .service { margin-top:24px; }
+      .f .number-label { margin-top:32px; }
+      .f .number { color:#08765a; font-size:6.2rem; }
+      .f .details { margin-top:22px; }
+      .f .details div { background:rgba(255,255,255,.7); }
+      .f .hint { margin-top:21px; }
+      .g { min-height:590px; padding:24px 27px; border-radius:10px; box-shadow:none; border:1px solid #d9e4e6; }
+      .g .receipt-logo { display:block; width:55px; height:55px; object-fit:contain; margin:0 auto 9px; padding:6px; border-radius:12px; background:#fff; border:1px solid #d9e6e5; }
+      .g .receipt-bank { color:#123c59; font-size:.95rem; font-weight:900; text-align:center; }
+      .g .receipt-welcome { margin-top:4px; color:#59727f; font-size:.72rem; text-align:center; }
+      .g .receipt-separator { margin:17px 0; border:0; border-top:1px dashed #9eb7b8; }
+      .g .number-label { margin-top:0; }
+      .g .number { color:#0c6d59; font-size:5.8rem; }
+      .g .receipt-service { color:#607a85; font-size:.68rem; text-align:center; }
+      .g .receipt-service b { display:block; margin-top:4px; color:#133a56; font-size:1rem; }
+      .g .details { margin-top:18px; }
+      .g .details div { padding:9px 7px; background:#f3f9f7; }
+      .g .receipt-lines { margin-top:18px; color:#567079; font-size:.69rem; line-height:1.65; }
+      .g .receipt-lines div { display:flex; justify-content:space-between; gap:12px; }
+      .g .receipt-lines b { color:#163c55; }
+      .g .receipt-footer { margin-top:18px; padding-top:15px; border-top:1px dashed #9eb7b8; color:#527078; font-size:.68rem; line-height:1.55; text-align:center; }
+      .g .receipt-footer strong { display:block; margin-top:8px; color:#0b7258; font-size:.78rem; }
+      @media (max-width: 980px) { .samples { grid-template-columns:1fr; max-width:520px; } .ticket { min-height:0; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Ticket dizayn shablonlari</h1>
+      <p>Asosiy raqam doim birinchi o‘rinda. Xizmat tavsifi qisqa qoldirilgan.</p>
+    </header>
+    <main class="samples">
+      <article class="sample">
+        <div class="sample-label">A — Bank cheki <span>tiniq, rasmiy va minimal</span></div>
+        <div class="ticket a">
+          <div class="brand"><span class="brand-mark">◇</span><span>DAVR BANK NAVBAT</span><span>23:58</span></div>
+          <div class="service">TANLANGAN XIZMAT<strong>💳 Bank kartalari</strong></div>
+          <div class="number-label">Sizning raqamingiz</div><div class="number">K-042</div>
+          <div class="details"><div><b>3-o‘rin</b>navbatdagi o‘rningiz</div><div><b>2</b>sizdan oldingilar</div></div>
+          <hr class="rule" /><div class="hint">Raqamingiz TV ekranda va shu sahifada yangilanadi.</div>
+        </div>
+      </article>
+      <article class="sample">
+        <div class="sample-label">B — Katta raqam <span>masofadan tez o‘qiladigan kiosk varianti</span></div>
+        <div class="ticket b">
+          <div class="brand"><span class="brand-mark">◇</span><span>DAVR BANK NAVBAT</span><span>23:58</span></div>
+          <div class="service">💳 Bank kartalari<strong>Karta ochish, bloklash va PIN-kod xizmatlari</strong></div>
+          <div class="number-label">Sizning raqamingiz</div><div class="number">K-042</div>
+          <div class="details"><div><b>3-o‘rin</b>navbatdagi o‘rningiz</div><div><b>2</b>sizdan oldingilar</div></div>
+          <div class="hint">Operator chaqirganida ekranda oynasi ko‘rsatiladi.</div>
+          <div class="ready">✓ Chekingiz printerga yuborildi</div>
+        </div>
+      </article>
+      <article class="sample">
+        <div class="sample-label">C — Premium kvitansiya <span>printer cheki ruhidagi batafsil variant</span></div>
+        <div class="ticket c">
+          <div class="brand"><span class="brand-mark">◇</span><span>DAVR BANK</span><span>23:58</span></div>
+          <div class="service">TANLANGAN XIZMAT<strong>💳 Bank kartalari</strong></div>
+          <div class="number-label">Sizning raqamingiz</div><div class="number">K-042</div>
+          <div class="details"><div><b>3-o‘rin</b>navbatdagi o‘rningiz</div><div><b>2</b>sizdan oldingilar</div></div>
+          <div class="receipt">Sana <span>28.09.2026</span><br />Vaqt <span>23:58</span><br />Filial <span>Uchtepa</span></div>
+        </div>
+      </article>
+      <article class="sample">
+        <div class="sample-label">D — Eco 58 mm <span>eng kam qog‘oz: taxminan 55–70 mm</span></div>
+        <div class="ticket d">
+          <div class="brand"><span>DAVR BANK</span><span>28.09 · 23:58</span></div>
+          <div class="service">XIZMAT<strong>💳 Bank kartalari</strong></div>
+          <div class="number-label">Navbat raqamingiz</div><div class="number">K-042</div>
+          <div class="details"><div><b>3</b>o‘rningiz</div><div><b>2</b>oldinda</div></div>
+          <div class="receipt">Uchtepa filiali · 1284<br />Davr Bank navbat tizimi</div>
+        </div>
+      </article>
+      <article class="sample">
+        <div class="sample-label">E — Status-card <span>kiosk ekrani uchun aniq va tezkor</span></div>
+        <div class="ticket e">
+          <div class="topband"><div class="brand"><span class="brand-mark">◇</span><span>DAVR BANK NAVBAT</span><span>23:58</span></div></div>
+          <div class="service">💳 Bank kartalari<strong>Karta bilan bog‘liq xizmatlar</strong></div>
+          <div class="number-label">Sizning raqamingiz</div><div class="number">K-042</div>
+          <div class="details"><div><b>3-o‘rin</b>navbatdagi o‘rningiz</div><div><b>2</b>sizdan oldingilar</div></div>
+          <div class="statusline">● Navbat holati shu ekranda yangilanadi</div>
+        </div>
+      </article>
+      <article class="sample">
+        <div class="sample-label">F — Davr Bank green <span>brend ranglari bilan yengil premium ko‘rinish</span></div>
+        <div class="ticket f">
+          <div class="brand"><span class="brand-mark">◇</span><span>DAVR BANK</span><span>23:58</span></div>
+          <div class="service">TANLANGAN XIZMAT<strong>💳 Bank kartalari</strong></div>
+          <div class="number-label">Sizning raqamingiz</div><div class="number">K-042</div>
+          <div class="details"><div><b>3-o‘rin</b>navbatdagi o‘rningiz</div><div><b>2</b>sizdan oldingilar</div></div>
+          <div class="hint">Operator chaqirganida oyna raqami katta ko‘rinishda chiqadi.</div>
+        </div>
+      </article>
+      <article class="sample">
+        <div class="sample-label">G — To‘liq bank cheki <span>logo, sana-vaqt, manzil va samimiy xabarlar bilan</span></div>
+        <div class="ticket g">
+          <img class="receipt-logo" src="/img/logo.jpg" alt="Davr Bank" />
+          <div class="receipt-bank">“DAVR BANK” XATB</div>
+          <div class="receipt-welcome">Uchtepa filiali — Xush kelibsiz!</div>
+          <hr class="receipt-separator" />
+          <div class="number-label">Navbat raqamingiz</div><div class="number">K-042</div>
+          <div class="receipt-service">XIZMAT<b>💳 Bank kartalari</b></div>
+          <div class="details"><div><b>3-o‘rin</b>navbatdagi o‘rningiz</div><div><b>2</b>sizdan oldingilar</div></div>
+          <div class="receipt-lines">
+            <div><span>Sana</span><b>29.09.2026</b></div>
+            <div><span>Kun</span><b>Dushanba</b></div>
+            <div><span>Vaqt</span><b>10:35</b></div>
+            <div><span>Taxminiy kutish</span><b>~10 daqiqa</b></div>
+          </div>
+          <div class="receipt-footer">Toshkent shahri, Uchtepa tumani,<br />Ko‘kcha Darvoza, 489B<br /><b>Yagona axborot xizmati: 1284</b><strong>KUTGANINGIZ UCHUN RAHMAT!</strong></div>
+        </div>
+      </article>
+    </main>
+  </body>
+</html>

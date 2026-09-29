@@ -313,6 +313,12 @@
     $('tSvcName').textContent = myTicket.serviceName || '';
     $('tSvcSub').textContent = myTicket.serviceSubtitle || '';
     $('tCode').textContent = myTicket.code;
+    var now = new Date();
+    var weekdays = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    $('tDate').textContent = pad(now.getDate()) + '.' + pad(now.getMonth() + 1) + '.' + now.getFullYear();
+    $('tDay').textContent = weekdays[now.getDay()];
+    $('tTime').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
 
     var calledBox = $('tCalled');
     var active = $('tActive');
