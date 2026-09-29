@@ -61,10 +61,6 @@ async function copyToShare(tempFile) {
   throw lastErr;
 }
 
-// ---- ASCII-safe decorative helpers (Unicode box-drawing chars are risky —
-// thermal codepages already mangle non-ASCII like "oʻ", so stick to +,-,|,*) ----
-const BOX_WIDTH = 46; // detail rows wrap/pad to this width
-
 // Printer codepage can't encode the Uzbek modifier-letter apostrophe (ʻ/ʼ) or
 // curly quotes — node-thermal-printer silently drops in "?" per character
 // when that happens (confirmed: "bo'limi" -> "bo?limi" on real paper), so
@@ -74,18 +70,6 @@ function asciiSafe(text) {
   return String(text)
     .replace(/[ʻʼ‘’ʾʿ]/g, "'")
     .replace(/[“”]/g, '"');
-}
-
-// Plain "Label: value" row — used to be framed in a "|...|" box, but that
-// border was 2 extra lines of pure "+---+" paper with no information of its
-// own, so it's gone; the same 4 fields print in the same order either way.
-function boxRow(printer, label, value) {
-  const text = `${asciiSafe(label)}: ${asciiSafe(value)}`;
-  // Actually wrap instead of truncating — a silent .slice() here would drop
-  // the tail of the value on paper with no sign anything was cut.
-  for (let i = 0; i < text.length; i += BOX_WIDTH) {
-    printer.println(text.slice(i, i + BOX_WIDTH));
-  }
 }
 
 app.post('/print', async (req, res) => {
