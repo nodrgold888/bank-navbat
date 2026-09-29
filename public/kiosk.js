@@ -109,10 +109,14 @@
   var PRINT_SERVICE_URL = 'http://localhost:9100/print';
   // print-service's own worst case per attempt is COPY_TIMEOUT_MS (8s) times
   // up to 3 internal attempts plus 2 retry delays (~26s total) — this must
-  // stay above that, or the kiosk aborts and fires a second independent
-  // /print request while the first is still being processed, risking a
-  // duplicate physical receipt.
-  var PRINT_TIMEOUT_MS = 28000;
+  // stay comfortably above that, or the kiosk aborts and fires a second
+  // independent /print request while the first is still being processed,
+  // risking a duplicate physical receipt. Kept a few seconds clear of that
+  // 26s figure rather than right up against it, since it's a computed bound
+  // on the retry loop alone and doesn't include the printer.printImage()
+  // call, Windows spooler handoff, or plain Node event-loop scheduling
+  // delay that happen around it.
+  var PRINT_TIMEOUT_MS = 32000;
   var PRINT_RETRY_DELAY_MS = 1500;
 
   var toastTimer = null;
@@ -193,7 +197,16 @@
     btnReprint.hidden = true;
 
     var ok = await attemptPrint(payload);
-    if (!ok) {
+    // attemptPrint's own worst case is ~57s (two 32s attempts + a delay),
+    // but the kiosk auto-returns to the select screen after just 3s — by
+    // the time a failure comes back, a different customer can easily be
+    // standing here with their own ticket up. Only surface the toast and
+    // reprint button if this is still that same customer's screen;
+    // otherwise a stranger's failed print would show as an error on their
+    // own ticket, and tapping reprint would reprint THEIR ticket instead
+    // of the one that actually failed. attemptPrint already console.warn's
+    // every failed attempt, so staff-side diagnosis isn't lost either way.
+    if (!ok && myTicket && myTicket.code === ticket.code && !screenTicket.hidden) {
       toast('Chek chop etilmadi — printerni tekshiring');
       btnReprint.hidden = false;
     }
