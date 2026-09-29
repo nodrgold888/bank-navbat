@@ -4,6 +4,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { execSync } = require('child_process');
+const crypto = require('crypto');
 const { ThermalPrinter, PrinterTypes } = require('node-thermal-printer');
 
 const app = express();
@@ -166,7 +167,12 @@ app.post('/print', async (req, res) => {
 
     const buffer = printer.getBuffer();
 
-    const tempFile = path.join(os.tmpdir(), `receipt_${Date.now()}.bin`);
+    // Date.now() alone can collide if two /print requests land in the same
+    // millisecond (e.g. a kiosk client retry firing while the first attempt
+    // is still being processed) — one request's write/unlink could then
+    // clobber the other's temp file mid-copy. randomUUID() makes each
+    // request's file unique regardless of timing.
+    const tempFile = path.join(os.tmpdir(), `receipt_${Date.now()}_${crypto.randomUUID()}.bin`);
     fs.writeFileSync(tempFile, buffer);
 
     try {

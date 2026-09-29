@@ -107,7 +107,12 @@
 
   // ---- Local receipt printer (print-service running on this kiosk PC) ----
   var PRINT_SERVICE_URL = 'http://localhost:9100/print';
-  var PRINT_TIMEOUT_MS = 6000; // print-servisning o'zi 8s ichida javob beradi/bermaydi
+  // print-service's own worst case per attempt is COPY_TIMEOUT_MS (8s) times
+  // up to 3 internal attempts plus 2 retry delays (~26s total) — this must
+  // stay above that, or the kiosk aborts and fires a second independent
+  // /print request while the first is still being processed, risking a
+  // duplicate physical receipt.
+  var PRINT_TIMEOUT_MS = 28000;
   var PRINT_RETRY_DELAY_MS = 1500;
 
   var toastTimer = null;
@@ -192,6 +197,7 @@
       toast('Chek chop etilmadi — printerni tekshiring');
       btnReprint.hidden = false;
     }
+    return ok;
   }
 
   btnReprint.addEventListener('click', async function () {
@@ -271,13 +277,27 @@
         serviceColor: t.serviceColor,
       };
       showTicket(t.position, t.peopleAhead, null);
-      // Wait for the print attempt (including its retry) to actually finish
-      // before starting the return-to-menu countdown — it used to fire
-      // immediately alongside printing, so on a slow/retrying printer the
-      // kiosk could reset itself mid-print, before the receipt was even
-      // done (or before a failed-print notice had a chance to show).
-      await printTicket(myTicket, t.peopleAhead, t.position, t.etaMin);
-      scheduleAutoReturn();
+      // Only the shared physical kiosk has a print-service to talk to
+      // (localhost:9100 on that PC) — a personal phone via the QR code
+      // has nothing listening there, so printing was always guaranteed to
+      // fail: it used to still try unconditionally, burning the full
+      // attempt+retry timeout (many seconds) and leaving a permanently
+      // dead "qayta chop etish" button on every personal-phone visit.
+      if (IS_SHARED_KIOSK) {
+        // Wait for the print attempt (including its retry) to actually finish
+        // before starting the return-to-menu countdown — it used to fire
+        // immediately alongside printing, so on a slow/retrying printer the
+        // kiosk could reset itself mid-print, before the receipt was even
+        // done (or before a failed-print notice had a chance to show).
+        var printed = await printTicket(myTicket, t.peopleAhead, t.position, t.etaMin);
+        // Only auto-return on a successful print. On a failed one, the
+        // 3-second countdown used to wipe out the failure toast and the
+        // "Chekni qayta chop etish" button before the customer had any real
+        // chance to read either — the one screen (the physical kiosk) where
+        // that retry button actually matters was the one place it could
+        // never be used. Stay put instead; staff can send them back manually.
+        if (printed) scheduleAutoReturn();
+      }
     } catch (err) {
       alert('Xatolik: ' + err.message);
     } finally {
