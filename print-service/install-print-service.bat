@@ -9,13 +9,23 @@ setlocal
 set "DIR=%~dp0"
 set "NSSM=%DIR%nssm.exe"
 set "SERVICE_NAME=BankNavbatPrint"
+set "TASK_NAME=BankNavbatPrint"
 
 if not exist "%NSSM%" (
-    echo XATOLIK: nssm.exe topilmadi.
-    echo Uni https://nssm.cc/download dan yuklab, shu papkaga qo'ying:
-    echo %DIR%
+    echo NSSM topilmadi. Windows Task Scheduler fallback ishlatiladi.
+    echo Print-servis kompyuter yoqilganda avtomatik ishga tushadi.
+    schtasks /delete /tn "%TASK_NAME%" /f >nul 2>&1
+    schtasks /create /tn "%TASK_NAME%" /tr "cmd.exe /d /c \"\"%DIR%supervisor.bat\"\"" /sc onstart /ru SYSTEM /rl HIGHEST /f
+    if errorlevel 1 (
+        echo XATOLIK: avtomatik task yaratilmadi. Skriptni Administrator sifatida ishga tushiring.
+        pause
+        exit /b 1
+    )
+    schtasks /run /tn "%TASK_NAME%"
+    echo.
+    echo Tayyor. Holatni tekshirish uchun: schtasks /query /tn "%TASK_NAME%"
     pause
-    exit /b 1
+    exit /b 0
 )
 
 for /f "delims=" %%N in ('where node') do set "NODE=%%N"
