@@ -68,6 +68,33 @@ body.kiosk {
 .kiosk .page-credit { color: rgba(255, 255, 255, 0.72); }
 .kiosk .page-credit b { color: #fff; }
 
+/* G: complete customer ticket, adapted for both the kiosk screen and printout. */
+.kiosk .ticket {
+  max-width: 680px;
+  margin: 12px auto 0;
+  padding: clamp(26px, 4vw, 42px);
+  background: #fff;
+  border: 1px solid #d8e7e5;
+  border-radius: 20px;
+  box-shadow: 0 24px 44px -30px #073d4a;
+}
+.kiosk .t-bank { display: flex; align-items: center; justify-content: center; gap: 12px; padding-bottom: 17px; border-bottom: 1px dashed #9eb7b8; color: #123c59; }
+.kiosk .t-bank-logo { width: 50px; height: 50px; padding: 5px; object-fit: contain; border: 1px solid #d9e6e5; border-radius: 12px; background: #fff; }
+.kiosk .t-bank b { display: block; font-size: clamp(.9rem, 1.3vw, 1.05rem); }
+.kiosk .t-bank span { display: block; margin-top: 3px; color: #607984; font-size: clamp(.68rem, 1vw, .8rem); }
+.kiosk .ticket .t-svc { display: block; margin-top: 20px; padding: 13px 16px; border-radius: 14px; color: #123c59; font-size: clamp(1.05rem, 1.8vw, 1.35rem); }
+.kiosk .ticket .t-svc-sub { margin: 9px 8px 0; color: #607984; font-size: clamp(.75rem, 1.1vw, .9rem); line-height: 1.45; }
+.kiosk .ticket .t-lbl { margin-top: 24px; font-size: clamp(.8rem, 1.2vw, .95rem); letter-spacing: .1em; text-transform: uppercase; }
+.kiosk .ticket .t-code { color: #0c6d59; font-size: clamp(5rem, 10vw, 7.8rem); }
+.kiosk .t-timing { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 20px; padding-top: 17px; border-top: 1px dashed #9eb7b8; }
+.kiosk .t-timing div { color: #6d8490; font-size: clamp(.62rem, .9vw, .72rem); }
+.kiosk .t-timing b { display: block; margin-top: 4px; color: #173d56; font-size: clamp(.76rem, 1.15vw, .92rem); }
+body.shared-kiosk .ticket { max-width: 800px; }
+body.shared-kiosk .ticket .t-svc { font-size: 1.5rem; }
+body.shared-kiosk .t-timing { gap: 14px; margin-top: 26px; padding-top: 20px; }
+body.shared-kiosk .t-timing div { font-size: .92rem; }
+body.shared-kiosk .t-timing b { font-size: 1.1rem; }
+
 @media (min-width: 700px) {
   .kiosk .k-wrap { max-width: 1320px; }
   .kiosk .svc-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }

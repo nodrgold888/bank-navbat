@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ixcham chek — Davr Bank</title>
+    <style>
+      * { box-sizing:border-box; }
+      body { margin:0; min-height:100vh; display:grid; place-items:center; padding:28px; background:linear-gradient(135deg,#0c607a,#168363); font-family:Arial,sans-serif; }
+      .receipt { width:min(100%,390px); padding:18px 20px; background:#fff; color:#101820; box-shadow:0 24px 48px rgba(0,0,0,.28); text-align:center; }
+      .logo { width:48px; height:43px; object-fit:contain; display:block; margin:0 auto 5px; }
+      .bank { font-size:14px; font-weight:800; } .welcome { margin:3px 0 10px; color:#4d5960; font-size:11px; }
+      .line { border:0; border-top:1px dashed #9ba7a9; margin:9px 0; }
+      .label { color:#58676d; font-size:10px; font-weight:bold; } .code { color:#0b7059; font-size:53px; font-weight:900; letter-spacing:-3px; line-height:1; }
+      .service-label { margin-top:8px; color:#58676d; font-size:10px; font-weight:bold; } .service { margin:3px 0 8px; font-size:14px; font-weight:800; } .data { display:grid; gap:4px; margin:9px 0; color:#2b3b41; font-size:11px; } .data .queue-focus { color:#123c59; font-size:13px; font-weight:800; line-height:1.3; }
+      .address { margin-top:9px; font-size:11px; line-height:1.45; } .phone { margin-top:5px; font-size:11px; font-weight:bold; } .thanks { margin-top:9px; padding:7px; background:#e7f6ee; color:#0a7359; font-size:11px; font-weight:800; }
+      .note { width:min(100%,390px); margin-top:16px; color:rgba(255,255,255,.88); text-align:center; font-size:13px; line-height:1.5; }
+    </style>
+  </head>
+  <body>
+    <main><div class="receipt">
+      <img class="logo" src="/img/receipt-logo.png" alt="Davr Bank" />
+      <div class="bank">“DAVR BANK” XATB | Uchtepa filiali</div><div class="welcome">Xush kelibsiz!</div><hr class="line" />
+      <div class="label">NAVBAT RAQAMINGIZ</div><div class="code">K-042</div>
+      <div class="service-label">TANLANGAN XIZMAT</div><div class="service">💳 BANK KARTALARI</div><hr class="line" />
+      <div class="data"><div>29.09.2026 | Dushanba | 10:35</div><div class="queue-focus">Navbatdagi o‘rningiz: 3-o‘rin<br />Sizdan oldingilar: 2</div><div>Taxminiy kutish: ~10 daqiqa</div></div><hr class="line" />
+      <div class="address">Toshkent sh., Uchtepa tumani<br />Ko‘kcha Darvoza, 489B</div><div class="phone">Yagona axborot xizmati: 1284</div><div class="thanks">KUTGANINGIZ UCHUN RAHMAT!</div>
+    </div><div class="note">Barcha ma’lumotlar saqlandi; logo va satrlar ixchamlashtirilgani uchun chek qog‘ozi taxminan yarmiga kamayadi.</div></main>
+  </body>
+</html>

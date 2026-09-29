@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>G — To‘liq bank cheki</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+      * { box-sizing: border-box; }
+      body { min-height:100vh; margin:0; padding:clamp(24px,5vw,72px); font-family:Inter,Arial,sans-serif; color:#123c59; background:radial-gradient(850px 600px at 3% 0%,#3c75c9,transparent 65%),linear-gradient(135deg,#0b5d77,#168662); }
+      .caption { max-width:660px; margin:0 auto 22px; color:#fff; }
+      .caption h1 { margin:0; font-size:clamp(1.55rem,3vw,2.45rem); }
+      .caption p { margin:8px 0 0; color:rgba(255,255,255,.8); }
+      .ticket { max-width:660px; margin:auto; padding:clamp(28px,4.5vw,54px); background:#fff; border:1px solid #d9e4e6; border-radius:16px; box-shadow:0 30px 55px rgba(0,35,50,.28); }
+      .logo { display:block; width:88px; height:88px; object-fit:contain; padding:9px; margin:0 auto 13px; border:1px solid #d9e6e5; border-radius:18px; background:#fff; }
+      .bank { color:#123c59; font-weight:900; font-size:clamp(1.1rem,2vw,1.45rem); text-align:center; }
+      .welcome { margin-top:6px; color:#59727f; font-size:clamp(.8rem,1.3vw,.98rem); text-align:center; }
+      hr { margin:27px 0; border:0; border-top:1px dashed #9eb7b8; }
+      .label { color:#6d8490; font-size:.76rem; font-weight:800; letter-spacing:.14em; text-align:center; }
+      .number { color:#0c6d59; font-size:clamp(5rem,12vw,8.5rem); font-weight:900; line-height:1; letter-spacing:-.07em; text-align:center; }
+      .service { margin-top:22px; padding:14px 18px; border-radius:14px; background:#eef8f5; color:#527783; font-size:.82rem; font-weight:700; text-align:center; }
+      .service strong { display:block; margin-top:6px; color:#123c59; font-size:clamp(1.2rem,2.3vw,1.6rem); }
+      .stats { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:26px; }
+      .stats div { padding:17px 10px; border-radius:14px; background:#f2f9f7; text-align:center; color:#657e88; font-size:.76rem; }
+      .stats b { display:block; margin-bottom:5px; color:#173d56; font-size:clamp(1.35rem,2.4vw,1.8rem); }
+      .facts { margin-top:24px; color:#58727d; font-size:clamp(.78rem,1.25vw,.96rem); line-height:1.8; }
+      .facts div { display:flex; justify-content:space-between; gap:20px; padding:4px 0; border-bottom:1px solid #eef3f2; }
+      .facts b { color:#163c55; }
+      footer { margin-top:26px; padding-top:23px; border-top:1px dashed #9eb7b8; color:#527078; font-size:clamp(.75rem,1.2vw,.9rem); line-height:1.65; text-align:center; }
+      footer b { color:#123c59; }
+      footer strong { display:block; margin-top:12px; padding:10px; border-radius:9px; color:#08705a; background:#e8f7ef; font-size:clamp(.76rem,1.3vw,.95rem); }
+    </style>
+  </head>
+  <body>
+    <div class="caption"><h1>G — To‘liq bank cheki</h1><p>Logo, navbat ma’lumoti, aniq sana-vaqt va filial ma’lumotlari bilan.</p></div>
+    <main class="ticket">
+      <img class="logo" src="/img/receipt-logo.png" alt="Davr Bank" />
+      <div class="bank">“DAVR BANK” XATB</div>
+      <div class="welcome">Uchtepa filiali — Xush kelibsiz!</div>
+      <hr />
+      <div class="label">NAVBAT RAQAMINGIZ</div><div class="number">K-042</div>
+      <div class="service">TANLANGAN XIZMAT<strong>💳 Bank kartalari</strong></div>
+      <div class="stats"><div><b>3-o‘rin</b>navbatdagi o‘rningiz</div><div><b>2</b>sizdan oldingilar</div></div>
+      <div class="facts"><div><span>Sana</span><b>29.09.2026</b></div><div><span>Kun</span><b>Dushanba</b></div><div><span>Vaqt</span><b>10:35</b></div><div><span>Taxminiy kutish</span><b>~10 daqiqa</b></div></div>
+      <footer>Toshkent shahri, Uchtepa tumani,<br />Ko‘kcha Darvoza, 489B<br /><b>Yagona axborot xizmati: 1284</b><strong>KUTGANINGIZ UCHUN RAHMAT!</strong></footer>
+    </main>
+  </body>
+</html>

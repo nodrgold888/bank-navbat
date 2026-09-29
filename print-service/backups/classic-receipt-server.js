@@ -1,10 +1,16 @@
+/*
+ * Classic receipt layout backup.
+ * Source: main commit 10751b6 (before the full date/day/time layout).
+ * Do not run this file as a second print service; restore its receipt block
+ * into ../server.js only if the classic paper layout is needed again.
+ */
+
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { execSync } = require('child_process');
-const crypto = require('crypto');
 const { ThermalPrinter, PrinterTypes } = require('node-thermal-printer');
 
 const app = express();
@@ -81,16 +87,13 @@ function asciiSafe(text) {
 // own, so it's gone; the same 4 fields print in the same order either way.
 function boxRow(printer, label, value) {
   const text = `${asciiSafe(label)}: ${asciiSafe(value)}`;
-  // Actually wrap instead of truncating — a silent .slice() here would drop
-  // the tail of the value on paper with no sign anything was cut.
-  for (let i = 0; i < text.length; i += BOX_WIDTH) {
-    printer.println(text.slice(i, i + BOX_WIDTH));
-  }
+  const line = text.length > BOX_WIDTH ? text.slice(0, BOX_WIDTH) : text;
+  printer.println(line);
 }
 
 app.post('/print', async (req, res) => {
   try {
-    const { service, number, ahead, date, day, time, position, etaMin } = req.body || {};
+    const { service, number, ahead, date, time, position, etaMin } = req.body || {};
 
     if (!number) {
       return res.status(400).json({ error: "'number' (chek raqami) majburiy" });
@@ -114,12 +117,14 @@ app.post('/print', async (req, res) => {
       }
     }
 
-    // Compact layout: every customer-facing detail is retained, but related
-    // fields share a line and the receipt logo is smaller to save paper.
+    // ---- Header ----
+    // (no trailing blank line here — every removed blank/rule/border line
+    // below is pure whitespace paper, not information, so trimming them
+    // shortens the receipt without dropping a single field from it.)
     printer.bold(true);
-    printer.println('"DAVR BANK" XATB | Uchtepa filiali');
+    printer.println('"DAVR BANK" XATB');
     printer.bold(false);
-    printer.println('Xush kelibsiz!');
+    printer.println('Uchtepa filiali - Xush kelibsiz!');
 
     // ---- Ticket number: the focal point — big & bold, plain (no invert) ----
     printer.println('Navbat raqami');
@@ -129,28 +134,28 @@ app.post('/print', async (req, res) => {
     printer.setTextSize(0, 0);
     printer.bold(false);
 
-    // ---- Service: bold and readable, without a separate label line ----
+    // ---- Service: its own big, bold section — not buried in the card ----
     printer.alignCenter();
-    printer.println('TANLANGAN XIZMAT');
+    printer.println('Xizmat turi');
     printer.bold(true);
     printer.setTextSize(1, 1);
     printer.println(asciiSafe(service || '-').toUpperCase());
     printer.setTextSize(0, 0);
     printer.bold(false);
 
-    // Date, weekday and time; then queue position and wait estimate. The
-    // values are unchanged, only grouped to make the receipt about half as long.
-    printer.println(`${date || '-'} | ${day || '-'} | ${time || '-'}`);
-    printer.bold(true);
-    printer.println(`Navbatdagi o'rningiz: ${position != null ? `${position}-o'rin` : '-'}`);
-    printer.println(`Sizdan oldingilar: ${ahead != null ? ahead : '-'}`);
-    printer.bold(false);
-    printer.println(`Taxminiy kutish: ${etaMin != null ? `~${etaMin} daqiqa` : '-'}`);
+    // ---- Details: same 4 fields as before, without the decorative box
+    // border (2 lines of pure "+---+" framing, no information of its own) ----
+    // and without a separator rule — the font-size step-down from the
+    // service name already marks the transition clearly enough.
+    printer.alignLeft();
+    boxRow(printer, 'Sana', `${date || ''}  ${time || ''}`);
+    boxRow(printer, 'Navbatdagi tartibingiz', position != null ? `${position}-o'rin` : '-');
+    boxRow(printer, 'Sizdan oldin', ahead != null ? `${ahead} kishi` : '-');
+    boxRow(printer, 'Taxminiy kutish', etaMin != null ? `~${etaMin} daqiqa` : '-');
     printer.alignCenter();
 
     // ---- Branch contact info ----
-    printer.println('Toshkent sh., Uchtepa tumani');
-    printer.println("Ko'kcha Darvoza, 489B");
+    printer.println(BRANCH_ADDRESS);
     printer.bold(true);
     printer.println(`Yagona axborot xizmati: ${BRANCH_PHONE}`);
     printer.bold(false);
@@ -165,12 +170,7 @@ app.post('/print', async (req, res) => {
 
     const buffer = printer.getBuffer();
 
-    // Date.now() alone can collide if two /print requests land in the same
-    // millisecond (e.g. a kiosk client retry firing while the first attempt
-    // is still being processed) — one request's write/unlink could then
-    // clobber the other's temp file mid-copy. randomUUID() makes each
-    // request's file unique regardless of timing.
-    const tempFile = path.join(os.tmpdir(), `receipt_${Date.now()}_${crypto.randomUUID()}.bin`);
+    const tempFile = path.join(os.tmpdir(), `receipt_${Date.now()}.bin`);
     fs.writeFileSync(tempFile, buffer);
 
     try {
@@ -216,3 +216,4 @@ process.on('unhandledRejection', (err) => {
 app.listen(9100, () => {
   console.log(`Print-servis 9100-portda ishga tushdi (printer share: ${PRINTER_SHARE_NAME})`);
 });
+
