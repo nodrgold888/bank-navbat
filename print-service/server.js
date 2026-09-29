@@ -141,8 +141,10 @@ app.post('/print', async (req, res) => {
     // Date, weekday and time; then queue position and wait estimate. The
     // values are unchanged, only grouped to make the receipt about half as long.
     printer.println(`${date || '-'} | ${day || '-'} | ${time || '-'}`);
+    printer.bold(true);
     printer.println(`Navbatdagi o'rningiz: ${position != null ? `${position}-o'rin` : '-'}`);
     printer.println(`Sizdan oldingilar: ${ahead != null ? ahead : '-'}`);
+    printer.bold(false);
     printer.println(`Taxminiy kutish: ${etaMin != null ? `~${etaMin} daqiqa` : '-'}`);
     printer.alignCenter();
 
