@@ -72,6 +72,36 @@ function asciiSafe(text) {
     .replace(/[“”]/g, '"');
 }
 
+// 48 columns at normal size, 24 at double width (setTextSize(1, 1)).
+const SERVICE_LINE_CHARS = 24;
+
+function wrapWords(text, width) {
+  const lines = [];
+  let line = '';
+  String(text)
+    .split(/\s+/)
+    .filter(Boolean)
+    .forEach((word) => {
+      let w = word;
+      while (w.length > width) {
+        if (line) {
+          lines.push(line);
+          line = '';
+        }
+        lines.push(w.slice(0, width));
+        w = w.slice(width);
+      }
+      if (!line) line = w;
+      else if ((line + ' ' + w).length <= width) line += ' ' + w;
+      else {
+        lines.push(line);
+        line = w;
+      }
+    });
+  if (line) lines.push(line);
+  return lines.length ? lines : ['-'];
+}
+
 app.post('/print', async (req, res) => {
   try {
     const { service, number, ahead, date, day, time, position, etaMin } = req.body || {};
@@ -118,7 +148,11 @@ app.post('/print', async (req, res) => {
     printer.println('TANLANGAN XIZMAT');
     printer.bold(true);
     printer.setTextSize(1, 1);
-    printer.println(asciiSafe(service || '-').toUpperCase());
+    // Double-size text fits only half the columns; break at word boundaries so a
+    // long name never splits mid-word.
+    wrapWords(asciiSafe(service || '-').toUpperCase(), SERVICE_LINE_CHARS).forEach((line) => {
+      printer.println(line);
+    });
     printer.setTextSize(0, 0);
     printer.bold(false);
 
