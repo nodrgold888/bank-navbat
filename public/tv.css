@@ -1,201 +1,125 @@
-/* TV broadcast refinement: retain the bank's teal-blue glass look while
-   making the called ticket and operator assignment readable from a distance. */
-body.tv {
-  background: radial-gradient(1150px 700px at 3% -10%, rgba(63, 102, 205, 0.3), transparent 58%),
-    radial-gradient(1000px 650px at 100% 0%, rgba(39, 204, 151, 0.16), transparent 58%),
-    linear-gradient(140deg, #061b34 0%, #063229 100%);
-}
-
-.tv-wrap {
-  padding: clamp(14px, 1.8vw, 28px);
-  gap: clamp(10px, 1.2vw, 18px);
-}
-
-.tv-head {
-  min-height: 78px;
-  padding: clamp(12px, 1.35vw, 20px) clamp(16px, 1.8vw, 28px);
-  border-radius: 24px;
-}
-.tv-head .title {
-  font-size: clamp(1.25rem, 2.15vw, 2.45rem);
-  gap: clamp(10px, 1vw, 16px);
-}
-.tv-head .title .brand-logo {
-  width: clamp(46px, 4vw, 68px);
-  height: clamp(46px, 4vw, 68px);
-}
-.tv-live { font-size: clamp(0.78rem, 1vw, 1.05rem); }
-.tv-live .live-dot { width: 10px; height: 10px; }
-.tv-head .right { gap: clamp(12px, 1.6vw, 24px); }
-.tv-head .clock { font-size: clamp(1.55rem, 2.5vw, 2.8rem); }
-.tv-head .date { font-size: clamp(0.72rem, 1.2vw, 1.25rem); }
-.voice-controls .sound-toggle {
-  padding: 9px 12px;
-  font-size: clamp(0.72rem, 0.95vw, 1rem);
-  border-radius: 12px;
-}
-
-.tv-body { grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.85fr); gap: clamp(14px, 1.4vw, 22px); }
-.now-serving { gap: clamp(8px, 1vh, 12px); }
-.now-serving > h2, .waiting-panel h2 { font-size: clamp(1rem, 1.5vw, 1.65rem); }
-.waiting-panel h2 { margin-bottom: clamp(10px, 1.3vw, 16px); }
-
-/* Featured currency service remains separate from the six regular operator boxes. */
-.valyuta-cell {
-  min-height: 86px;
-  margin: 0 0 clamp(8px, 1.1vw, 14px);
-  padding: clamp(10px, 1vw, 16px) 24px;
-  border-radius: 20px;
-}
-.valyuta-cell .op-name { font-size: clamp(1.5rem, 2.7vw, 2.5rem); }
-.valyuta-cell .op-code { font-size: clamp(3.1rem, 6vw, 6.2rem); }
-
-.op-grid { gap: clamp(10px, 1.2vw, 18px); }
-.op-cell {
-  /* Padding cut to almost nothing — the name and code are the only content
-     now, so essentially the whole box goes to them, not breathing room. */
-  padding: clamp(2px, 0.3vh, 6px) clamp(7px, 0.9vw, 14px);
-  border-radius: 22px;
-  border-color: rgba(255, 255, 255, 0.24);
-}
-.op-cell.idle {
-  opacity: 0.74;
-  background: var(--glass-sheen-dark),
-    linear-gradient(120deg, rgba(35, 121, 191, 0.28), rgba(28, 148, 88, 0.24));
-}
-.op-cell.idle .op-name { opacity: 0.8; }
-.op-cell.idle .op-code { color: rgba(255, 255, 255, 0.85); }
-.op-cell .op-name { font-size: clamp(1.35rem, 2vw, 2.6rem); line-height: 1; }
-.op-cell .op-name small { font-size: clamp(0.9rem, 1.3vw, 1.4rem); }
-.op-cell .op-code { font-size: clamp(5rem, 11.2vh, 12.5rem); line-height: 1; }
-.op-cell .op-svc {
-  font-size: clamp(1.1rem, 1.8vw, 2rem);
-  line-height: 1.2;
-  overflow-wrap: anywhere;
-}
-
-/* A brighter edge and glow are enough to identify a new call; scaling used to clip text. */
-.op-cell.just-called {
-  transform: none;
-  border-width: 2px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.56), 0 0 0 3px rgba(111, 230, 160, 0.22),
-    0 0 36px rgba(111, 230, 160, 0.42);
-}
-.op-cell.just-called .op-name { font-size: clamp(1.45rem, 2.15vw, 2.75rem); }
-.op-cell.just-called .op-code { font-size: clamp(5.2rem, 11.6vh, 12.9rem); }
-
-.waiting-panel {
-  padding: clamp(15px, 1.8vw, 24px);
-  border-radius: 24px;
-  background: var(--glass-sheen-dark), linear-gradient(165deg, rgba(81, 197, 174, 0.16), rgba(255, 255, 255, 0.035));
-}
-.waiting-list { gap: 9px; }
-.wait-item { padding: clamp(10px, 1.2vw, 16px); border-radius: 16px; gap: 10px; }
-.wait-item .wi-code { font-size: clamp(1.5rem, 2.5vw, 3rem); }
-.wait-item .wi-svc { font-size: clamp(0.75rem, 1.05vw, 1.2rem); padding: 5px 9px; overflow-wrap: anywhere; }
-.wait-empty {
-  opacity: 0.78;
-  font-size: clamp(1rem, 1.45vw, 1.5rem);
-  color: rgba(255, 255, 255, 0.88);
-}
-.wait-empty-icon {
-  width: clamp(52px, 5vw, 72px);
-  height: clamp(52px, 5vw, 72px);
-  font-size: clamp(1.6rem, 2.1vw, 2.2rem);
-  box-shadow: 0 0 0 8px rgba(111, 230, 160, 0.06), 0 0 28px rgba(111, 230, 160, 0.15);
-}
-.tv-foot { padding-top: 10px; }
-.tvf-branch { font-size: clamp(0.64rem, 0.85vw, 1rem); }
-
-@media (max-width: 1150px) {
-  body.tv { height: auto; min-height: 100vh; overflow: auto; }
-  .tv-wrap { height: auto; min-height: 100vh; }
-  .tv-body { grid-template-columns: 1fr; }
-  .op-grid { min-height: 510px; }
-  .waiting-panel { min-height: 250px; }
-}
-
-@media (max-width: 680px) {
-  .tv-head { align-items: flex-start; gap: 12px; }
-  .tv-head .right { margin-left: auto; gap: 8px; }
-  .voice-controls { display: none; }
-  .tv-head .title { max-width: 64%; }
-  .tv-head .date { max-width: 130px; }
-  .op-grid { grid-template-columns: 1fr; min-height: auto; }
-  .op-cell { min-height: 145px; }
-  .valyuta-cell { min-height: 120px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .op-cell.just-called, .tv-boom.boom { animation: none; }
-}
-
-/* ==========================================================================
-   Light & clean theme — white cards on a pale teal wash, dark navy text,
-   Davr Bank teal/green accents. Layout above is unchanged; this block only
-   re-colours it. (Prefixed with body.tv so it wins over the dark rules.)
-   ========================================================================== */
-body.tv {
-  background: radial-gradient(1100px 700px at 0% -10%, rgba(64, 141, 205, 0.14), transparent 60%),
-    radial-gradient(1000px 650px at 100% 0%, rgba(34, 197, 140, 0.16), transparent 60%),
-    linear-gradient(140deg, #f4f8fb 0%, #e9f4ef 100%);
+/* TV board: a big "now serving" card for every operator (Valyuta wide + gold), next-in-line strip below. */
+/* New TV board — light page, deep teal hero. Sizes lean on vh/vw so it fits 1080p and 4K alike. */
+body.tvn {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  font-family: Inter, system-ui, sans-serif;
   color: #123c59;
+  background: radial-gradient(1000px 600px at 0% -10%, rgba(64, 141, 205, 0.14), transparent 60%),
+    radial-gradient(900px 600px at 100% 0%, rgba(34, 197, 140, 0.16), transparent 60%),
+    linear-gradient(140deg, #f5f9fb, #e8f3ee);
 }
-body.tv .tv-head,
-body.tv .waiting-panel,
-body.tv .op-cell {
-  background: #fff;
-  border: 1px solid #d6e4e8;
-  box-shadow: 0 10px 26px -18px rgba(18, 60, 89, 0.45);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+.tvn-wrap { height: 100vh; display: grid; grid-template-rows: auto 1fr auto; gap: 1.6vh; padding: 2vh 1.8vw; }
+
+.tvn-head { display: flex; justify-content: space-between; align-items: center; padding: 1.2vh 1.6vw; background: #fff; border: 1px solid #d6e4e8; border-radius: 1.6vh; box-shadow: 0 10px 26px -20px rgba(18, 60, 89, 0.5); }
+.tvn-brand { display: flex; align-items: center; gap: 1.2vw; }
+.tvn-brand img { width: 6.4vh; height: 6.4vh; border-radius: 1.4vh; object-fit: contain; }
+.tvn-brand b { display: block; font-size: 3.4vh; font-weight: 800; }
+.tvn-brand span { display: block; color: #5d7783; font-size: 1.9vh; font-weight: 500; }
+.tvn-live { display: flex !important; align-items: center; gap: 0.6vw; margin-left: 1vw; font-size: 1.8vh !important; font-weight: 700; color: #0b7059 !important; }
+.tvn-live i { width: 1.2vh; height: 1.2vh; border-radius: 50%; background: #17a56c; box-shadow: 0 0 0 0.5vh rgba(23, 165, 108, 0.2); }
+.tvn-live i.off { background: #e11d48; box-shadow: none; }
+.tvn-right { display: flex; align-items: center; gap: 1.6vw; }
+.tvn-btn { background: #e8f1f3; color: #123c59; font-weight: 700; font-size: 1.7vh; padding: 1.2vh 1.2vw; border-radius: 1.2vh; border: 0; cursor: pointer; }
+.tvn-time { text-align: right; }
+.tvn-time .clock { font-size: 4.2vh; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.05; }
+.tvn-time .date { color: #5d7783; font-size: 1.9vh; }
+
+.tvn-main { display: grid; grid-template-columns: 1.55fr 1fr; gap: 1.6vw; min-height: 0; }
+
+/* Hero */
+.tvn-hero {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 0;
+  color: #fff; border-radius: 2.4vh; padding: 2vh 2vw;
+  background: radial-gradient(900px 500px at 15% 0%, rgba(255, 255, 255, 0.14), transparent 60%), linear-gradient(135deg, #0a5f63 0%, #0b7059 55%, #17a56c 100%);
+  box-shadow: 0 30px 60px -34px rgba(8, 70, 66, 0.75);
 }
-body.tv .tv-head .title { color: #123c59; }
-body.tv .tv-head .title .brand-logo { background: #fff; border: 1px solid #d6e4e8; }
-body.tv .tv-live { color: #4d6671; }
-body.tv .tv-head .clock { color: #123c59; }
-body.tv .tv-head .date { color: #4d6671; opacity: 1; }
-body.tv .sound-toggle { background: #e8f1f3; color: #123c59; }
+.hero-label { font-size: 2.6vh; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.85; }
+.hero-code { font-size: min(27vh, 17vw); font-weight: 900; line-height: 1; letter-spacing: -0.03em; margin: 1vh 0; font-variant-numeric: tabular-nums; text-shadow: 0 8px 30px rgba(0, 0, 0, 0.18); }
+.hero-go { display: flex; align-items: center; gap: 1.2vw; background: rgba(255, 255, 255, 0.16); border-radius: 999px; padding: 1.2vh 2.4vw; }
+.hero-go .arrow { font-size: 4vh; }
+.hero-op { font-size: 5.6vh; font-weight: 800; }
+.hero-svc { margin-top: 2vh; font-size: 3vh; font-weight: 600; opacity: 0.92; min-height: 3.4vh; }
+.tvn-hero.idle { background: linear-gradient(135deg, #5d7783, #7d939d); box-shadow: none; }
+.tvn-hero.idle .hero-code { font-size: 14vh; opacity: 0.6; }
+.tvn-hero.idle .hero-go { background: rgba(255, 255, 255, 0.12); }
+.tvn-hero.pulse { animation: hero-pulse 1.1s ease 0s 3; }
+@keyframes hero-pulse { 0%, 100% { box-shadow: 0 30px 60px -34px rgba(8, 70, 66, 0.75), 0 0 0 0 rgba(23, 165, 108, 0); } 50% { box-shadow: 0 30px 60px -34px rgba(8, 70, 66, 0.75), 0 0 0 2vh rgba(23, 165, 108, 0.35); } }
 
-body.tv .now-serving > h2,
-body.tv .waiting-panel h2 { color: #0b7059; }
+/* Operator board */
+.tvn-board { display: flex; flex-direction: column; min-height: 0; background: #fff; border: 1px solid #d6e4e8; border-radius: 2.4vh; padding: 2vh 1.4vw; box-shadow: 0 10px 26px -20px rgba(18, 60, 89, 0.5); }
+.tvn-board h2 { margin: 0 0 1.4vh; font-size: 2.4vh; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #0b7059; }
+.board-list { flex: 1; display: grid; grid-auto-rows: minmax(0, 1fr); gap: 1vh; min-height: 0; }
+.row { --c: #b4c4ca; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1vw; padding: 0 1.4vw; border-radius: 1.4vh; background: #f3f8f9; border: 1px solid #e0eaed; min-height: 0; }
+.row .dot { width: 1.6vh; height: 1.6vh; border-radius: 50%; background: var(--c); }
+.row .nm { font-size: 3vh; font-weight: 700; }
+.row .cd { font-size: 4.6vh; font-weight: 900; font-variant-numeric: tabular-nums; color: #0b7059; }
+.row.free .nm, .row.free .cd { color: #8aa0a9; font-weight: 600; }
+.row.free .cd { font-size: 2.6vh; }
+.row.busy { background: #fff; border-color: var(--c); box-shadow: inset 0.6vh 0 0 var(--c); }
+.row.latest { background: #e7f6ee; border-color: #0b7059; box-shadow: inset 0.6vh 0 0 #0b7059, 0 0 0 0.3vh rgba(11, 112, 89, 0.2); }
+.row.vip { background: #fffaf0; border: 2px solid #eab308; }
+.row.vip.free .cd { color: #cdb86f; }
 
-/* Operator boxes */
-body.tv .op-cell .op-name { color: #123c59; opacity: 1; }
-body.tv .op-cell .op-svc { color: #4d6671; opacity: 1; }
-body.tv .op-cell .op-code { color: #0b7059; }
-body.tv .op-cell.idle { opacity: 1; background: #f6fafb; border-color: #e0eaed; box-shadow: none; }
-body.tv .op-cell.idle .op-name { color: #7b919a; }
-body.tv .op-cell.idle .op-code { color: #b4c4ca; }
-body.tv .op-cell.just-called {
-  background: linear-gradient(120deg, #0b7059 0%, #17a56c 100%);
-  border-color: #0b7059;
-  color: #fff;
-  box-shadow: 0 14px 30px -12px rgba(11, 112, 89, 0.7), 0 0 0 3px rgba(23, 165, 108, 0.25);
+/* Next-in-line strip */
+.tvn-next { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 1.6vw; background: #fff; border: 1px solid #d6e4e8; border-radius: 2vh; padding: 1.6vh 1.6vw; box-shadow: 0 10px 26px -20px rgba(18, 60, 89, 0.5); }
+.next-title b { display: block; font-size: 2.6vh; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #0b7059; }
+.next-title span { display: block; margin-top: 0.4vh; color: #5d7783; font-size: 1.9vh; font-weight: 600; }
+.next-strip { display: flex; gap: 1vw; overflow: hidden; min-width: 0; align-items: center; }
+.chip { --c: #789; flex: none; display: flex; align-items: center; gap: 0.7vw; padding: 1vh 1.2vw; background: #f3f8f9; border: 1px solid #dde8ec; border-radius: 1.4vh; border-bottom: 0.5vh solid var(--c); }
+.chip i { display: none; }
+.chip b { font-size: 4.2vh; font-weight: 900; font-variant-numeric: tabular-nums; }
+.chip span { font-size: 1.9vh; font-weight: 600; color: #4d6671; max-width: 12vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.none { color: #4d6671; font-size: 2.6vh; font-weight: 600; }
+
+.tvn-flash { position: fixed; inset: 0; pointer-events: none; z-index: 50; opacity: 0; background: radial-gradient(circle at 35% 45%, rgba(23, 165, 108, 0.4), transparent 60%); }
+.tvn-flash.go { animation: flash 0.9s ease-out; }
+@keyframes flash { 0% { opacity: 0; } 12% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .tvn-hero.pulse, .tvn-flash.go { animation: none; } }
+
+/* Board D — every operator is its own hero card (same look as design A's hero). */
+.tvd-main { display: grid; grid-template-rows: auto 1fr; gap: 1.6vh; min-height: 0; }
+.tvd-vwrap:empty { display: none; }
+.tvd-vwrap .card { min-height: 0; height: 17vh; }
+.tvd-grid { display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 1.6vh 1.2vw; min-height: 0; }
+
+.card {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 0; overflow: hidden;
+  color: #fff; border-radius: 2.2vh; padding: 0.6vh 1vw;
+  background: radial-gradient(600px 300px at 15% 0%, rgba(255, 255, 255, 0.14), transparent 60%), linear-gradient(135deg, #0a5f63 0%, #0b7059 55%, #17a56c 100%);
+  box-shadow: 0 22px 44px -30px rgba(8, 70, 66, 0.75);
 }
-body.tv .op-cell.just-called .op-name,
-body.tv .op-cell.just-called .op-svc,
-body.tv .op-cell.just-called .op-code { color: #fff; }
-@keyframes op-cell-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(23, 165, 108, 0); }
-  50% { box-shadow: 0 0 0 16px rgba(23, 165, 108, 0.35); }
-}
+.c-label { font-size: 1.5vh; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.85; }
+.c-code { font-size: min(9.6vh, 6.4vw); font-weight: 900; line-height: 1; letter-spacing: -0.03em; margin: 0.3vh 0; font-variant-numeric: tabular-nums; text-shadow: 0 6px 22px rgba(0, 0, 0, 0.18); }
+.c-go { display: flex; align-items: center; gap: 0.7vw; background: rgba(255, 255, 255, 0.16); border-radius: 999px; padding: 0.4vh 1.2vw; }
+.c-go span { font-size: 2vh; }
+.c-go b { font-size: 2.8vh; font-weight: 800; }
+.c-svc { margin-top: 0.4vh; font-size: 1.7vh; font-weight: 600; opacity: 0.92; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; min-height: 2vh; }
 
-/* Valyuta stays its own featured box, in a warm tint */
-body.tv .valyuta-cell { background: #fffaf0; border: 2px solid #eab308; box-shadow: 0 10px 26px -18px rgba(180, 130, 0, 0.55); }
-body.tv .valyuta-cell.idle { background: #fffcf5; }
-body.tv .valyuta-cell.idle .op-code { color: #d9c88e; }
-body.tv .valyuta-cell.just-called { background: linear-gradient(120deg, #0b7059 0%, #17a56c 100%); border-color: #0b7059; }
+.card.free { background: linear-gradient(135deg, #6a838e, #8397a1); box-shadow: none; }
+.card.free .c-code { font-size: min(6vh, 4vw); opacity: 0.6; text-shadow: none; }
+.card.free .c-go { background: rgba(255, 255, 255, 0.12); }
 
-/* Waiting list */
-body.tv .wait-item { background: #f3f8f9; border: 1px solid #dde8ec; box-shadow: none; }
-body.tv .wait-item .wi-code { color: #123c59; }
-body.tv .wait-item .wi-svc { color: #0b7059; background: #e7f6ee; opacity: 1; }
-body.tv .wait-empty { color: #4d6671; opacity: 1; }
-body.tv .wait-empty-icon { background: #e7f6ee; border-color: #9fd9bf; color: #0b7059; box-shadow: none; }
+.card.vip { background: radial-gradient(600px 300px at 15% 0%, rgba(255, 255, 255, 0.5), transparent 60%), linear-gradient(135deg, #f0b90b, #ffd24a); color: #3b2c00; box-shadow: 0 22px 44px -30px rgba(160, 110, 0, 0.7); }
+.card.vip .c-go { background: rgba(255, 255, 255, 0.5); }
+.card.vip .c-code { text-shadow: none; }
+.card.vip.free { background: linear-gradient(135deg, #cdb878, #dccb97); color: #fff; }
+.vip { display: grid !important; grid-template-columns: auto 1fr auto; grid-template-rows: auto auto; align-items: center; justify-items: center; column-gap: 3vw; padding: 1vh 3vw; }
+.vip .c-label { grid-column: 1; grid-row: 1; justify-self: start; }
+.vip .c-code { grid-column: 2; grid-row: 1 / span 2; font-size: min(11vh, 7vw); margin: 0; }
+.vip .c-go { grid-column: 3; grid-row: 1; justify-self: end; }
+.vip .c-svc { grid-column: 3; grid-row: 2; justify-self: end; margin: 0; }
+.vip.free .c-code { font-size: 6vh; }
 
-/* Footer + call flash */
-body.tv .tv-foot { border-top-color: #d3e1e5; }
-body.tv .tvf-branch { color: #4d6671; opacity: 1; }
-body.tv .tvf-branch b { color: #123c59; }
-.tv-boom { background: radial-gradient(circle at 50% 30%, rgba(23, 165, 108, 0.4) 0%, rgba(23, 165, 108, 0) 60%); }
+.card.latest { box-shadow: 0 22px 44px -30px rgba(8, 70, 66, 0.75), 0 0 0 0.7vh rgba(255, 255, 255, 0.9), 0 0 0 1.2vh rgba(23, 165, 108, 0.6); }
+.card.vip.latest { box-shadow: 0 0 0 0.7vh #fff, 0 0 0 1.2vh rgba(240, 185, 11, 0.7); }
+.card.pulse { animation: card-pulse 1.1s ease 0s 3; }
+@keyframes card-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
+@media (prefers-reduced-motion: reduce) { .card.pulse { animation: none; } }
+
+.tvn-voice { display: flex; gap: 0.6vw; align-items: center; }
+.tvn-voice [hidden] { display: none; }
+.tvn-voice select.tvn-btn { max-width: 14vw; }
+.tvn-toast { position: fixed; left: 50%; bottom: 3vh; transform: translateX(-50%); background: #123c59; color: #fff; padding: 1vh 1.6vw; border-radius: 1.2vh; font-size: 2vh; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 60; }
+.tvn-toast.show { opacity: 1; }

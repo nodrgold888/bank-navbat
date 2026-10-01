@@ -11,59 +11,48 @@
     <link rel="stylesheet" href="/tv.css" />
     <link rel="icon" href="/img/logo.jpg" />
   </head>
-  <body class="tv">
-    <div class="tv-boom" id="tvBoom"></div>
-    <div class="tv-wrap">
-      <header class="tv-head">
-        <div class="title">
-          <img class="brand-logo" src="/img/logo.jpg" alt="Davr Bank" /> Davr Bank navbat tizimi
-          <span class="tv-live"><span class="live-dot" id="liveDot"></span>Jonli</span>
+  <body class="tvn tvd">
+    <div class="tvn-flash" id="flash"></div>
+    <div class="tvn-wrap">
+      <header class="tvn-head">
+        <div class="tvn-brand">
+          <img src="/img/logo.jpg" alt="Davr Bank" />
+          <div><b>Davr Bank</b><span>Uchtepa filiali · Navbat tizimi</span></div>
+          <span class="tvn-live"><i id="liveDot"></i>Jonli</span>
         </div>
-        <div class="right">
-          <div class="voice-controls">
-            <button class="sound-toggle" id="soundToggle">🔊 Signal: yoniq</button>
-            <button class="sound-toggle" id="soundTest" title="Signalni sinash">🔔 Sinash</button>
-            <!-- Hidden for now (per request) — code/functionality kept as-is
-                 for whenever a good voice is actually found; just remove
-                 "hidden" to show these controls again. -->
-            <select class="sound-toggle" id="voiceSelect" title="Chaqiruv ovozi" hidden>
+        <div class="tvn-right">
+          <div class="tvn-voice">
+            <button class="tvn-btn" id="soundToggle">🔊 Signal</button>
+            <button class="tvn-btn" id="soundTest" title="Signalni sinash">🔔 Sinash</button>
+            <!-- Hidden for now (per request) — functionality kept for when a good
+                 Uzbek voice is found; remove "hidden" to show these again. -->
+            <select class="tvn-btn" id="voiceSelect" title="Chaqiruv ovozi" hidden>
               <option value="">🗣️ Ovoz: tanlanmagan</option>
             </select>
-            <button class="sound-toggle" id="voiceTest" title="Ovozda o'qishni sinash" hidden>▶️ Ovozni sinash</button>
+            <button class="tvn-btn" id="voiceTest" title="Ovozda o'qishni sinash" hidden>▶️ Ovozni sinash</button>
           </div>
-          <div>
-            <div class="clock tabnum" id="clock">00:00:00</div>
+          <div class="tvn-time">
+            <div class="clock" id="clock">00:00:00</div>
             <div class="date" id="date">—</div>
           </div>
         </div>
       </header>
 
-      <div class="tv-body">
-        <section class="now-serving">
-          <h2>Operatorlar</h2>
+      <main class="tvd-main">
+        <div class="tvd-vwrap" id="vwrap"></div>
+        <div class="tvd-grid" id="grid"></div>
+      </main>
 
-          <div class="valyuta-wrap" id="valyutaWrap"></div>
-
-          <div class="op-grid" id="opGrid"></div>
-        </section>
-
-        <aside class="waiting-panel">
-          <h2>Navbatdagilar</h2>
-          <div class="waiting-list" id="waitingList"></div>
-        </aside>
-      </div>
-
-      <footer class="tv-foot">
-        <div class="tvf-branch">
-          "DAVR BANK" XATB UCHTEPA FILIALI · Yagona axborot xizmati:
-          <b>1284</b>
+      <section class="tvn-next">
+        <div class="next-title">
+          <b>Keyingilar</b>
+          <span id="nextCount">0 kishi kutmoqda</span>
         </div>
-      </footer>
+        <div class="next-strip" id="next"></div>
+      </section>
     </div>
-
+    <div class="tvn-toast" id="voiceToast"></div>
     <div class="offline-banner" id="offline">Server bilan aloqa uzildi — qayta ulanmoqda…</div>
-    <div class="toast" id="voiceToast"></div>
-
     <script src="/common.js"></script>
     <script src="/tv.js"></script>
   </body>

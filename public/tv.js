@@ -1,10 +1,6 @@
-/* ==========================================================================
-   TV display (read-only, auto-updating)
-   ========================================================================== */
-
+/* TV display (read-only, auto-updating): a big "now serving" card per operator. */
 (function () {
   'use strict';
-
   var $ = function (id) {
     return document.getElementById(id);
   };
@@ -12,63 +8,24 @@
   var soundOn = localStorage.getItem('tvSound') !== 'off';
   var lastSeq = null;
   var initialised = false;
-  var lastWaitingSig = null;
 
-  // ---- Auto-scroll the waiting-queue panel ----
-  // Every waiting ticket is sent now (no more 8-item cutoff), so the list
-  // can be taller than the panel. This is an unattended display — nobody's
-  // going to scroll it by hand — so cycle through it automatically instead
-  // of just clipping whatever doesn't fit.
-  var waitingScrollTimer = null;
-  var waitingScrollPaused = false;
-  function manageWaitingScroll(el) {
-    var overflow = el.scrollHeight - el.clientHeight;
-    if (overflow <= 4) {
-      if (waitingScrollTimer) {
-        clearInterval(waitingScrollTimer);
-        waitingScrollTimer = null;
-      }
-      el.scrollTop = 0;
-      return;
-    }
-    if (waitingScrollTimer) return; // already cycling
-    waitingScrollTimer = setInterval(function () {
-      if (waitingScrollPaused) return;
-      var max = el.scrollHeight - el.clientHeight;
-      if (el.scrollTop >= max) {
-        waitingScrollPaused = true;
-        setTimeout(function () {
-          el.scrollTop = 0;
-          waitingScrollPaused = false;
-        }, 2500);
-        return;
-      }
-      el.scrollTop += 1;
-    }, 40);
+  function updateSoundBtn() {
+    $('soundToggle').textContent = soundOn ? '🔊 Signal' : '🔇 Signal';
   }
-
   updateSoundBtn();
   $('soundToggle').addEventListener('click', function () {
     soundOn = !soundOn;
     localStorage.setItem('tvSound', soundOn ? 'on' : 'off');
     updateSoundBtn();
-    if (soundOn) Navbat.chime(); // user gesture — unlocks WebAudio
+    if (soundOn) Navbat.chime();
   });
-  function updateSoundBtn() {
-    $('soundToggle').textContent = soundOn ? '🔊 Signal: yoniq' : '🔇 Signal: oʻchiq';
-  }
 
-  // Test button — plays the call signal
   $('soundTest').addEventListener('click', function () {
     Navbat.chime('call');
   });
 
-  // ---- Voice announcement setup ----
-  // No voice is bundled or auto-picked: quality varies wildly by device
-  // (Chrome only offers a real Uzbek voice when it can reach Google's
-  // online voice list; Windows' own offline voices usually have none at
-  // all), so whoever sets up this TV picks whichever installed voice
-  // actually sounds acceptable, once, and it's remembered on this device.
+  // Voice setup: nothing is bundled or auto-picked (voice quality varies by
+  // device); whoever sets up the TV picks an installed voice once.
   var voiceSelect = $('voiceSelect');
   if (Navbat.hasTTS) {
     Navbat.onVoicesReady(function (voices) {
@@ -90,22 +47,13 @@
     });
   } else {
     voiceSelect.disabled = true;
-    voiceSelect.title = 'Bu brauzer ovozda oʻoqishni qoʻllab-quvvatlamaydi';
   }
   voiceSelect.addEventListener('change', function () {
     Navbat.setSelectedVoiceURI(voiceSelect.value);
   });
-  $('voiceTest').addEventListener('click', function () {
-    if (!voiceSelect.value) {
-      voiceToast("Avval ro'yxatdan ovoz tanlang");
-      return;
-    }
-    Navbat.speak('B001 raqamli mijoz, 6-operatorga murojaat qiling.');
-  });
   var voiceToastTimer = null;
   function voiceToast(msg) {
     var el = $('voiceToast');
-    if (!el) return;
     el.textContent = msg;
     el.classList.add('show');
     clearTimeout(voiceToastTimer);
@@ -113,8 +61,14 @@
       el.classList.remove('show');
     }, 2200);
   }
+  $('voiceTest').addEventListener('click', function () {
+    if (!voiceSelect.value) {
+      voiceToast("Avval ro'yxatdan ovoz tanlang");
+      return;
+    }
+    Navbat.speak('B001 raqamli mijoz, 6-operatorga murojaat qiling.');
+  });
 
-  // ---- Clock ----
   function tickClock() {
     var d = new Date();
     $('clock').textContent = Navbat.fmtClock(d);
@@ -123,132 +77,87 @@
   setInterval(tickClock, 1000);
   tickClock();
 
-  // ---- Announcement ----
-  // The headline banner that used to show this text is gone (operators now
-  // get more screen space) — the full-screen boom flash plus each operator
-  // box's own highlight/pulse (see render() below) carry the announcement.
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
   function announce(call) {
     if (soundOn) Navbat.chime(call.recall ? 'recall' : 'call');
-    var boom = $('tvBoom');
-    boom.classList.remove('boom');
-    void boom.offsetWidth;
-    boom.classList.add('boom');
+    var f = $('flash');
+    f.classList.remove('go');
+    void f.offsetWidth;
+    f.classList.add('go');
     if (soundOn) {
       var prefix = call.recall ? 'Qayta chaqiruv. ' : '';
       Navbat.speak(prefix + call.code + ' raqamli mijoz, ' + call.operatorName + 'ga murojaat qiling.');
     }
   }
 
-  // ---- Render ----
+  function cardHtml(b, latest) {
+    var busy = !!b.ticketCode;
+    var cls = 'card ' + (busy ? 'busy' : 'free') + (b.name === 'Valyuta' ? ' vip' : '') + (latest ? ' latest' : '');
+    return (
+      '<div class="' + cls + '" data-op="' + b.id + '">' +
+      '<div class="c-label">' + (busy ? 'Chaqirilmoqda' : 'Bo‘sh') + '</div>' +
+      '<div class="c-code">' + (busy ? esc(b.ticketCode) : '—') + '</div>' +
+      '<div class="c-go"><span>➜</span><b>' + esc(b.name) + '</b></div>' +
+      '<div class="c-svc">' + (busy ? (b.serviceIcon ? esc(b.serviceIcon) + ' ' : '') + esc(b.serviceName || '') : '&nbsp;') + '</div>' +
+      '</div>'
+    );
+  }
+
   function render(view) {
     var call = view.lastCall;
-
-    // Shared markup builder for both the regular grid cells and the
-    // featured Valyuta box below. Service type is intentionally left off —
-    // just the operator and the ticket number.
-    function opCellHtml(b) {
-      var statusTxt = b.ticketCode ? '' : 'boʻsh';
-      return (
-        '<div class="op-name">' +
-        '<span class="op-name-text">' + b.name + '</span>' +
-        (statusTxt ? '<small>' + statusTxt + '</small>' : '') +
-        '</div>' +
-        '<div class="op-code">' +
-        (b.ticketCode || '—') +
-        '</div>'
-      );
-    }
-
-    // Valyuta gets its own featured, centered box instead of sitting in the
-    // regular grid — pulled out here, before the grid loop below.
-    var onlineBoard = view.board.filter(function (b) {
+    var online = view.board.filter(function (b) {
       return b.online;
     });
-    var valyutaWrap = $('valyutaWrap');
-    valyutaWrap.innerHTML = '';
-    var valyuta = onlineBoard.find(function (b) {
+    var valyuta = online.filter(function (b) {
       return b.name === 'Valyuta';
+    })[0];
+    var rest = online.filter(function (b) {
+      return b.name !== 'Valyuta';
     });
-    if (valyuta) {
-      var vCell = document.createElement('div');
-      vCell.className = 'op-cell valyuta-cell';
-      if (!valyuta.ticketCode) vCell.classList.add('idle');
-      var vJustCalled = call && call.operatorId === valyuta.id && valyuta.ticketCode === call.code;
-      if (vJustCalled) vCell.classList.add('just-called');
-      vCell.innerHTML = opCellHtml(valyuta);
-      valyutaWrap.appendChild(vCell);
+    function isLatest(b) {
+      return !!(call && call.operatorId === b.id && b.ticketCode === call.code);
     }
 
-    // Operator grid — paused/offline operators are left off the board
-    // entirely (a customer has nowhere to go for one anyway), instead of
-    // showing a dimmed "dam olishda" box that just takes up space.
-    var grid = $('opGrid');
-    grid.innerHTML = '';
-    onlineBoard
-      .filter(function (b) {
-        return b.name !== 'Valyuta';
+    $('vwrap').innerHTML = valyuta ? cardHtml(valyuta, isLatest(valyuta)) : '';
+    var cols = rest.length <= 3 ? Math.max(rest.length, 1) : rest.length <= 6 ? 3 : 4;
+    $('grid').style.setProperty('--cols', cols);
+    $('grid').innerHTML = rest
+      .map(function (b) {
+        return cardHtml(b, isLatest(b));
       })
-      .forEach(function (b) {
-        var cell = document.createElement('div');
-        cell.className = 'op-cell';
-        if (!b.ticketCode) cell.classList.add('idle');
-        var justCalled = call && call.operatorId === b.id && b.ticketCode === call.code;
-        if (justCalled) cell.classList.add('just-called');
-        // Border picks up the active service's own color — same idea as
-        // Valyuta's gold border, just driven by whichever service the
-        // operator is actually serving right now.
-        if (b.ticketCode && !justCalled) cell.style.borderColor = b.serviceColor || '#eab308';
-        cell.innerHTML = opCellHtml(b);
-        grid.appendChild(cell);
-      });
+      .join('');
 
-    // Waiting list — every queue, not just the first few. Only rebuild the
-    // DOM when the actual set of waiting tickets changes, so an in-progress
-    // auto-scroll (below) isn't reset to the top on every routine state push.
-    var wl = $('waitingList');
-    var waitingSig = view.waitingList.map(function (w) {
-      return w.code;
-    }).join(',');
-    if (waitingSig !== lastWaitingSig) {
-      lastWaitingSig = waitingSig;
-      wl.innerHTML = '';
-      if (!view.waitingList.length) {
-        var e = document.createElement('div');
-        e.className = 'wait-empty';
-        e.innerHTML = '<span class="wait-empty-icon">✓</span>Hozircha navbatda hech kim yoʻq';
-        wl.appendChild(e);
-      } else {
-        view.waitingList.forEach(function (w) {
-          var item = document.createElement('div');
-          item.className = 'wait-item';
-          item.innerHTML =
-            '<span class="dot" style="background:' +
-            (w.serviceColor || '#789') +
-            '"></span>' +
-            '<span class="wi-code tabnum">' +
-            w.code +
-            '</span><span class="wi-svc">' +
-            (w.serviceIcon ? w.serviceIcon + ' ' : '') +
-            w.serviceName +
-            '</span>';
-          wl.appendChild(item);
-        });
-      }
-    }
-    manageWaitingScroll(wl);
+    var wl = view.waitingList || [];
+    $('nextCount').textContent = wl.length + ' kishi kutmoqda';
+    $('next').innerHTML = wl.length
+      ? wl
+          .map(function (w) {
+            return (
+              '<div class="chip" style="--c:' + esc(w.serviceColor || '#789') + '"><b>' +
+              esc(w.code) + '</b><span>' + esc(w.serviceName) + '</span></div>'
+            );
+          })
+          .join('')
+      : '<div class="none">✓ Hozircha navbatda hech kim yo‘q</div>';
 
-    // Detect a fresh call
     if (call) {
-      if (initialised && call.seq !== lastSeq) announce(call);
+      if (initialised && call.seq !== lastSeq) {
+        announce(call);
+        var el = document.querySelector('.card[data-op="' + call.operatorId + '"]');
+        if (el) el.classList.add('pulse');
+      }
       lastSeq = call.seq;
     }
     initialised = true;
   }
 
-  function onConn(online) {
+  Navbat.connect(render, function (online) {
     $('offline').classList.toggle('show', !online);
-    $('liveDot').classList.toggle('live-dot-off', !online);
-  }
-
-  Navbat.connect(render, onConn);
+    $('liveDot').classList.toggle('off', !online);
+  });
 })();

@@ -60,32 +60,31 @@ written for Claude Code specifically.
 
 ## Current state of the TV screen (`/tv`), as of the latest commit
 
-This view went through many redesign rounds in a single session (glass →
-neon/digital-signage → navy "reference photo" match → back to glass) before
-the branch owner settled on the current look:
+The TV was redesigned several times (glass, neon, navy, light-with-sidebar).
+The owner's final choice is the current layout:
 
-- Light & clean theme (white cards on a pale teal wash, navy text, green
-  accents; the just-called box is solid green) — the owner's latest choice,
-  applied as a re-colour block at the bottom of `public/tv.css`. The earlier
-  glass/dark and navy/neon variants were replaced; layout is unchanged.
-- Operators render in a plain 2-column grid (`public/tv.js` builds
-  `#opGrid`), each box showing operator name, big ticket code, and the
-  service name/icon underneath.
-- **Valyuta (operator 7) is pulled out into its own separate, full-width
-  featured box above the regular grid** (gold border) — it is intentionally
-  not part of the equal-size grid with the other six operators. An earlier
-  attempt to merge it into one equal-size 7-box grid was explicitly reverted
-  by the branch owner; don't redo that merge without asking.
-- Voice/TTS announcement controls exist in the header (`#voiceSelect`,
-  `#voiceTest` in `public/tv.html`) but are deliberately `hidden` — the
-  feature works (see `Navbat.speak`/`Navbat.hasTTS` in `public/common.js`)
-  but no acceptable Uzbek voice has been found yet on the deployed hardware.
-  Don't remove the code, and don't un-hide it without being asked.
+- Light, clean page (pale teal wash, white cards, navy text, green accents).
+  `public/tv.html`, `tv.js` and `tv.css` are self-contained; the old
+  `body.tv` rules in `style.css` are no longer used by this page.
+- **Every operator has its own big "now serving" card** (`.card` in
+  `public/tv.js`): a teal/green card with the ticket code, an arrow pill with
+  the operator name, and the service name; a free operator is a grey "Bo'sh"
+  card. The most recently called card gets an outline and a short pulse.
+- **Valyuta (operator 7) is its own wide gold card above the grid** — keep it
+  separate from the equal-size grid; don't merge it without asking.
+- A "Keyingilar" strip along the bottom lists the waiting tickets. The header
+  is deliberately just the brand, live dot, sound buttons and clock — the
+  owner asked for the queue-summary boxes that used to sit in the middle to be
+  removed; don't re-add them.
+- Voice/TTS announcement controls (`#voiceSelect`, `#voiceTest` in
+  `public/tv.html`) exist but are deliberately `hidden` — the feature works
+  (see `Navbat.speak`/`Navbat.hasTTS` in `public/common.js`) but no acceptable
+  Uzbek voice has been found yet on the deployed hardware. Don't remove the
+  code, and don't un-hide it without being asked.
 
 If you change this page's design, take a real screenshot before and after
-(see the run skill above) rather than reasoning about CSS in the abstract —
-this page in particular has a long history of changes that looked fine in
-theory and clipped/overflowed in the actual rendered browser.
+(see the run skill above) rather than reasoning about CSS in the abstract.
+Older designs are in git history.
 
 ## Gotchas worth knowing up front
 
