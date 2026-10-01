@@ -38,6 +38,11 @@ requires a user gesture before playing audio). Launch the TV with
 opens it with `--autoplay-policy=no-user-gesture-required` — without that
 flag the on-screen "Signal: yoniq" toggle looks on but nothing plays.
 
+**Receipt printer:** the kiosk PC runs a separate local service that prints the
+ticket — see [`print-service/README.md`](print-service/README.md). It is not
+updated by deploys; after changing anything in `print-service/` it must be
+copied to the kiosk PC and restarted.
+
 Options:
 
 ```bash
