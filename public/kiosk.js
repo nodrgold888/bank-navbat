@@ -72,7 +72,7 @@
     badge.id = 'kioskModeBadge';
     badge.textContent = IS_SHARED_KIOSK ? 'KIOSK REJIMI' : 'ODDIY REJIM (shaxsiy telefon)';
     badge.className = IS_SHARED_KIOSK ? 'kiosk-badge on' : 'kiosk-badge off';
-    document.body.appendChild(badge);
+    (document.querySelector('.k-wrap') || document.body).appendChild(badge);
   })();
 
   function clearAutoReturn() {
