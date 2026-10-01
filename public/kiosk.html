@@ -32,37 +32,35 @@
       <!-- 2-ekran: chipta -->
       <section id="screen-ticket" hidden>
         <div class="ticket" id="ticketCard">
-          <div class="t-bank">
-            <img class="t-bank-logo" src="/img/receipt-logo.png" alt="Davr Bank" />
-            <div><b>“DAVR BANK” XATB</b><span>Uchtepa filiali — Xush kelibsiz!</span></div>
-          </div>
-          <div class="t-svc" id="tSvc"><span id="tSvcIcon">•</span> <span id="tSvcName">—</span></div>
-          <div class="t-svc-sub" id="tSvcSub"></div>
+          <img class="rc-logo" src="/img/receipt-logo.png" alt="Davr Bank" />
+          <div class="rc-bank">“DAVR BANK” XATB | Uchtepa filiali</div>
+          <div class="rc-welcome">Xush kelibsiz!</div>
+          <hr class="rc-line" />
 
-          <div class="t-lbl">Sizning raqamingiz</div>
+          <div class="t-lbl">Navbat raqamingiz</div>
           <div class="t-code tabnum" id="tCode">—</div>
 
-          <div id="tCalled" class="t-called" hidden></div>
+          <div class="rc-svc-label">Tanlangan xizmat</div>
+          <div class="t-svc" id="tSvc"><span id="tSvcIcon">•</span> <span id="tSvcName">—</span></div>
+          <div class="t-svc-sub" id="tSvcSub" hidden></div>
+          <hr class="rc-line" />
 
-          <div id="tActive">
-            <div class="t-rows">
-              <div class="box">
-                <div class="v tabnum" id="tPos">1</div>
-                <div class="k">Navbatdagi oʻrningiz</div>
+          <div class="rc-data">
+            <div><span id="tDate">—</span> | <span id="tDay">—</span> | <span id="tTime">—</span></div>
+            <div id="tCalled" class="t-called" hidden></div>
+            <div id="tActive">
+              <div class="rc-queue">
+                Navbatdagi oʻrningiz: <span id="tPos">1</span><br />
+                Sizdan oldingilar: <span id="tAhead">0</span>
               </div>
-              <div class="box">
-                <div class="v tabnum" id="tAhead">0</div>
-                <div class="k">Sizdan oldingilar</div>
-              </div>
+              <div class="rc-eta">Taxminiy kutish: <span id="tEta">—</span></div>
             </div>
-            <div class="t-people" id="tPeople">Bu xizmatda navbatda kutayotganlar: 0</div>
           </div>
+          <hr class="rc-line" />
 
-          <div class="t-timing">
-            <div><span>Sana</span><b id="tDate">—</b></div>
-            <div><span>Kun</span><b id="tDay">—</b></div>
-            <div><span>Vaqt</span><b id="tTime">—</b></div>
-          </div>
+          <div class="rc-address">Toshkent sh., Uchtepa tumani<br />Ko'kcha Darvoza, 489B</div>
+          <div class="rc-phone">Yagona axborot xizmati: 1284</div>
+          <div class="rc-thanks">KUTGANINGIZ UCHUN RAHMAT!</div>
 
           <div class="t-hint">Ushbu sahifani yopmang — raqamingiz shu yerda yangilanib turadi.</div>
           <button class="btn-block ghost" id="btnReprint" hidden>Chekni qayta chop etish</button>

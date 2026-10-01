@@ -290,6 +290,8 @@
         serviceSubtitle: t.serviceSubtitle,
         serviceIcon: t.serviceIcon,
         serviceColor: t.serviceColor,
+        etaMin: t.etaMin,
+        issuedAt: new Date(),
       };
       showTicket(t.position, t.peopleAhead, null);
       // Return to the select screen right away so the next customer isn't
@@ -326,7 +328,7 @@
     $('tSvcName').textContent = myTicket.serviceName || '';
     $('tSvcSub').textContent = myTicket.serviceSubtitle || '';
     $('tCode').textContent = myTicket.code;
-    var now = new Date();
+    var now = myTicket.issuedAt || new Date();
     var weekdays = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
     var pad = function (n) { return String(n).padStart(2, '0'); };
     $('tDate').textContent = pad(now.getDate()) + '.' + pad(now.getMonth() + 1) + '.' + now.getFullYear();
@@ -345,8 +347,8 @@
       $('tPos').textContent = position + '-oʻrin';
       $('tAhead').textContent = peopleAhead;
       var svc = svcOf(lastView, myTicket.serviceId);
-      $('tPeople').textContent =
-        'Bu xizmatda navbatda kutayotganlar: ' + (svc ? svc.waiting : peopleAhead + 1);
+      var eta = svc && svc.etaMin != null ? svc.etaMin : myTicket.etaMin;
+      $('tEta').textContent = eta != null ? '~' + eta + ' daqiqa' : '—';
     }
   }
 

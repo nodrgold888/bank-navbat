@@ -68,32 +68,41 @@ body.kiosk {
 .kiosk .page-credit { color: rgba(255, 255, 255, 0.72); }
 .kiosk .page-credit b { color: #fff; }
 
-/* G: complete customer ticket, adapted for both the kiosk screen and printout. */
-.kiosk .ticket {
-  max-width: 680px;
+/* Compact receipt ticket — mirrors the printed receipt (see print-service/server.js).
+   Everything is sized in em off .ticket's font-size, so the shared kiosk just scales it up. */
+body.kiosk .ticket {
+  --c: #0b7059;
+  width: 100%;
+  max-width: 36em;
   margin: 12px auto 0;
-  padding: clamp(26px, 4vw, 42px);
+  padding: 1.7em 1.8em;
+  font-size: clamp(13px, 3.4vw, 16px);
   background: #fff;
-  border: 1px solid #d8e7e5;
-  border-radius: 20px;
-  box-shadow: 0 24px 44px -30px #073d4a;
+  border: 0;
+  border-radius: 0;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.28);
+  color: #101820;
+  text-align: center;
 }
-.kiosk .t-bank { display: flex; align-items: center; justify-content: center; gap: 12px; padding-bottom: 17px; border-bottom: 1px dashed #9eb7b8; color: #123c59; }
-.kiosk .t-bank-logo { width: 50px; height: 50px; padding: 5px; object-fit: contain; border: 1px solid #d9e6e5; border-radius: 12px; background: #fff; }
-.kiosk .t-bank b { display: block; font-size: clamp(.9rem, 1.3vw, 1.05rem); }
-.kiosk .t-bank span { display: block; margin-top: 3px; color: #607984; font-size: clamp(.68rem, 1vw, .8rem); }
-.kiosk .ticket .t-svc { display: block; margin-top: 20px; padding: 13px 16px; border-radius: 14px; color: #123c59; font-size: clamp(1.05rem, 1.8vw, 1.35rem); }
-.kiosk .ticket .t-svc-sub { margin: 9px 8px 0; color: #607984; font-size: clamp(.75rem, 1.1vw, .9rem); line-height: 1.45; }
-.kiosk .ticket .t-lbl { margin-top: 24px; font-size: clamp(.8rem, 1.2vw, .95rem); letter-spacing: .1em; text-transform: uppercase; }
-.kiosk .ticket .t-code { color: #0c6d59; font-size: clamp(5rem, 10vw, 7.8rem); }
-.kiosk .t-timing { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 20px; padding-top: 17px; border-top: 1px dashed #9eb7b8; }
-.kiosk .t-timing div { color: #6d8490; font-size: clamp(.62rem, .9vw, .72rem); }
-.kiosk .t-timing b { display: block; margin-top: 4px; color: #173d56; font-size: clamp(.76rem, 1.15vw, .92rem); }
-body.shared-kiosk .ticket { max-width: 800px; }
-body.shared-kiosk .ticket .t-svc { font-size: 1.5rem; }
-body.shared-kiosk .t-timing { gap: 14px; margin-top: 26px; padding-top: 20px; }
-body.shared-kiosk .t-timing div { font-size: .92rem; }
-body.shared-kiosk .t-timing b { font-size: 1.1rem; }
+.kiosk .rc-logo { display: block; width: 4.4em; height: 4em; margin: 0 auto 0.5em; object-fit: contain; }
+.kiosk .rc-bank { font-size: 1.3em; font-weight: 800; }
+.kiosk .rc-welcome { margin: 0.3em 0 0.9em; color: #4d5960; font-size: 1em; }
+.kiosk .rc-line { border: 0; border-top: 1px dashed #9ba7a9; margin: 0.85em 0; }
+body.kiosk .ticket .t-lbl { margin: 0; color: #58676d; font-size: 0.95em; font-weight: 700; letter-spacing: 0; text-transform: uppercase; }
+body.kiosk .ticket .t-code { margin: 0.1em 0 0; color: #0b7059; font-size: 4.9em; font-weight: 900; letter-spacing: -0.06em; line-height: 1; }
+.kiosk .rc-svc-label { margin-top: 0.8em; color: #58676d; font-size: 0.95em; font-weight: 700; text-transform: uppercase; }
+body.kiosk .ticket .t-svc { display: block; margin: 0.25em 0 0; padding: 0; background: none; border-radius: 0; color: #101820; font-size: 1.3em; font-weight: 800; text-transform: uppercase; }
+.kiosk .rc-data { display: grid; gap: 0.4em; color: #2b3b41; font-size: 1em; }
+.kiosk .rc-queue { color: #123c59; font-size: 1.2em; font-weight: 800; line-height: 1.35; }
+.kiosk .rc-eta { margin-top: 0.4em; }
+body.kiosk .ticket .t-called { margin: 0.2em 0; padding: 0.7em; border-radius: 0; background: #e7f6ee; color: #0a7359; font-size: 1.2em; font-weight: 800; }
+.kiosk .rc-address { font-size: 1em; line-height: 1.45; }
+.kiosk .rc-phone { margin-top: 0.4em; font-size: 1em; font-weight: 700; }
+.kiosk .rc-thanks { margin-top: 0.9em; padding: 0.65em; background: #e7f6ee; color: #0a7359; font-size: 1em; font-weight: 800; }
+body.kiosk .ticket .t-hint { margin: 1.1em 0 0.9em; color: #6d8490; font-size: 0.9em; }
+body.kiosk .ticket .btn-block { padding: 0.9em; font-size: 1.05em; border-radius: 0.8em; }
+body.shared-kiosk .ticket { max-width: 36em; margin-top: 0; padding: 1.2em 1.6em; font-size: min(20px, 1.75vh); }
+body.shared-kiosk .ticket .btn-block { padding: 0.7em; }
 
 @media (min-width: 700px) {
   .kiosk .k-wrap { max-width: 1320px; }
