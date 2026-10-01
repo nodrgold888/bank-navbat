@@ -64,8 +64,10 @@ This view went through many redesign rounds in a single session (glass →
 neon/digital-signage → navy "reference photo" match → back to glass) before
 the branch owner settled on the current look:
 
-- Teal/blue glassmorphism theme (matches kiosk/staff/admin), not the
-  navy/neon variants that were tried and reverted.
+- Light & clean theme (white cards on a pale teal wash, navy text, green
+  accents; the just-called box is solid green) — the owner's latest choice,
+  applied as a re-colour block at the bottom of `public/tv.css`. The earlier
+  glass/dark and navy/neon variants were replaced; layout is unchanged.
 - Operators render in a plain 2-column grid (`public/tv.js` builds
   `#opGrid`), each box showing operator name, big ticket code, and the
   service name/icon underneath.
