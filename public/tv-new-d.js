@@ -96,6 +96,14 @@
           .join('')
       : '<div class="none">✓ Hozircha navbatda hech kim yo‘q</div>';
 
+    var waitN = (view.waitingList || []).length;
+    var maxEta = 0;
+    (view.services || []).forEach(function (s) {
+      if (s.waiting > 0 && s.etaMin > maxEta) maxEta = s.etaMin;
+    });
+    $('midWait').textContent = waitN;
+    $('midEta').textContent = waitN ? '~' + maxEta : '0';
+
     if (call) {
       if (initialised && call.seq !== lastSeq) {
         announce(call);

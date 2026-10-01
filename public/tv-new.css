@@ -76,3 +76,9 @@ body.tvn {
 .tvn-flash.go { animation: flash 0.9s ease-out; }
 @keyframes flash { 0% { opacity: 0; } 12% { opacity: 1; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .tvn-hero.pulse, .tvn-flash.go { animation: none; } }
+
+/* Live queue summary in the header's middle */
+.tvn-mid { display: flex; gap: 1.4vw; }
+.mid-stat { display: flex; align-items: baseline; gap: 0.6vw; padding: 0.8vh 1.4vw; background: #e7f6ee; border-radius: 1.4vh; color: #0b7059; }
+.mid-stat b { font-size: 4vh; font-weight: 900; font-variant-numeric: tabular-nums; }
+.mid-stat span { font-size: 1.8vh; font-weight: 700; }
