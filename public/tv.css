@@ -291,3 +291,24 @@ body.tvn::before { opacity: 0.16; filter: brightness(3) saturate(0); }
 .card.free .c-go { background: rgba(255, 255, 255, 0.2); }
 .card.vip.free { background: rgba(255, 244, 205, 0.28); border: 1px solid rgba(255, 255, 255, 0.5); color: #fff6d6; }
 .tvn-head, .tvn-next { box-shadow: 0 10px 28px -16px rgba(5, 40, 80, 0.7); }
+
+/* ==========================================================================
+   Ticket number fills the card; only the operator name stays next to it
+   (the "Chaqirilmoqda" label and the service name are hidden)
+   ========================================================================== */
+.c-label, .c-svc { display: none !important; }
+.card { padding: 0.2vh 0.6vw; }
+
+.card:not(.vip) .c-code { font-size: 19vh; line-height: 0.86; letter-spacing: -0.04em; }
+.card:not(.vip) .c-code { font-size: min(18.5vh, 10.4vw); }
+.card.free:not(.vip) .c-code { font-size: 9vh; }
+.card.free:not(.vip) .c-code { font-size: min(9vh, 6vw); }
+.card:not(.vip) .c-go { margin-top: 0.4vh; padding: 0.3vh 1.8vw; }
+.card:not(.vip) .c-go b { font-size: 3.4vh; }
+.card:not(.vip) .c-go span { font-size: 2.6vh; }
+
+.tvd-vwrap .card { height: 23.5vh; }
+.vip .c-code { font-size: 21vh; line-height: 0.88; }
+.vip .c-code { font-size: min(21vh, 15vw); }
+.vip.free .c-code { font-size: 9vh; }
+.vip .c-go { grid-row: 1 / span 2; align-self: center; }
