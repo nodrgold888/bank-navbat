@@ -176,3 +176,50 @@ body.tvn {
     radial-gradient(700px 520px at 0% 100%, rgba(14, 110, 181, 0.45), transparent 62%),
     linear-gradient(135deg, #a9d0ef 0%, #bfe0e8 50%, #b3e0c0 100%);
 }
+
+/* ==========================================================================
+   Dark Davr Bank green page + the biggest possible ticket numbers (TV only)
+   ========================================================================== */
+body.tvn {
+  background:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.035) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.035) 75%) 0 0 / 7vh 7vh,
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.035) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.035) 75%) 0 0 / 7vh 7vh,
+    radial-gradient(900px 650px at 0% 0%, rgba(14, 110, 181, 0.30), transparent 62%),
+    radial-gradient(900px 650px at 100% 100%, rgba(47, 158, 74, 0.38), transparent 62%),
+    linear-gradient(135deg, #04241a 0%, #073a29 50%, #0a4a31 100%);
+}
+.tvn-wrap { gap: 1.2vh; padding: 1.4vh 1.2vw; }
+.tvn-head { padding: 0.8vh 1.4vw; }
+.tvn-brand img { width: 5.6vh; height: 5.6vh; }
+.tvn-brand b { font-size: 3vh; }
+.tvn-brand span { font-size: 1.7vh; }
+.tvn-time .clock { font-size: 3.6vh; }
+.tvn-time .date { font-size: 1.7vh; }
+.tvn-next { padding-top: 1vh; padding-bottom: 1vh; }
+.tvd-main { gap: 1.2vh; }
+.tvd-grid { gap: 1.2vh 0.9vw; }
+
+/* Cards: the ticket number takes almost the whole card; label/pill/service shrink to one thin line each */
+.card { padding: 0.4vh 0.8vw; }
+.c-label { font-size: clamp(9px, 4.6cqh, 1.6vh); }
+.c-code { font-size: min(64cqh, 34cqw); line-height: 0.88; letter-spacing: -0.04em; }
+.c-go { padding: 0.2vh 1.4vw; }
+.c-go span { font-size: min(8cqh, 2vh); }
+.c-go b { font-size: min(10.5cqh, 2.8vh); }
+.c-svc { font-size: min(7cqh, 1.9vh); margin-top: 0; }
+.card.free { background: rgba(255, 255, 255, 0.09); border: 0.2vh dashed rgba(255, 255, 255, 0.28); box-shadow: none; }
+.card.free .c-code { font-size: min(34cqh, 18cqw); opacity: 0.45; }
+.card.free .c-go { background: rgba(255, 255, 255, 0.10); }
+
+/* Valyuta: taller card, huge number */
+.tvd-vwrap .card { height: 21vh; }
+.vip .c-code { font-size: min(19vh, 14vw); line-height: 0.9; }
+.vip.free .c-code { font-size: 10vh; }
+.vip .c-label { font-size: 1.8vh; }
+.vip .c-go span { font-size: 2.6vh; }
+.vip .c-go b { font-size: 3.6vh; }
+.vip .c-svc { font-size: 2.1vh; }
+.card.vip.free { background: rgba(240, 185, 11, 0.16); border: 0.2vh dashed rgba(240, 185, 11, 0.5); color: #f3d36b; }
+.card { container-type: size; }
+.tvd-vwrap .card { height: 22.5vh; }
+.vip .c-code { font-size: min(20.5vh, 15vw); }
