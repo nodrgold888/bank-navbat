@@ -1086,6 +1086,20 @@ async function ttsHandler(res, url) {
     res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' });
     res.end(text);
   };
+  // GET /api/tts with no parameters reports the setup (booleans only, never the key) so a
+  // missing/misnamed environment variable can be spotted without server logs.
+  if (!url.searchParams.has('code') && !url.searchParams.has('op')) {
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+    return res.end(
+      JSON.stringify({
+        enabled: TTS_ENABLED,
+        hasKey: Boolean(AZURE_SPEECH_KEY),
+        hasRegion: Boolean(AZURE_SPEECH_REGION),
+        hasEndpointOverride: Boolean(process.env.AZURE_SPEECH_ENDPOINT),
+        voice: AZURE_SPEECH_VOICE,
+      })
+    );
+  }
   if (!TTS_ENABLED) return send(503, 'TTS sozlanmagan');
   const code = url.searchParams.get('code') || '';
   const op = url.searchParams.get('op') || '';
