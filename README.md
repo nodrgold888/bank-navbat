@@ -44,7 +44,9 @@ variables on Render (never commit them): `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGIO
 (e.g. `westeurope`), optionally `AZURE_SPEECH_VOICE` (`uz-UZ-SardorNeural` is the male
 voice). The TV asks `GET /api/tts?code=B001&op=6-operator`; the server builds the
 announcement itself (no free text), caches the audio and rate-limits new synthesis.
-Without the key (or if Azure fails) the TV falls back to the browser voice. Browsers need
+Alternatively set `KOTIB_API_KEY` (KotibAI, billed per character; optional `KOTIB_VOICE`,
+default `Aziza`) — when present it is used instead of Azure. `GET /api/tts` reports which
+provider is active. Without a key (or if the provider fails) the TV falls back to the browser voice. Browsers need
 one interaction (press "Signal" or "Sinash" once) before audio can play, unless Chrome
 is started with `--autoplay-policy=no-user-gesture-required` (`tv-autostart.bat` does).
 

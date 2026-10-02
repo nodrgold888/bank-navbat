@@ -1033,7 +1033,16 @@ const AZURE_SPEECH_VOICE = process.env.AZURE_SPEECH_VOICE || 'uz-UZ-MadinaNeural
 const AZURE_SPEECH_ENDPOINT =
   process.env.AZURE_SPEECH_ENDPOINT ||
   (AZURE_SPEECH_REGION ? `https://${AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1` : '');
-const TTS_ENABLED = Boolean(AZURE_SPEECH_KEY && AZURE_SPEECH_ENDPOINT);
+// KotibAI (Uzbek voices Aziza/Nargiza/Soliha/Sherzod/Aziz) is used instead of Azure when its
+// key is set. It bills per character, so results are cached per ticket+operator.
+//   KOTIB_API_KEY  (required to enable)   KOTIB_VOICE (default Aziza)   KOTIB_API_URL (override)
+const KOTIB_API_KEY = process.env.KOTIB_API_KEY || '';
+const KOTIB_VOICE = process.env.KOTIB_VOICE || 'Aziza';
+const KOTIB_API_URL = process.env.KOTIB_API_URL || 'https://developer.kotib.ai/api/v1/tts';
+const AZURE_ENABLED = Boolean(AZURE_SPEECH_KEY && AZURE_SPEECH_ENDPOINT);
+const TTS_PROVIDER = KOTIB_API_KEY ? 'kotib' : AZURE_ENABLED ? 'azure' : '';
+const TTS_ENABLED = Boolean(TTS_PROVIDER);
+const TTS_VOICE = TTS_PROVIDER === 'kotib' ? KOTIB_VOICE : AZURE_SPEECH_VOICE;
 
 const TTS_CACHE_MAX = 400;
 const TTS_RATE_PER_MIN = 90;
@@ -1057,6 +1066,40 @@ function buildAnnouncement(code, op, recall) {
     `<speak version='1.0' xml:lang='uz-UZ'>` +
     `<voice xml:lang='uz-UZ' name='${AZURE_SPEECH_VOICE}'>${body}</voice></speak>`
   );
+}
+
+const UZ_DIGITS = ['nol', 'bir', 'ikki', 'uch', "to'rt", 'besh', 'olti', 'yetti', 'sakkiz', "to'qqiz"];
+const UZ_LETTERS = {
+  A: 'a', B: 'be', C: 'se', D: 'de', E: 'e', F: 'ef', G: 'ge', H: 'ha', I: 'i', J: 'je', K: 'ka', L: 'el', M: 'em',
+  N: 'en', O: 'o', P: 'pe', Q: 'qa', R: 'er', S: 'es', T: 'te', U: 'u', V: 've', W: 'dublve', X: 'xa', Y: 'ye', Z: 'zet',
+};
+
+// KotibAI takes plain text, so the code is spelled out ("B001" -> "be nol nol bir").
+function buildPlainAnnouncement(code, op, recall) {
+  const spelled = [...code].map((c) => (/\d/.test(c) ? UZ_DIGITS[Number(c)] : UZ_LETTERS[c] || c)).join(' ');
+  const opSpoken = op.replace(/\d/g, (d) => UZ_DIGITS[Number(d)]);
+  return `${recall ? 'Qayta chaqiruv. ' : ''}${spelled} raqamli mijoz, ${opSpoken}ga murojaat qiling.`;
+}
+
+async function synthesizeKotib(text) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 12000);
+  try {
+    const r = await fetch(KOTIB_API_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${KOTIB_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, lang: 'uz', voice: KOTIB_VOICE, blocking: true }),
+      signal: controller.signal,
+    });
+    if (!r.ok) throw new Error(`Kotib TTS ${r.status}`);
+    const data = await r.json();
+    if (!data || !data.audio_url) throw new Error('Kotib TTS: audio_url yoq');
+    const a = await fetch(data.audio_url, { signal: controller.signal });
+    if (!a.ok) throw new Error(`Kotib audio ${a.status}`);
+    return Buffer.from(await a.arrayBuffer());
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function synthesize(ssml) {
@@ -1093,10 +1136,12 @@ async function ttsHandler(res, url) {
     return res.end(
       JSON.stringify({
         enabled: TTS_ENABLED,
+        provider: TTS_PROVIDER || null,
+        hasKotibKey: Boolean(KOTIB_API_KEY),
         hasKey: Boolean(AZURE_SPEECH_KEY),
         hasRegion: Boolean(AZURE_SPEECH_REGION),
         hasEndpointOverride: Boolean(process.env.AZURE_SPEECH_ENDPOINT),
-        voice: AZURE_SPEECH_VOICE,
+        voice: TTS_VOICE,
       })
     );
   }
@@ -1106,7 +1151,7 @@ async function ttsHandler(res, url) {
   const recall = url.searchParams.get('recall') === '1';
   if (!/^[A-Z]\d{3,4}$/.test(code) || !/^[0-9A-Za-zʻʼ'’ -]{1,30}$/.test(op)) return send(400, 'Notoʻgʻri parametr');
 
-  const key = `${AZURE_SPEECH_VOICE}|${recall ? 1 : 0}|${code}|${op}`;
+  const key = `${TTS_PROVIDER}|${TTS_VOICE}|${recall ? 1 : 0}|${code}|${op}`;
   let audio = ttsCache.get(key);
   if (!audio) {
     let job = ttsInflight.get(key);
@@ -1117,7 +1162,11 @@ async function ttsHandler(res, url) {
         ttsWindowCount = 0;
       }
       if (++ttsWindowCount > TTS_RATE_PER_MIN) return send(429, 'Juda koʻp soʻrov');
-      job = synthesize(buildAnnouncement(code, op, recall)).finally(() => ttsInflight.delete(key));
+      job = (
+        TTS_PROVIDER === 'kotib'
+          ? synthesizeKotib(buildPlainAnnouncement(code, op, recall))
+          : synthesize(buildAnnouncement(code, op, recall))
+      ).finally(() => ttsInflight.delete(key));
       ttsInflight.set(key, job);
     }
     try {
