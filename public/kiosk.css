@@ -152,13 +152,15 @@ body.shared-kiosk .k-sub { margin-bottom: 20px; }
 body.shared-kiosk .svc-card { min-height: 140px; padding-top: 14px; padding-bottom: 14px; }
 body.shared-kiosk .k-wrap { padding-top: 24px; }
 
-/* Bigger text and cards on the shared terminal (descriptions capped at 2 lines so all 7 services still fit one screen) */
+/* Bigger text and cards on the shared terminal. The full description is always shown
+   (no truncation): the "Navbat ..." pill floats in the card's top-right corner so the text
+   gets the whole card width, which keeps every service on one screen. */
 body.shared-kiosk .k-brand { font-size: 2.2rem; }
 body.shared-kiosk .k-clock { font-size: 2rem; }
-body.shared-kiosk .k-title { font-size: 4.6rem; }
-body.shared-kiosk .k-sub { font-size: 1.7rem; margin-bottom: 20px; }
-body.shared-kiosk .svc-card { min-height: 146px; grid-template-columns: 88px minmax(0, 1fr) auto; gap: 22px; }
-body.shared-kiosk .svc-card .svc-ic { width: 88px; height: 88px; font-size: 2.7rem; border-radius: 22px; }
-body.shared-kiosk .svc-card .svc-title { font-size: 2.3rem; }
-body.shared-kiosk .svc-card .svc-sub { font-size: 1.22rem; line-height: 1.35; margin-top: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-body.shared-kiosk .svc-card .svc-meta { font-size: 1.2rem; padding: 10px 16px; }
+body.shared-kiosk .k-title { font-size: 4.4rem; }
+body.shared-kiosk .k-sub { font-size: 1.6rem; margin-bottom: 18px; }
+body.shared-kiosk .svc-card { position: relative; min-height: 130px; grid-template-columns: 84px minmax(0, 1fr); gap: 22px; padding: 18px 22px; align-items: start; }
+body.shared-kiosk .svc-card .svc-ic { width: 84px; height: 84px; font-size: 2.6rem; border-radius: 20px; align-self: center; }
+body.shared-kiosk .svc-card .svc-title { font-size: 2.1rem; padding-right: 190px; }
+body.shared-kiosk .svc-card .svc-sub { font-size: 1.28rem; line-height: 1.36; margin-top: 6px; color: #36566f; }
+body.shared-kiosk .svc-card .svc-meta { position: absolute; top: 16px; right: 18px; font-size: 1.1rem; padding: 8px 14px; }
