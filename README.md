@@ -192,8 +192,15 @@ defaults to serving every service type and starts online.
 
 - **Admin dashboard** (`/admin`) — tickets issued/served today, no-shows, average
   wait & handling time per service type, busiest service type. Labels in Uzbek.
-- **Notification sound** on the TV when a number is called — plays
-  `public/audio/notify.mp3` (played twice for a recall), falling back to a
-  synthesised bell if the file can't load. On-screen **Signal: yoniq / oʻchiq**
-  toggle and a test button. Swap the sound by replacing `notify.mp3`.
+- **Recorded Uzbek calls** on the TV: `public/tv-voice.js` joins clips in
+  `public/audio/voice/` to say the ticket prefix, every digit (including zeros),
+  customer phrase, operator number and instruction. Calls play sequentially;
+  recalls begin with “Qayta chaqiruv”. The server retains 100 recent calls for
+  polling clients. Reloading the TV does not replay old calls. “Sinash” plays D042
+  for operator 2; the signal toggle stops playback and clears pending audio.
+  The clips come from the supplied recordings; `sources.json` records cut points.
+  F was absent, so that letter currently uses browser speech synthesis.
+  Add `F.wav` with the matching speaker's “Ef” recording to remove this dependency.
+  Station 7 uses recorded “yetti” + “operatorga”. Audio playback needs a click on
+  the TV or the autoplay-enabled launcher, as described above.
 - **Pause/resume an operator** ("Operator dam olishda").

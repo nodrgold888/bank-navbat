@@ -8,6 +8,8 @@
   var soundOn = localStorage.getItem('tvSound') !== 'off';
   var lastSeq = null;
   var initialised = false;
+  TVVoice.setEnabled(soundOn);
+  TVVoice.onError(voiceToast);
 
   function updateSoundBtn() {
     $('soundToggle').textContent = soundOn ? '🔊 Signal' : '🔇 Signal';
@@ -17,14 +19,17 @@
     soundOn = !soundOn;
     localStorage.setItem('tvSound', soundOn ? 'on' : 'off');
     updateSoundBtn();
-    if (soundOn) Navbat.chime();
+    TVVoice.setEnabled(soundOn);
+    if (soundOn) TVVoice.unlock();
   });
 
   $('soundTest').addEventListener('click', function () {
-    Navbat.chime('call');
-    setTimeout(function () {
-      speakCall({ code: 'B001', operatorName: '6-operator', recall: false });
-    }, 900);
+    soundOn = true;
+    localStorage.setItem('tvSound', 'on');
+    updateSoundBtn();
+    TVVoice.setEnabled(true);
+    TVVoice.unlock();
+    TVVoice.enqueue({ code: 'D042', operatorId: 2 });
   });
 
   // Voice setup: nothing is bundled or auto-picked (voice quality varies by
@@ -153,12 +158,11 @@
   });
 
   function announce(call) {
-    if (soundOn) Navbat.chime(call.recall ? 'recall' : 'call');
+    if (soundOn) TVVoice.enqueue(call);
     var f = $('flash');
     f.classList.remove('go');
     void f.offsetWidth;
     f.classList.add('go');
-    if (soundOn) speakCall(call);
   }
 
   function cardHtml(b, latest) {
@@ -243,12 +247,16 @@
 
     if (call) {
       if (initialised && call.seq !== lastSeq) {
-        announce(call);
+        var calls = (view.recentCalls || []).filter(function (item) {
+          return item.seq > (lastSeq || 0);
+        });
+        if (!calls.length) calls = [call];
+        calls.forEach(announce);
         var el = document.querySelector('.card[data-op="' + call.operatorId + '"]');
         if (el) el.classList.add('pulse');
       }
       lastSeq = call.seq;
-    }
+    } else lastSeq = null;
     initialised = true;
   }
 

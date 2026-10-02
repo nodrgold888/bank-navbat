@@ -175,6 +175,8 @@ function freshState() {
 }
 
 let state = freshState();
+// Retain recent calls so a polling TV does not miss simultaneous operators.
+let recentCalls = [];
 
 // ---------------------------------------------------------------------------
 // Persistence (survives restart during the day; resets at midnight)
@@ -684,6 +686,7 @@ function buildView() {
     skipped: skippedList,
     operators,
     lastCall,
+    recentCalls,
     stats: {
       issued: state.tickets.length,
       served: state.tickets.filter((t) => t.status === 'served').length,
@@ -765,6 +768,11 @@ function broadcast() {
 
 /** Called after every mutation. */
 function commit() {
+  if (!state.lastCall) recentCalls = [];
+  else if (!recentCalls.length || recentCalls[recentCalls.length - 1].ts !== state.lastCall.ts || recentCalls[recentCalls.length - 1].seq !== state.lastCall.seq) {
+    recentCalls.push({ ...state.lastCall });
+    recentCalls = recentCalls.slice(-100);
+  }
   invalidateView();
   broadcast();
   persist();

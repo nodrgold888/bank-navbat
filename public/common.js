@@ -281,7 +281,7 @@ window.Navbat = (function () {
     return notifyEl;
   }
 
-  function playFile(volume) {
+  function playFile(volume, onEnded) {
     // A fresh clone per call, instead of reusing/resetting one shared
     // element: two chimes fired close together (e.g. two calls landing
     // within the same second, or the recall's own double-beep) used to
@@ -290,6 +290,9 @@ window.Navbat = (function () {
     try {
       const a = notifyAudio().cloneNode(true);
       a.volume = volume;
+      if (typeof onEnded === 'function') {
+        a.addEventListener('ended', onEnded, { once: true });
+      }
       const p = a.play();
       if (p && typeof p.catch === 'function') p.catch(function () {});
       return p;
@@ -383,30 +386,33 @@ window.Navbat = (function () {
    * Play a notification sound.
    * @param {'call'|'recall'|'ticket'} [kind]  defaults to 'call'
    */
-  function chime(kind) {
+  function chime(kind, onComplete) {
     try {
       const vol = kind === 'ticket' ? 0.5 : 1;
-      const p = playFile(vol);
+      const done = typeof onComplete === 'function' ? onComplete : function () {};
+      // The bundled file may be a full spoken call rather than a short bell.
+      // On recall, wait until the first playback finishes before repeating it
+      // so two voice clips never overlap each other.
+      const afterFirst =
+        kind === 'recall'
+          ? function () {
+              const second = playFile(1, done);
+              if (!second) done();
+            }
+          : done;
+      const p = playFile(vol, afterFirst);
       if (p && typeof p.then === 'function') {
         p.then(null, function () {
           synthBell(kind);
+          setTimeout(done, kind === 'recall' ? 1500 : 1000);
         });
-      }
-      // recall: play it twice so it clearly differs from a first call
-      if (kind === 'recall') {
-        setTimeout(function () {
-          try {
-            const b = notifyAudio().cloneNode(true);
-            b.volume = 1;
-            const bp = b.play();
-            if (bp && bp.catch) bp.catch(function () {});
-          } catch (e) {
-            /* ignore */
-          }
-        }, 650);
+      } else {
+        synthBell(kind);
+        setTimeout(done, kind === 'recall' ? 1500 : 1000);
       }
     } catch (e) {
       synthBell(kind);
+      if (typeof onComplete === 'function') setTimeout(onComplete, 1000);
     }
   }
 
@@ -455,25 +461,33 @@ window.Navbat = (function () {
     }
   }
 
-  /**
-   * Speak text aloud using the operator-selected voice. No-ops quietly if
-   * speech synthesis isn't supported or no voice has been chosen yet — the
-   * chime alone still plays either way, so this is a pure enhancement.
-   */
+  /** Speak a dynamic ticket/operator announcement. */
   function speak(text) {
     if (!hasTTS || !text) return;
     const uri = getSelectedVoiceURI();
-    if (!uri) return; // nobody has picked a voice on this device yet
-    const voice = listVoices().find(function (v) {
-      return v.voiceURI === uri;
-    });
-    if (!voice) return; // previously-picked voice no longer available
+    const voices = listVoices();
+    // Honour an explicitly selected voice first. On an unattended TV there
+    // may be no saved selection, so automatically prefer Uzbek, then the
+    // browser's default voice, then any available voice. Leaving utter.voice
+    // unset still lets the browser resolve `uz-UZ` when its voices arrive late.
+    const voice =
+      voices.find(function (v) {
+        return uri && v.voiceURI === uri;
+      }) ||
+      voices.find(function (v) {
+        return /^uz(?:-|_)/i.test(v.lang);
+      }) ||
+      voices.find(function (v) {
+        return v.default;
+      }) ||
+      voices[0] ||
+      null;
     try {
       window.speechSynthesis.cancel(); // don't queue/overlap announcements
       const utter = new SpeechSynthesisUtterance(text);
-      utter.voice = voice;
-      utter.lang = voice.lang;
-      utter.rate = 0.95;
+      if (voice) utter.voice = voice;
+      utter.lang = voice ? voice.lang : 'uz-UZ';
+      utter.rate = 0.9;
       utter.pitch = 1;
       window.speechSynthesis.speak(utter);
     } catch (e) {
