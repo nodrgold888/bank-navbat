@@ -131,3 +131,23 @@ body.shared-kiosk .ticket .btn-block { padding: 0.7em; }
   .kiosk .svc-card { min-height: 118px; padding: 16px; }
   .kiosk .svc-card .svc-sub { font-size: 0.78rem; }
 }
+
+/* ==========================================================================
+   Typography polish (teal look kept): heavier Inter, larger sizes, tighter rhythm
+   ========================================================================== */
+.kiosk .k-brand { font-weight: 800; letter-spacing: -0.01em; font-size: clamp(1.25rem, 2.2vw, 1.9rem); }
+.kiosk .k-clock { font-weight: 800; font-size: clamp(1.1rem, 1.8vw, 1.7rem); letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+.kiosk .k-title { font-weight: 900; letter-spacing: -0.025em; line-height: 1.05; font-size: clamp(2.3rem, 4.6vw, 4.1rem); }
+.kiosk .k-sub { font-weight: 500; font-size: clamp(1.02rem, 1.6vw, 1.45rem); line-height: 1.4; color: rgba(255, 255, 255, 0.92); }
+
+.kiosk .svc-card .svc-title { font-weight: 800; letter-spacing: -0.015em; line-height: 1.15; font-size: clamp(1.2rem, 2vw, 1.8rem); color: #0c2540; }
+.kiosk .svc-card .svc-sub { font-weight: 500; line-height: 1.4; font-size: clamp(0.88rem, 1.3vw, 1.12rem); color: #46667e; }
+.kiosk .svc-card .svc-meta { font-weight: 800; font-size: clamp(0.8rem, 1.15vw, 1rem); padding: 8px 13px; letter-spacing: 0.01em; }
+
+/* Terminal: drop the big clipboard picture so all seven services fit without scrolling */
+body.shared-kiosk .k-illus { display: none; }
+body.shared-kiosk .k-head { padding-bottom: 12px; }
+body.shared-kiosk .k-title { margin-top: 4px; }
+body.shared-kiosk .k-sub { margin-bottom: 20px; }
+body.shared-kiosk .svc-card { min-height: 140px; padding-top: 14px; padding-bottom: 14px; }
+body.shared-kiosk .k-wrap { padding-top: 24px; }
