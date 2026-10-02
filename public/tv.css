@@ -78,7 +78,7 @@ body.tvn {
 .chip span { font-size: 1.9vh; font-weight: 600; color: #4d6671; max-width: 12vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .none { color: #4d6671; font-size: 2.6vh; font-weight: 600; }
 
-.tvn-flash { position: fixed; inset: 0; pointer-events: none; z-index: 50; opacity: 0; background: radial-gradient(circle at 35% 45%, rgba(23, 165, 108, 0.4), transparent 60%); }
+.tvn-flash { position: fixed; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none; z-index: 50; opacity: 0; background: radial-gradient(circle at 35% 45%, rgba(23, 165, 108, 0.4), transparent 60%); }
 .tvn-flash.go { animation: flash 0.9s ease-out; }
 @keyframes flash { 0% { opacity: 0; } 12% { opacity: 1; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .tvn-hero.pulse, .tvn-flash.go { animation: none; } }
@@ -203,6 +203,7 @@ body.tvn {
 .card { padding: 0.4vh 0.8vw; }
 .c-label { font-size: 1.5vh; }
 .c-label { font-size: clamp(9px, 4.6cqh, 1.6vh); }
+.c-code { font-size: 15vh; }
 .c-code { font-size: min(15.6vh, 10.4vw); line-height: 0.88; letter-spacing: -0.04em; }
 .c-code { font-size: min(64cqh, 34cqw); }
 .c-go { padding: 0.2vh 1.4vw; }
@@ -213,13 +214,15 @@ body.tvn {
 .c-svc { font-size: 1.9vh; margin-top: 0; }
 .c-svc { font-size: min(7cqh, 1.9vh); }
 .card.free { background: rgba(255, 255, 255, 0.09); border: 0.2vh dashed rgba(255, 255, 255, 0.28); box-shadow: none; }
+.card.free .c-code { font-size: 8.5vh; }
 .card.free .c-code { font-size: min(8.8vh, 6vw); opacity: 0.45; }
 .card.free .c-code { font-size: min(34cqh, 18cqw); }
 .card.free .c-go { background: rgba(255, 255, 255, 0.10); }
 
 /* Valyuta: taller card, huge number */
 .tvd-vwrap .card { height: 21vh; }
-.vip .c-code { font-size: min(19vh, 14vw); line-height: 0.9; }
+.vip .c-code { font-size: 19vh; line-height: 0.9; }
+.vip .c-code { font-size: min(19vh, 14vw); }
 .vip.free .c-code { font-size: 10vh; }
 .vip .c-label { font-size: 1.8vh; }
 .vip .c-go span { font-size: 2.6vh; }
@@ -228,11 +231,12 @@ body.tvn {
 .card.vip.free { background: rgba(240, 185, 11, 0.16); border: 0.2vh dashed rgba(240, 185, 11, 0.5); color: #f3d36b; }
 .card { container-type: size; }
 .tvd-vwrap .card { height: 22.5vh; }
+.vip .c-code { font-size: 20vh; }
 .vip .c-code { font-size: min(20.5vh, 15vw); }
 
 /* Davr Bank mark as a large watermark behind everything (shows through the empty cards and the gaps) */
 body.tvn::before {
-  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  content: ''; position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 0; pointer-events: none;
   background: url('/img/davr-mark.svg') center / auto 112vh no-repeat;
   opacity: 0.20;
 }

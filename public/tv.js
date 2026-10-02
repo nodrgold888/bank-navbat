@@ -175,6 +175,14 @@
     initialised = true;
   }
 
+  // /tv?debug=1 shows the screen size and browser at the bottom-left, for diagnosing odd TVs.
+  if (/[?&]debug=1/.test(location.search)) {
+    var dbg = document.createElement('div');
+    dbg.style.cssText = 'position:fixed;left:6px;bottom:6px;z-index:999;background:rgba(0,0,0,.75);color:#fff;font:12px monospace;padding:4px 8px;border-radius:4px;max-width:60vw';
+    dbg.textContent = window.innerWidth + 'x' + window.innerHeight + ' @' + window.devicePixelRatio + ' | ' + navigator.userAgent;
+    document.body.appendChild(dbg);
+  }
+
   Navbat.connect(render, function (online) {
     $('offline').classList.toggle('show', !online);
     $('liveDot').classList.toggle('off', !online);
