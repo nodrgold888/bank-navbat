@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 554 554" fill="none" stroke-width="30" stroke-linejoin="miter" stroke-linecap="butt">
+  <g stroke="#1f78e0">
+    <polyline points="112,214 36,275 112,338"/>
+    <polyline points="127,186 197,112 368,272 300,322"/>
+    <polyline points="127,372 197,442 262,376"/>
+  </g>
+  <g stroke="#22b24c">
+    <polyline points="297,182 365,112 432,182"/>
+    <polyline points="442,206 520,275 442,345"/>
+    <polyline points="258,222 188,274 360,442 425,372"/>
+  </g>
+</svg>
