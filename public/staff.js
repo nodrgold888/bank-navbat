@@ -357,9 +357,31 @@
     });
   }
 
+  // ---- Self-reload after a deploy ----
+  // The server stamps every state push with its asset version. When it changes
+  // (a new deploy), reload to pick up the new page — but never in the middle of
+  // an action. The chosen operator is kept in localStorage, so the panel comes back as it was.
+  var loadedAssetVersion = null;
+  function checkAssetVersion(view) {
+    if (!view || !view.assetVersion) return;
+    if (!loadedAssetVersion) {
+      loadedAssetVersion = view.assetVersion;
+      return;
+    }
+    if (view.assetVersion === loadedAssetVersion) return;
+    if (busy) {
+      setTimeout(function () {
+        checkAssetVersion(view);
+      }, 1500);
+      return;
+    }
+    location.reload();
+  }
+
   // ---- Render ----
   function render(view) {
     lastView = view;
+    checkAssetVersion(view);
     if (!opId) return;
     var me = myOp(view);
     if (!me) return;
