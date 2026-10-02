@@ -259,3 +259,25 @@ body.tvn::before { opacity: 0.34; background-size: auto 118vh; background-positi
 .card.free .c-code { opacity: 0.55; }
 .card.free .c-go { background: rgba(255, 255, 255, 0.6); }
 .card.vip.free { background: rgba(255, 244, 205, 0.6); border: 0.2vh solid rgba(255, 255, 255, 0.85); color: #8a6d12; }
+
+/* ==========================================================================
+   Final look (owner's pick): vivid Davr Bank blue->green page, white cards for
+   called operators, frosted glass for free ones
+   ========================================================================== */
+body.tvn { background: linear-gradient(135deg, #0e6eb5 0%, #1a8ca0 45%, #2f9e4a 100%); }
+body.tvn::before { opacity: 0.16; filter: brightness(3) saturate(0); }
+
+.card:not(.free):not(.vip) { background: linear-gradient(135deg, #ffffff, #eaf3fb); color: #0a4f86; box-shadow: 0 18px 38px -26px rgba(5, 40, 80, 0.8); }
+.card:not(.free):not(.vip) .c-code { color: #0a4f86; text-shadow: none; }
+.card:not(.free):not(.vip) .c-go { background: #dcebf7; color: #0a4f86; }
+.card:not(.free):not(.vip) .c-label, .card:not(.free):not(.vip) .c-svc { color: #3b6a8f; opacity: 1; }
+.card.latest:not(.vip) { box-shadow: 0 0 0 0.7vh #fff, 0 0 0 1.2vh rgba(255, 255, 255, 0.45); }
+
+.card.free {
+  background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.5); color: #fff;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: none;
+}
+.card.free .c-code { opacity: 0.6; }
+.card.free .c-go { background: rgba(255, 255, 255, 0.2); }
+.card.vip.free { background: rgba(255, 244, 205, 0.28); border: 1px solid rgba(255, 255, 255, 0.5); color: #fff6d6; }
+.tvn-head, .tvn-next { box-shadow: 0 10px 28px -16px rgba(5, 40, 80, 0.7); }
