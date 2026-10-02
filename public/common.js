@@ -156,42 +156,59 @@ window.Navbat = (function () {
   }
 
   /** JSON POST so'rov. */
-  const POST_TIMEOUT_MS = 10000;
+  const POST_TIMEOUT_MS = 8000;
+  const POST_ATTEMPTS = 2;
+
+  function newRequestId() {
+    return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+  }
+
   async function post(url, body) {
     // Every caller (kiosk ticket-taking, staff call/recall/skip/cancel,
     // admin cancel/reset) disables its buttons before this call and
     // re-enables them once it settles — without a timeout, a stalled
-    // connection (dead proxy, server hiccup) left those buttons disabled
-    // for however long the browser's own TCP timeout takes (potentially
-    // minutes), with no error shown. This was already fixed for the print
-    // request specifically; every other action shares the same helper, so
-    // it belongs here instead.
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), POST_TIMEOUT_MS);
-    let res;
-    try {
-      res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body || {}),
-        signal: controller.signal,
-      });
-    } catch (e) {
-      if (e.name === 'AbortError') throw new Error('Server javob bermadi');
-      throw e;
-    } finally {
-      clearTimeout(timer);
+    // connection left those buttons disabled for minutes, with no error shown.
+    //
+    // A timeout does NOT mean the server didn't act: the request may well have been
+    // processed with only the reply lost. So the same X-Request-Id is sent on every
+    // attempt and the server runs a given id only once (replaying the saved answer),
+    // which makes an automatic retry safe — and means a staff member never has to
+    // re-click "call next" (which would skip a customer) after a flaky moment.
+    const requestId = newRequestId();
+    let lastErr = null;
+    for (let attempt = 1; attempt <= POST_ATTEMPTS; attempt += 1) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), POST_TIMEOUT_MS);
+      let res;
+      try {
+        res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Request-Id': requestId },
+          body: JSON.stringify(body || {}),
+          signal: controller.signal,
+        });
+      } catch (e) {
+        lastErr = e.name === 'AbortError' ? new Error('Server javob bermadi') : e;
+        if (attempt < POST_ATTEMPTS) {
+          await new Promise((r) => setTimeout(r, 600));
+          continue;
+        }
+        throw lastErr;
+      } finally {
+        clearTimeout(timer);
+      }
+      let data = {};
+      try {
+        data = await res.json();
+      } catch (e) {
+        /* ignore */
+      }
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error || 'Soʻrovda xatolik');
+      }
+      return data;
     }
-    let data = {};
-    try {
-      data = await res.json();
-    } catch (e) {
-      /* ignore */
-    }
-    if (!res.ok || data.ok === false) {
-      throw new Error(data.error || 'Soʻrovda xatolik');
-    }
-    return data;
+    throw lastErr || new Error('Server javob bermadi');
   }
 
   const WEEKDAYS = [

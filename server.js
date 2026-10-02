@@ -1016,6 +1016,36 @@ const API_HANDLERS = {
   },
 };
 
+// ---------------------------------------------------------------------------
+// Idempotent POSTs
+// ---------------------------------------------------------------------------
+// A client that times out can't tell "never arrived" from "done, reply lost", so it
+// retries with the same X-Request-Id. Running a given id once and replaying the saved
+// answer keeps a retried "call next" from skipping a customer or a retried ticket
+// request from issuing two numbers. Failed attempts aren't remembered.
+const IDEMPOTENCY_TTL_MS = 2 * 60 * 1000;
+const IDEMPOTENCY_MAX = 2000;
+/** @type {Map<string, {at: number, promise: Promise<any>}>} */
+const idempotentRuns = new Map();
+
+function runOnce(key, fn) {
+  if (!key) return Promise.resolve().then(fn);
+  const hit = idempotentRuns.get(key);
+  if (hit) return hit.promise;
+  const promise = Promise.resolve().then(fn);
+  idempotentRuns.set(key, { at: Date.now(), promise });
+  promise.catch(() => idempotentRuns.delete(key));
+  while (idempotentRuns.size > IDEMPOTENCY_MAX) {
+    idempotentRuns.delete(idempotentRuns.keys().next().value);
+  }
+  return promise;
+}
+
+setInterval(() => {
+  const cutoff = Date.now() - IDEMPOTENCY_TTL_MS;
+  for (const [key, v] of idempotentRuns) if (v.at < cutoff) idempotentRuns.delete(key);
+}, 30 * 1000).unref();
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = url.pathname;
@@ -1042,7 +1072,9 @@ const server = http.createServer(async (req, res) => {
     const apiKey = `${req.method} ${pathname}`;
     if (API_HANDLERS[apiKey]) {
       const body = await readJsonBody(req);
-      return sendJson(res, 200, await API_HANDLERS[apiKey](body));
+      const requestId = String(req.headers['x-request-id'] || '').slice(0, 80);
+      const result = await runOnce(requestId && `${apiKey}|${requestId}`, () => API_HANDLERS[apiKey](body));
+      return sendJson(res, 200, result);
     }
 
     if (pathname.startsWith('/api/')) {
