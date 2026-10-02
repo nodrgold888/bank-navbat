@@ -240,3 +240,22 @@ body.tvn::before { opacity: 0.10; }
 .card.free .c-go { background: #e4ebf1; }
 .card.vip.free { background: #fff6dc; border: 0.2vh dashed #e3c25a; color: #8a6d12; }
 .tvn-head, .tvn-next { border: 1px solid #d6e4e8; box-shadow: 0 8px 22px -14px rgba(18, 60, 89, 0.45); }
+
+/* Softer, prettier light background: brand-tinted mesh + large logo mark; empty cards become frosted glass */
+body.tvn {
+  background:
+    radial-gradient(900px 700px at 8% 6%, rgba(14, 110, 181, 0.22), transparent 62%),
+    radial-gradient(1000px 760px at 96% 92%, rgba(47, 158, 74, 0.26), transparent 62%),
+    radial-gradient(700px 520px at 92% 8%, rgba(120, 190, 235, 0.22), transparent 62%),
+    radial-gradient(700px 520px at 6% 96%, rgba(150, 215, 170, 0.24), transparent 62%),
+    linear-gradient(160deg, #f1f8ff 0%, #eaf6f4 50%, #eaf8ee 100%);
+}
+body.tvn::before { opacity: 0.34; background-size: auto 118vh; background-position: 52% 50%; filter: blur(0.3px) saturate(1.05); }
+.card.free {
+  background: rgba(255, 255, 255, 0.42); border: 0.2vh solid rgba(255, 255, 255, 0.85); color: #3f6076;
+  backdrop-filter: blur(6px) saturate(1.2); -webkit-backdrop-filter: blur(6px) saturate(1.2);
+  box-shadow: 0 10px 28px -18px rgba(18, 60, 89, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.card.free .c-code { opacity: 0.55; }
+.card.free .c-go { background: rgba(255, 255, 255, 0.6); }
+.card.vip.free { background: rgba(255, 244, 205, 0.6); border: 0.2vh solid rgba(255, 255, 255, 0.85); color: #8a6d12; }
