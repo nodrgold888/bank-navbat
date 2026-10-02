@@ -1061,7 +1061,7 @@ function buildAnnouncement(code, op, recall) {
   // Letter and digits are read one by one ("B nol nol bir"), as customers see them on screen.
   const prefix = recall ? 'Qayta chaqiruv. ' : '';
   const spoken = `<say-as interpret-as="characters">${xmlEscape(code)}</say-as>`;
-  const body = `${prefix}${xmlEscape(op)}. ${spoken} raqamli mijoz, marhamat.`;
+  const body = `${prefix}${spoken} raqamli mijoz, ${xmlEscape(op)}ga murojaat qiling.`;
   return (
     `<speak version='1.0' xml:lang='uz-UZ'>` +
     `<voice xml:lang='uz-UZ' name='${AZURE_SPEECH_VOICE}'>${body}</voice></speak>`
@@ -1078,7 +1078,7 @@ const UZ_LETTERS = {
 function buildPlainAnnouncement(code, op, recall) {
   const spelled = [...code].map((c) => (/\d/.test(c) ? UZ_DIGITS[Number(c)] : UZ_LETTERS[c] || c)).join(' ');
   const opSpoken = op.replace(/\d/g, (d) => UZ_DIGITS[Number(d)]);
-  return `${recall ? 'Qayta chaqiruv. ' : ''}${opSpoken}. ${spelled} raqamli mijoz, marhamat.`;
+  return `${recall ? 'Qayta chaqiruv. ' : ''}${spelled} raqamli mijoz, ${opSpoken}ga murojaat qiling.`;
 }
 
 async function synthesizeKotib(text) {
