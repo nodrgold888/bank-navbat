@@ -110,6 +110,7 @@
 
   // Keyingilar: a ticker that glides sideways when the tickets don't fit; static otherwise.
   var lastNextSig = null;
+  var loadedAssetVersion = null;
   function chipHtml(w) {
     return (
       '<div class="chip" style="--c:' + esc(w.serviceColor || '#789') + '"><b>' +
@@ -133,6 +134,15 @@
   }
 
   function render(view) {
+    // Unattended TV: when the server is redeployed (new asset version), reload to pick up the new page.
+    if (view.assetVersion) {
+      if (!loadedAssetVersion) loadedAssetVersion = view.assetVersion;
+      else if (view.assetVersion !== loadedAssetVersion) {
+        location.reload();
+        return;
+      }
+    }
+
     var call = view.lastCall;
     var online = view.board.filter(function (b) {
       return b.online;

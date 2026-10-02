@@ -674,6 +674,7 @@ function buildView() {
     .sort((a, b) => b.issued - a.issued)[0] || null;
 
   return {
+    assetVersion: ASSET_VERSION,
     businessDate: state.businessDate,
     services,
     board,

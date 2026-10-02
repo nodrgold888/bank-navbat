@@ -312,3 +312,13 @@ body.tvn::before { opacity: 0.16; filter: brightness(3) saturate(0); }
 .vip .c-code { font-size: min(21vh, 15vw); }
 .vip.free .c-code { font-size: 9vh; }
 .vip .c-go { grid-row: 1 / span 2; align-self: center; }
+
+/* Chrome < 84 has no flex `gap`: spacing via margins instead (harmless duplicates elsewhere) */
+.tvn-brand, .c-go, .chip, .hero-go, .tvn-voice, .tvn-right, .next-track { gap: 0; }
+.tvn-brand img { margin-right: 1.2vw; }
+.c-go span { margin-right: 0.7vw; }
+.chip b { margin-right: 0.7vw; }
+.next-track .chip { margin-right: 1vw; }
+.tvn-right > * { margin-left: 1.6vw; }
+.tvn-voice .tvn-btn { margin-left: 0.6vw; }
+.tvn-voice .tvn-btn:first-child { margin-left: 0; }
