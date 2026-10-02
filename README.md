@@ -38,6 +38,16 @@ requires a user gesture before playing audio). Launch the TV with
 opens it with `--autoplay-policy=no-user-gesture-required` — without that
 flag the on-screen "Signal: yoniq" toggle looks on but nothing plays.
 
+**TV voice (Azure Uzbek voice):** the TV can announce each call in Uzbek using Azure
+Speech (`uz-UZ-MadinaNeural`). The Azure key stays on the server — set these environment
+variables on Render (never commit them): `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION`
+(e.g. `westeurope`), optionally `AZURE_SPEECH_VOICE` (`uz-UZ-SardorNeural` is the male
+voice). The TV asks `GET /api/tts?code=B001&op=6-operator`; the server builds the
+announcement itself (no free text), caches the audio and rate-limits new synthesis.
+Without the key (or if Azure fails) the TV falls back to the browser voice. Browsers need
+one interaction (press "Signal" or "Sinash" once) before audio can play, unless Chrome
+is started with `--autoplay-policy=no-user-gesture-required` (`tv-autostart.bat` does).
+
 **Receipt printer:** the kiosk PC runs a separate local service that prints the
 ticket — see [`print-service/README.md`](print-service/README.md). It is not
 updated by deploys; after changing anything in `print-service/` it must be

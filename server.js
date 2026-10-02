@@ -675,6 +675,7 @@ function buildView() {
 
   return {
     assetVersion: ASSET_VERSION,
+    tts: TTS_ENABLED,
     businessDate: state.businessDate,
     services,
     board,
@@ -1017,6 +1018,112 @@ const API_HANDLERS = {
 };
 
 // ---------------------------------------------------------------------------
+// Text-to-speech for the TV (Azure Speech, Uzbek neural voice)
+// ---------------------------------------------------------------------------
+// The browser never sees the Azure key: the TV asks GET /api/tts?code=B001&op=6-operator
+// and this server calls Azure. The endpoint takes structured params (not free text) and
+// builds the announcement itself, so it can't be used to synthesize arbitrary speech or
+// burn quota; results are cached and uncached synthesis is rate-limited.
+//   AZURE_SPEECH_KEY     (required to enable)  - a key from the Azure Speech resource
+//   AZURE_SPEECH_REGION  (e.g. "westeurope")   - the resource's region
+//   AZURE_SPEECH_VOICE   (default uz-UZ-MadinaNeural; uz-UZ-SardorNeural is the male voice)
+const AZURE_SPEECH_KEY = process.env.AZURE_SPEECH_KEY || '';
+const AZURE_SPEECH_REGION = process.env.AZURE_SPEECH_REGION || '';
+const AZURE_SPEECH_VOICE = process.env.AZURE_SPEECH_VOICE || 'uz-UZ-MadinaNeural';
+const AZURE_SPEECH_ENDPOINT =
+  process.env.AZURE_SPEECH_ENDPOINT ||
+  (AZURE_SPEECH_REGION ? `https://${AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1` : '');
+const TTS_ENABLED = Boolean(AZURE_SPEECH_KEY && AZURE_SPEECH_ENDPOINT);
+
+const TTS_CACHE_MAX = 400;
+const TTS_RATE_PER_MIN = 90;
+/** @type {Map<string, Buffer>} */
+const ttsCache = new Map();
+/** @type {Map<string, Promise<Buffer>>} */
+const ttsInflight = new Map();
+let ttsWindowStart = 0;
+let ttsWindowCount = 0;
+
+function xmlEscape(text) {
+  return text.replace(/[<>&'"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[c]);
+}
+
+function buildAnnouncement(code, op, recall) {
+  // Letter and digits are read one by one ("B nol nol bir"), as customers see them on screen.
+  const prefix = recall ? 'Qayta chaqiruv. ' : '';
+  const spoken = `<say-as interpret-as="characters">${xmlEscape(code)}</say-as>`;
+  const body = `${prefix}${spoken} raqamli mijoz, ${xmlEscape(op)}ga murojaat qiling.`;
+  return (
+    `<speak version='1.0' xml:lang='uz-UZ'>` +
+    `<voice xml:lang='uz-UZ' name='${AZURE_SPEECH_VOICE}'>${body}</voice></speak>`
+  );
+}
+
+async function synthesize(ssml) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    const r = await fetch(AZURE_SPEECH_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Ocp-Apim-Subscription-Key': AZURE_SPEECH_KEY,
+        'Content-Type': 'application/ssml+xml',
+        'X-Microsoft-OutputFormat': 'audio-16khz-128kbitrate-mono-mp3',
+        'User-Agent': 'bank-navbat',
+      },
+      body: ssml,
+      signal: controller.signal,
+    });
+    if (!r.ok) throw new Error(`Azure TTS ${r.status}`);
+    return Buffer.from(await r.arrayBuffer());
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function ttsHandler(res, url) {
+  const send = (status, text) => {
+    res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' });
+    res.end(text);
+  };
+  if (!TTS_ENABLED) return send(503, 'TTS sozlanmagan');
+  const code = url.searchParams.get('code') || '';
+  const op = url.searchParams.get('op') || '';
+  const recall = url.searchParams.get('recall') === '1';
+  if (!/^[A-Z]\d{3,4}$/.test(code) || !/^[0-9A-Za-zʻʼ'’ -]{1,30}$/.test(op)) return send(400, 'Notoʻgʻri parametr');
+
+  const key = `${AZURE_SPEECH_VOICE}|${recall ? 1 : 0}|${code}|${op}`;
+  let audio = ttsCache.get(key);
+  if (!audio) {
+    let job = ttsInflight.get(key);
+    if (!job) {
+      const now = Date.now();
+      if (now - ttsWindowStart > 60000) {
+        ttsWindowStart = now;
+        ttsWindowCount = 0;
+      }
+      if (++ttsWindowCount > TTS_RATE_PER_MIN) return send(429, 'Juda koʻp soʻrov');
+      job = synthesize(buildAnnouncement(code, op, recall)).finally(() => ttsInflight.delete(key));
+      ttsInflight.set(key, job);
+    }
+    try {
+      audio = await job;
+    } catch (err) {
+      console.error('TTS xatosi:', err.message);
+      return send(502, 'TTS xatosi');
+    }
+    ttsCache.set(key, audio);
+    while (ttsCache.size > TTS_CACHE_MAX) ttsCache.delete(ttsCache.keys().next().value);
+  }
+  res.writeHead(200, {
+    'Content-Type': 'audio/mpeg',
+    'Content-Length': audio.length,
+    'Cache-Control': 'private, max-age=3600',
+  });
+  res.end(audio);
+}
+
+// ---------------------------------------------------------------------------
 // Idempotent POSTs
 // ---------------------------------------------------------------------------
 // A client that times out can't tell "never arrived" from "done, reply lost", so it
@@ -1059,6 +1166,7 @@ const server = http.createServer(async (req, res) => {
       });
       return res.end(viewJson());
     }
+    if (req.method === 'GET' && pathname === '/api/tts') return ttsHandler(res, url);
     if (req.method === 'GET' && pathname === '/api/qr') {
       return sendJson(res, 200, {
         ok: true,
