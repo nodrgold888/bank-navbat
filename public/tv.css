@@ -128,3 +128,32 @@ body.tvn {
 .tvn-voice select.tvn-btn { max-width: 14vw; }
 .tvn-toast { position: fixed; left: 50%; bottom: 3vh; transform: translateX(-50%); background: #123c59; color: #fff; padding: 1vh 1.6vw; border-radius: 1.2vh; font-size: 2vh; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 60; }
 .tvn-toast.show { opacity: 1; }
+
+/* Davr Bank brand colours: logo blue (#0e6eb5) flowing into logo green (#2f9e4a) */
+:root { --db-blue: #0e6eb5; --db-blue-dark: #0a4f86; --db-green: #2f9e4a; }
+body.tvn {
+  background: radial-gradient(1000px 650px at 0% -10%, rgba(14, 110, 181, 0.18), transparent 60%),
+    radial-gradient(900px 600px at 100% 0%, rgba(47, 158, 74, 0.18), transparent 60%),
+    linear-gradient(140deg, #f3f8fc, #eaf5ee);
+}
+.tvn-head, .tvn-next { position: relative; overflow: hidden; }
+.tvn-head::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 0.7vh; background: linear-gradient(90deg, var(--db-blue), var(--db-green)); }
+.tvn-next::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 0.8vh; background: linear-gradient(180deg, var(--db-blue), var(--db-green)); }
+.tvn-brand b { color: var(--db-blue-dark); }
+.tvn-live { color: var(--db-green) !important; }
+.tvn-live i { background: var(--db-green); box-shadow: 0 0 0 0.5vh rgba(47, 158, 74, 0.22); }
+.tvn-time .clock { color: var(--db-blue-dark); }
+.tvn-btn { background: #e3eff8; color: var(--db-blue-dark); }
+
+.card:not(.free):not(.vip) {
+  background: radial-gradient(600px 300px at 15% 0%, rgba(255, 255, 255, 0.18), transparent 60%), linear-gradient(135deg, var(--db-blue-dark) 0%, var(--db-blue) 45%, var(--db-green) 100%);
+  box-shadow: 0 22px 44px -30px rgba(10, 79, 134, 0.8);
+}
+.card.latest:not(.vip) { box-shadow: 0 0 0 0.7vh #fff, 0 0 0 1.2vh rgba(47, 158, 74, 0.7); }
+.card.free { background: linear-gradient(135deg, #6f8aa0, #8aa0b2); }
+
+.tvn-next { padding-left: 2.4vw; }
+.next-title b { color: var(--db-blue); }
+.chip { background: #f1f7fc; border-color: #d6e6f2; border-bottom-color: var(--c); }
+.chip b { color: var(--db-blue-dark); }
+.chip span { color: #46657c; }
