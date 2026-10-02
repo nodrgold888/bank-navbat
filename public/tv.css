@@ -17,7 +17,7 @@ body.tvn {
 .tvn-brand img { width: 6.4vh; height: 6.4vh; border-radius: 1.4vh; object-fit: contain; }
 .tvn-brand b { display: block; font-size: 3.4vh; font-weight: 800; }
 .tvn-brand span { display: block; color: #5d7783; font-size: 1.9vh; font-weight: 500; }
-.tvn-live { display: flex !important; align-items: center; gap: 0.6vw; margin-left: 1vw; font-size: 1.8vh !important; font-weight: 700; color: #0b7059 !important; }
+.tvn-live { grid-column: 1; justify-self: start; display: flex !important; align-items: center; gap: 0.6vw; font-size: 1.8vh !important; font-weight: 700; color: #0b7059 !important; }
 .tvn-live i { width: 1.2vh; height: 1.2vh; border-radius: 50%; background: #17a56c; box-shadow: 0 0 0 0.5vh rgba(23, 165, 108, 0.2); }
 .tvn-live i.off { background: #e11d48; box-shadow: none; }
 .tvn-right { grid-column: 3; justify-self: end; display: flex; align-items: center; gap: 1.6vw; }
