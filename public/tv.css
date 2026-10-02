@@ -231,3 +231,12 @@ body.tvn::before {
   opacity: 0.20;
 }
 .tvn-wrap { position: relative; z-index: 1; }
+
+/* White page background (logo watermark kept, faint) */
+body.tvn { background: #ffffff; }
+body.tvn::before { opacity: 0.10; }
+.card.free { background: #f1f5f8; border: 0.2vh dashed #c3d0da; color: #5d7783; }
+.card.free .c-code { opacity: 0.5; }
+.card.free .c-go { background: #e4ebf1; }
+.card.vip.free { background: #fff6dc; border: 0.2vh dashed #e3c25a; color: #8a6d12; }
+.tvn-head, .tvn-next { border: 1px solid #d6e4e8; box-shadow: 0 8px 22px -14px rgba(18, 60, 89, 0.45); }
