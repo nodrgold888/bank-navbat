@@ -112,8 +112,16 @@
       // render() for it — which used to leave every button stuck disabled
       // until some unrelated event elsewhere finally forced a redraw.
       try {
-        var freshRes = await fetch('/api/state', { cache: 'no-store' });
-        if (freshRes.ok) lastView = await freshRes.json();
+        var ctl = new AbortController();
+        var t = setTimeout(function () {
+          ctl.abort();
+        }, 6000);
+        try {
+          var freshRes = await fetch('/api/state', { cache: 'no-store', signal: ctl.signal });
+          if (freshRes.ok) lastView = await freshRes.json();
+        } finally {
+          clearTimeout(t);
+        }
       } catch (e) {
         /* fall through to re-rendering the last known view below */
       }

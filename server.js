@@ -1097,6 +1097,12 @@ if (process.env.RENDER_EXTERNAL_URL) {
   }, SELF_PING_INTERVAL_MS);
 }
 
+// Node closes idle keep-alive sockets after 5s by default. Render/Cloudflare reuse
+// upstream connections for longer, so a request sent just as Node closes the socket
+// fails with a reset ("server dan uzildi"). Keep sockets open longer than the proxy does.
+server.keepAliveTimeout = 65 * 1000;
+server.headersTimeout = 66 * 1000;
+
 server.listen(PORT, () => {
   const addrs = ['localhost', ...lanAddresses()];
   console.log('\n  Bank navbat tizimi ishga tushdi\n');

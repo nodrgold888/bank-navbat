@@ -27,7 +27,9 @@ window.Navbat = (function () {
     let stopped = false;
 
     const POLL_FAST_MS = 2500; // SSE dead / buffered — polling carries the load
-    const POLL_SLOW_MS = 20000; // SSE healthy — poll is just a safety net
+    const POLL_SLOW_MS = 10000; // SSE healthy — poll is just a safety net
+    const POLL_TIMEOUT_MS = 8000; // a stalled poll must never stop the loop
+    const SSE_STALE_MS = 35000; // no state/ping this long => the stream is silently dead, reopen it
     const SSE_HEALTHY_MS = 26000; // no state/ping within this => treat SSE as down
     const OFFLINE_AFTER_MS = 7000;
 
@@ -55,53 +57,96 @@ window.Navbat = (function () {
     }
 
     // --- Transport 1: SSE (primary when it works) ---
+    let es = null;
+    let sseOpenedAt = 0;
     function openSSE() {
-      let es;
+      if (stopped) return;
+      if (es) {
+        try {
+          es.close();
+        } catch (e) {
+          /* already closed */
+        }
+        es = null;
+      }
       try {
         es = new EventSource('/events');
       } catch (e) {
         return;
       }
-      es.addEventListener('state', function (e) {
+      sseOpenedAt = Date.now();
+      const mine = es;
+      mine.addEventListener('state', function (e) {
         lastSseAt = Date.now();
         apply(e.data);
       });
-      es.addEventListener('ping', function () {
+      mine.addEventListener('ping', function () {
         lastSseAt = Date.now();
       });
-      es.addEventListener('error', function () {
+      mine.addEventListener('error', function () {
         markMaybeOffline();
-        if (es.readyState === EventSource.CLOSED) setTimeout(openSSE, 3000);
+        if (mine.readyState === EventSource.CLOSED && es === mine) setTimeout(openSSE, 3000);
       });
     }
     openSSE();
+
+    // A half-open connection (Wi-Fi drop, NAT/proxy timeout, a sleeping device) fires no
+    // error and just goes quiet, so the stream is reopened if nothing — not even the
+    // server's 15s ping — has arrived for SSE_STALE_MS.
+    setInterval(function () {
+      if (stopped) return;
+      const quietFor = Date.now() - Math.max(lastSseAt, sseOpenedAt);
+      if (quietFor > SSE_STALE_MS) openSSE();
+    }, 5000);
 
     // --- Transport 2: adaptive polling backbone ---
     // Polls fast until SSE proves itself, then backs off to a slow safety net.
     // Keeps hundreds of concurrent clients cheap when SSE is healthy, while
     // still guaranteeing <=2.5s updates through proxies that buffer SSE.
     async function poll() {
+      // No timeout here used to be fatal: one request hung on a dead connection
+      // never settled, so loop() never ran again and the page froze for good.
+      const controller = new AbortController();
+      const timer = setTimeout(function () {
+        controller.abort();
+      }, POLL_TIMEOUT_MS);
       try {
-        const r = await fetch('/api/state', { cache: 'no-store' });
+        const r = await fetch('/api/state', { cache: 'no-store', signal: controller.signal });
         if (r.ok) apply(await r.text());
         else markMaybeOffline();
       } catch (e) {
         markMaybeOffline();
+      } finally {
+        clearTimeout(timer);
       }
     }
 
+    let loopTimer = null;
     function loop() {
       if (stopped) return;
+      clearTimeout(loopTimer);
       const sseHealthy = Date.now() - lastSseAt < SSE_HEALTHY_MS;
-      setTimeout(
+      loopTimer = setTimeout(
         function () {
           if (stopped) return;
-          poll().then(loop);
+          poll().then(loop, loop);
         },
         sseHealthy ? POLL_SLOW_MS : POLL_FAST_MS
       );
     }
-    poll().then(loop);
+    poll().then(loop, loop);
+
+    // Coming back from sleep / a network drop / a hidden tab: refresh right away
+    // instead of waiting for the next timer, and replace a possibly dead stream.
+    function wake() {
+      if (stopped) return;
+      openSSE();
+      poll().then(loop, loop);
+    }
+    window.addEventListener('online', wake);
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) wake();
+    });
 
     return {
       close: function () {
