@@ -108,6 +108,30 @@
     );
   }
 
+  // Keyingilar: a ticker that glides sideways when the tickets don't fit; static otherwise.
+  var lastNextSig = null;
+  function chipHtml(w) {
+    return (
+      '<div class="chip" style="--c:' + esc(w.serviceColor || '#789') + '"><b>' +
+      esc(w.code) + '</b><span>' + esc(w.serviceName) + '</span></div>'
+    );
+  }
+  function renderNext(wl) {
+    var strip = $('next');
+    if (!wl.length) {
+      strip.innerHTML = '<div class="none">✓ Hozircha navbatda hech kim yo‘q</div>';
+      return;
+    }
+    var html = wl.map(chipHtml).join('');
+    strip.innerHTML = '<div class="next-track">' + html + '</div>';
+    var track = strip.firstChild;
+    if (track.scrollWidth > strip.clientWidth + 4) {
+      track.innerHTML = html + html; // second copy makes the loop seamless
+      track.classList.add('run');
+      track.style.setProperty('--dur', Math.max(12, track.scrollWidth / 2 / 90) + 's'); // ~90px/s
+    }
+  }
+
   function render(view) {
     var call = view.lastCall;
     var online = view.board.filter(function (b) {
@@ -134,16 +158,11 @@
 
     var wl = view.waitingList || [];
     $('nextCount').textContent = wl.length + ' kishi kutmoqda';
-    $('next').innerHTML = wl.length
-      ? wl
-          .map(function (w) {
-            return (
-              '<div class="chip" style="--c:' + esc(w.serviceColor || '#789') + '"><b>' +
-              esc(w.code) + '</b><span>' + esc(w.serviceName) + '</span></div>'
-            );
-          })
-          .join('')
-      : '<div class="none">✓ Hozircha navbatda hech kim yo‘q</div>';
+    var nextSig = wl.map(function (w) { return w.code; }).join(',');
+    if (nextSig !== lastNextSig) {
+      lastNextSig = nextSig;
+      renderNext(wl);
+    }
 
     if (call) {
       if (initialised && call.seq !== lastSeq) {
