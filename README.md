@@ -49,12 +49,12 @@ bundled **Mira** phrase recordings in `public/audio/mira` (letter, "… raqamli 
 `public/audio/voice` clips as a fallback. Set `TV_CLOUD_VOICE=on` together with a
 key to turn cloud speech back on.
 Azure remains available as a fallback through `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION`
-(e.g. `westeurope`) and optional `AZURE_SPEECH_VOICE`. The TV asks
-`GET /api/tts?part=ticket&code=B001` and `GET /api/tts?part=operator&operator=6` and plays
-the two pieces back to back; the server builds the text itself (no free text), caches the
-audio and rate-limits new synthesis. To avoid a multi-second wait when an operator presses
-"call", the ticket piece is prepared when the ticket is issued (and its "Qayta chaqiruv"
-variant when it is called) and the seven operator pieces when the server starts. If cloud speech is unavailable,
+(e.g. `westeurope`) and optional `AZURE_SPEECH_VOICE`. The TV plays each call as **one whole sentence**
+(`GET /api/tts?code=B001&operator=6`, `&recall=1` for a repeat call); pieces joined together
+sounded robotic. The server builds the text itself (no free text), caches the audio and
+rate-limits new synthesis. To avoid a multi-second wait when an operator presses "call", the
+sentence is prepared when the ticket is issued for every operator that serves that service
+(at most two), and the "Qayta chaqiruv" variant when it is called. If cloud speech is unavailable,
 the TV automatically uses the bundled Uzbek recordings.
 The restricted `part=clip&key=...` variant exists only to create the finite set of bundled
 Mira clips; it cannot synthesize arbitrary text and is inactive while cloud speech is off.

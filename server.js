@@ -341,7 +341,7 @@ function issueTicket(serviceId) {
     operatorId: null,
   };
   state.tickets.push(ticket);
-  prefetchTicketVoice(ticket.code, false);
+  prefetchCallVoices(ticket.code, serviceId);
 
   const peopleAhead = state.tickets.filter(
     (t) => t.status === 'waiting' && t.serviceId === serviceId && t.createdAt < ticket.createdAt
@@ -407,7 +407,7 @@ function assignNext(op, serviceId) {
     recall: false,
     seq: state.callSeq,
   };
-  prefetchTicketVoice(next.code, true); // so a later "Qayta chaqirish" is instant too
+  prefetchFullCall(next.code, op.id, true); // so a later "Qayta chaqirish" is instant too
   return next;
 }
 
@@ -1058,7 +1058,7 @@ const TTS_PROVIDER = LYNX_API_KEY ? 'lynx' : AZURE_SPEECH_KEY && AZURE_SPEECH_EN
 const CLOUD_VOICE_ON = process.env.TV_CLOUD_VOICE === 'on';
 const TTS_ENABLED = Boolean(TTS_PROVIDER) && CLOUD_VOICE_ON;
 
-const TTS_CACHE_MAX = 400;
+const TTS_CACHE_MAX = 600;
 const TTS_RATE_PER_MIN = 90;
 /** @type {Map<string, Buffer>} */
 const ttsCache = new Map();
@@ -1164,22 +1164,23 @@ const ticketPartKey = (code, recall) => `${TTS_PROVIDER}|ticket|${recall ? 1 : 0
 const operatorPartKey = (operatorId) => `${TTS_PROVIDER}|operator|${operatorId}`;
 const numberPartKey = (number) => `${TTS_PROVIDER}|number|${number}`;
 
-function prefetchTicketVoice(code, recall) {
+// The TV plays each call as ONE whole sentence (pieces joined together sounded robotic).
+// A sentence depends on the operator, so when a ticket is issued we prepare it for every
+// operator that serves that service (at most two here); by the time someone presses
+// "call" the audio is already cached and plays at once.
+const fullCallKey = (code, operatorId, recall) => `${TTS_PROVIDER}|${recall ? 1 : 0}|${code}|${operatorId}`;
+
+function prefetchFullCall(code, operatorId, recall) {
   if (!TTS_ENABLED) return;
-  cachedSynthesis(ticketPartKey(code, recall), buildTicketPartText(code, recall)).catch((err) =>
+  cachedSynthesis(fullCallKey(code, operatorId, recall), buildAnnouncementText(code, operatorId, recall)).catch((err) =>
     console.error('TTS oldindan tayyorlash xatosi:', err.message)
   );
 }
 
-function prefetchOperatorVoices() {
+function prefetchCallVoices(code, serviceId) {
   if (!TTS_ENABLED) return;
-  // Staggered so a restart doesn't hit the provider with 7 requests at once.
-  for (let id = 1; id <= OPERATOR_SPEECH.length; id++) {
-    setTimeout(() => {
-      cachedSynthesis(operatorPartKey(id), buildOperatorPartText(id)).catch((err) =>
-        console.error('TTS oldindan tayyorlash xatosi:', err.message)
-      );
-    }, id * 1500).unref();
+  for (const op of state.operators) {
+    if (op.serviceIds.includes(serviceId)) prefetchFullCall(code, op.id, false);
   }
 }
 
@@ -1308,29 +1309,14 @@ async function ttsHandler(res, url) {
     return send(400, 'Notoʻgʻri parametr');
   }
 
-  const key = `${TTS_PROVIDER}|${recall ? 1 : 0}|${code}|${operatorId}`;
-  let audio = ttsCache.get(key);
-  if (!audio) {
-    let job = ttsInflight.get(key);
-    if (!job) {
-      const now = Date.now();
-      if (now - ttsWindowStart > 60000) {
-        ttsWindowStart = now;
-        ttsWindowCount = 0;
-      }
-      if (++ttsWindowCount > TTS_RATE_PER_MIN) return send(429, 'Juda koʻp soʻrov');
-      job = synthesize(buildAnnouncementText(code, operatorId, recall)).finally(() => ttsInflight.delete(key));
-      ttsInflight.set(key, job);
-    }
-    try {
-      audio = await job;
-    } catch (err) {
-      console.error('TTS xatosi:', err.message);
-      return send(502, 'TTS xatosi');
-    }
-    ttsCache.set(key, audio);
-    while (ttsCache.size > TTS_CACHE_MAX) ttsCache.delete(ttsCache.keys().next().value);
+  let audio;
+  try {
+    audio = await cachedSynthesis(fullCallKey(code, operatorId, recall), buildAnnouncementText(code, operatorId, recall));
+  } catch (err) {
+    console.error('TTS xatosi:', err.message);
+    return send(502, 'TTS xatosi');
   }
+  if (!audio) return send(429, 'Juda koʻp soʻrov');
   res.writeHead(200, {
     'Content-Type': 'audio/mpeg',
     'Content-Length': audio.length,
@@ -1460,7 +1446,6 @@ server.keepAliveTimeout = 65 * 1000;
 server.headersTimeout = 66 * 1000;
 
 server.listen(PORT, () => {
-  prefetchOperatorVoices();
   const addrs = ['localhost', ...lanAddresses()];
   console.log('\n  Bank navbat tizimi ishga tushdi\n');
   for (const a of addrs) {
