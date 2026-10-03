@@ -1,6 +1,6 @@
-"""Generate the TV's Lola phrase clips (public/audio/lola) with Lynx AI, once.
+"""Generate the TV's phrase clips (public/audio/mira) with Lynx AI, once.
 
-Usage:  LK=<lynx api key> python3 scripts/generate-lola.py public/audio/lola [key ...]
+Usage:  LK=<lynx api key> python3 scripts/generate-lola.py public/audio/mira [key ...]
 Existing files are skipped; pass keys (e.g. op-1 n-80) to regenerate only those
 (delete the old .mp3 first). Requests are spaced out: a fast burst got the Lynx
 account suspended for "automated access" once. Needs curl and ffmpeg.

@@ -71,10 +71,10 @@
       return parts;
     });
   }
-  // Lola recordings (public/audio/lola): whole phrases, so a call is 3-4 natural pieces:
-  // letter, number ("yigirma uch raqamli mijoz,"), operator ("oltinchi operatorga marhamat.").
+  // Mira recordings (public/audio/mira): whole phrases, so a call is 3-4 natural pieces:
+  // letter, number ("yigirma uch raqamli mijoz."), operator ("oltinchi aperatorga murojaat qiling.").
   // Numbers 100-999 add a hundreds piece. Returns null when a call can't be built from them.
-  function lolaPlan(call) {
+  function phrasePlan(call) {
     var code = String(call.code || '').toUpperCase();
     var m = /^([A-G])(\d{3,})$/.exec(code);
     var operator = Number(call.operatorId);
@@ -92,12 +92,12 @@
     plan.push(['op-' + operator, 0]);
     return plan;
   }
-  function loadLola(key) {
-    var k = 'lola:' + key;
+  function loadPhrase(key) {
+    var k = 'phrase:' + key;
     if (!buffers.has(k)) {
       var controller = new AbortController();
       var timeout = setTimeout(function () { controller.abort(); }, 10000);
-      var promise = fetch('/audio/lola/' + key + '.mp3', { signal: controller.signal })
+      var promise = fetch('/audio/mira/' + key + '.mp3', { signal: controller.signal })
         .then(function (r) { if (!r.ok) throw new Error('Audio topilmadi: ' + key); return r.arrayBuffer(); })
         .then(function (bytes) { return context().decodeAudioData(bytes); })
         .catch(function (err) { buffers.delete(k); throw err; })
@@ -149,11 +149,11 @@
               // Keep the TV useful during an API/network outage by using local recordings.
             }
           }
-          var plan = lolaPlan(call);
-          var lola = plan && await Promise.all(plan.map(function (step) { return loadLola(step[0]); })).catch(function () { return null; });
-          if (lola) {
+          var plan = phrasePlan(call);
+          var phrases = plan && await Promise.all(plan.map(function (step) { return loadPhrase(step[0]); })).catch(function () { return null; });
+          if (phrases) {
             for (var j = 0; j < plan.length && enabled && version === generation; j++) {
-              await play(lola[j]);
+              await play(phrases[j]);
               if (plan[j][1]) await pause(plan[j][1]);
             }
             continue;
