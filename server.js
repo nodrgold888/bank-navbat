@@ -1053,9 +1053,11 @@ const AZURE_SPEECH_ENDPOINT =
   process.env.AZURE_SPEECH_ENDPOINT ||
   (AZURE_SPEECH_REGION ? `https://${AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1` : '');
 const TTS_PROVIDER = LYNX_API_KEY ? 'lynx' : AZURE_SPEECH_KEY && AZURE_SPEECH_ENDPOINT ? 'azure' : '';
-// Cloud speech bills per request, so it stays OFF unless TV_CLOUD_VOICE=on is set; the TV
-// otherwise announces calls from the bundled recordings (public/audio/voice), which are free.
-const CLOUD_VOICE_ON = process.env.TV_CLOUD_VOICE === 'on';
+// Cloud speech bills per request, so it stays OFF unless TV_CLOUD_SPEECH=on is set; the TV
+// otherwise announces calls from the bundled Mira recordings (public/audio/mira), which are
+// free and come straight from the repo. (Named TV_CLOUD_SPEECH, not the earlier
+// TV_CLOUD_VOICE, so a leftover setting on the host doesn't switch the cloud back on.)
+const CLOUD_VOICE_ON = process.env.TV_CLOUD_SPEECH === 'on';
 const TTS_ENABLED = Boolean(TTS_PROVIDER) && CLOUD_VOICE_ON;
 
 const TTS_CACHE_MAX = 600;

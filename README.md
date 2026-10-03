@@ -46,7 +46,7 @@ Lynx requests explicitly use the native female **Mira** (`lynx_voice_mira_v1`) v
 **Cloud speech is off by default** (it bills per request): the TV announces calls from the
 bundled **Mira** phrase recordings in `public/audio/mira` (letter, "… raqamli mijoz",
 "… aperatorga murojaat qiling"; `texts.json` lists every clip) at no cost, with the older
-`public/audio/voice` clips as a fallback. Set `TV_CLOUD_VOICE=on` together with a
+`public/audio/voice` clips as a fallback. Set `TV_CLOUD_SPEECH=on` together with a
 key to turn cloud speech back on.
 Azure remains available as a fallback through `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION`
 (e.g. `westeurope`) and optional `AZURE_SPEECH_VOICE`. The TV plays each call as **one whole sentence**
