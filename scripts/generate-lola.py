@@ -24,7 +24,7 @@ for k, v in LET.items(): items['l-' + k] = v
 # Keep each destination phrase in one recording. Building it from separate
 # ordinal/operator/instruction clips makes the cadence sound robotic.
 for i in range(1, 7): items['op-%d' % i] = ORD[i - 1] + ' aperatorga murojaat qiling.'
-items['op-7'] = 'valyuta kassaga murojaat qiling.'
+items['op-7'] = 'valyuta kassasiga murojaat qiling.'
 items['recall'] = 'Qayta chaqiruv.'
 for h in range(1, 10):
     items['h-%d' % h] = HUND[h]
