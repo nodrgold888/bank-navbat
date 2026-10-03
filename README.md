@@ -40,7 +40,9 @@ flag the on-screen "Signal: yoniq" toggle looks on but nothing plays.
 
 **TV voice (native Uzbek):** the TV announces each call through Lynx AI Uzbekistan.
 The API key stays on the server — set `LYNX_API_KEY` on Render and never commit it.
-Lynx requests explicitly use the native female `lynx_voice_lola_v1` voice.
+Lynx requests explicitly use the native female **Mira** (`lynx_voice_mira_v1`) voice, Uzbek (`uz`) language and
+`natural` expressiveness. The optional `LYNX_TTS_VOICE`, `LYNX_TTS_LANGUAGE` and
+`LYNX_TTS_EXPRESSIVENESS` environment variables can override those defaults.
 **Cloud speech is off by default** (it bills per request): the TV announces calls from the
 bundled **Mira** phrase recordings in `public/audio/mira` (letter, "… raqamli mijoz",
 "… aperatorga murojaat qiling"; `texts.json` lists every clip) at no cost, with the older
@@ -54,8 +56,8 @@ audio and rate-limits new synthesis. To avoid a multi-second wait when an operat
 "call", the ticket piece is prepared when the ticket is issued (and its "Qayta chaqiruv"
 variant when it is called) and the seven operator pieces when the server starts. If cloud speech is unavailable,
 the TV automatically uses the bundled Uzbek recordings.
-The restricted `part=number&number=1..99` variant exists only to create missing bundled
-number clips; it cannot synthesize arbitrary text and is inactive while cloud speech is off.
+The restricted `part=clip&key=...` variant exists only to create the finite set of bundled
+Mira clips; it cannot synthesize arbitrary text and is inactive while cloud speech is off.
 Without the key (or if Azure fails) the TV falls back to the browser voice. Browsers need
 one interaction (press "Signal" or "Sinash" once) before audio can play, unless Chrome
 is started with `--autoplay-policy=no-user-gesture-required` (`tv-autostart.bat` does).

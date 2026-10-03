@@ -1041,6 +1041,9 @@ const API_HANDLERS = {
 //   AZURE_SPEECH_VOICE   (default uz-UZ-MadinaNeural; uz-UZ-SardorNeural is the male voice)
 const LYNX_API_KEY = process.env.LYNX_API_KEY || '';
 const LYNX_TTS_ENDPOINT = process.env.LYNX_TTS_ENDPOINT || 'https://api.lynx-ai.uz/v1/audio/speech';
+const LYNX_TTS_VOICE = process.env.LYNX_TTS_VOICE || 'lynx_voice_mira_v1';
+const LYNX_TTS_LANGUAGE = process.env.LYNX_TTS_LANGUAGE || 'uz';
+const LYNX_TTS_EXPRESSIVENESS = process.env.LYNX_TTS_EXPRESSIVENESS || 'natural';
 const AZURE_SPEECH_KEY = process.env.AZURE_SPEECH_KEY || '';
 const AZURE_SPEECH_REGION = process.env.AZURE_SPEECH_REGION || '';
 const AZURE_SPEECH_VOICE = process.env.AZURE_SPEECH_VOICE || 'uz-UZ-MadinaNeural';
@@ -1074,8 +1077,8 @@ const NUMBER_TENS = ['', "o‘n", 'yigirma', "o‘ttiz", 'qirq', 'ellik', 'oltmi
 
 function operatorInstruction(operatorId) {
   return operatorId === 7
-    ? 'valyuta operatoriga murojaat qiling.'
-    : `${OPERATOR_SPEECH[operatorId - 1]} operatorga murojaat qiling.`;
+    ? 'valyuta aperatorga murojaat qiling.'
+    : `${OPERATOR_SPEECH[operatorId - 1]} aperatorga murojaat qiling.`;
 }
 
 function buildAnnouncementText(code, operatorId, recall) {
@@ -1099,6 +1102,24 @@ function buildOperatorPartText(operatorId) {
 function buildNumberPartText(number) {
   const words = [NUMBER_TENS[Math.floor(number / 10)], NUMBER_ONES[number % 10]].filter(Boolean).join(' ');
   return `${words} raqamli mijoz,`;
+}
+
+function bundledClipText(key) {
+  const letter = key.match(/^l-([A-G])$/);
+  if (letter) return LETTER_SPEECH[letter[1]];
+  if (key === 'recall') return 'Qayta chaqiruv.';
+  const operator = key.match(/^op-([1-7])$/);
+  if (operator) return buildOperatorPartText(Number(operator[1]));
+  const hundred = key.match(/^h-([1-9])$/);
+  if (hundred) {
+    const n = Number(hundred[1]);
+    return n === 1 ? 'yuz' : `${NUMBER_ONES[n]} yuz`;
+  }
+  const hundredTicket = key.match(/^ht-([1-9])$/);
+  if (hundredTicket) return `${bundledClipText(`h-${hundredTicket[1]}`)} raqamli mijoz.`;
+  const number = key.match(/^n-([1-9]|[1-9]\d)$/);
+  if (number) return buildNumberPartText(Number(number[1])).replace(/,$/, '.');
+  return null;
 }
 
 /** Cached, de-duplicated, rate-limited synthesis. Resolves null when the rate limit is hit. */
@@ -1163,7 +1184,14 @@ async function synthesize(text) {
       ? {
           method: 'POST',
           headers: { Authorization: `Bearer ${LYNX_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, voice: 'lynx_voice_lola_v1' }),
+          body: JSON.stringify({
+            text,
+            voice: LYNX_TTS_VOICE,
+            language: LYNX_TTS_LANGUAGE,
+            expressiveness: LYNX_TTS_EXPRESSIVENESS,
+            ai_normalize: false,
+            enhance: false,
+          }),
           signal: controller.signal,
         }
       : {
@@ -1202,7 +1230,9 @@ async function ttsHandler(res, url) {
         hasAzureKey: Boolean(AZURE_SPEECH_KEY),
         hasRegion: Boolean(AZURE_SPEECH_REGION),
         hasEndpointOverride: Boolean(process.env.AZURE_SPEECH_ENDPOINT),
-        voice: TTS_PROVIDER === 'lynx' ? 'lynx-default-uz' : AZURE_SPEECH_VOICE,
+        voice: TTS_PROVIDER === 'lynx' ? LYNX_TTS_VOICE : AZURE_SPEECH_VOICE,
+        language: TTS_PROVIDER === 'lynx' ? LYNX_TTS_LANGUAGE : 'uz-UZ',
+        expressiveness: TTS_PROVIDER === 'lynx' ? LYNX_TTS_EXPRESSIVENESS : null,
       })
     );
   }
@@ -1214,25 +1244,33 @@ async function ttsHandler(res, url) {
   const number = Number(url.searchParams.get('number') || '');
   const recall = url.searchParams.get('recall') === '1';
   const operatorId = Number(operatorParam || ((op.match(/\d+/) || [])[0]) || (/valyuta/i.test(op) ? 7 : 0));
-  if (part === 'ticket' || part === 'operator' || part === 'number') {
+  if (part === 'ticket' || part === 'operator' || part === 'number' || part === 'clip') {
+    const clipKey = url.searchParams.get('key') || '';
+    const clipText = part === 'clip' ? bundledClipText(clipKey) : null;
     const valid =
       part === 'ticket'
         ? /^[A-G]\d{3,4}$/.test(code)
         : part === 'operator'
           ? Number.isInteger(operatorId) && operatorId >= 1 && operatorId <= 7
-          : Number.isInteger(number) && number >= 1 && number <= 99;
+          : part === 'number'
+            ? Number.isInteger(number) && number >= 1 && number <= 99
+            : clipText !== null;
     if (!valid) return send(400, 'Notoʻgʻri parametr');
     try {
       const cacheKey = part === 'ticket'
         ? ticketPartKey(code, recall)
         : part === 'operator'
           ? operatorPartKey(operatorId)
-          : numberPartKey(number);
+          : part === 'number'
+            ? numberPartKey(number)
+            : `${TTS_PROVIDER}|clip|${clipKey}`;
       const text = part === 'ticket'
         ? buildTicketPartText(code, recall)
         : part === 'operator'
           ? buildOperatorPartText(operatorId)
-          : buildNumberPartText(number);
+          : part === 'number'
+            ? buildNumberPartText(number)
+            : clipText;
       const audio = await cachedSynthesis(
         cacheKey,
         text
