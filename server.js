@@ -1026,22 +1026,27 @@ const API_HANDLERS = {
 };
 
 // ---------------------------------------------------------------------------
-// Text-to-speech for the TV (Azure Speech, Uzbek neural voice)
+// Text-to-speech for the TV (Lynx Uzbek voice, with Azure as a fallback provider)
 // ---------------------------------------------------------------------------
-// The browser never sees the Azure key: the TV asks GET /api/tts?code=B001&op=6-operator
-// and this server calls Azure. The endpoint takes structured params (not free text) and
+// The browser never sees a provider key: the TV asks GET /api/tts?code=B001&operator=6
+// and this server calls the configured provider. The endpoint takes structured params and
 // builds the announcement itself, so it can't be used to synthesize arbitrary speech or
 // burn quota; results are cached and uncached synthesis is rate-limited.
+//   LYNX_API_KEY         (preferred) - Lynx AI Uzbekistan server API key
+//   LYNX_TTS_ENDPOINT    (optional)  - defaults to the Lynx production speech endpoint
 //   AZURE_SPEECH_KEY     (required to enable)  - a key from the Azure Speech resource
 //   AZURE_SPEECH_REGION  (e.g. "westeurope")   - the resource's region
 //   AZURE_SPEECH_VOICE   (default uz-UZ-MadinaNeural; uz-UZ-SardorNeural is the male voice)
+const LYNX_API_KEY = process.env.LYNX_API_KEY || '';
+const LYNX_TTS_ENDPOINT = process.env.LYNX_TTS_ENDPOINT || 'https://api.lynx-ai.uz/v1/audio/speech';
 const AZURE_SPEECH_KEY = process.env.AZURE_SPEECH_KEY || '';
 const AZURE_SPEECH_REGION = process.env.AZURE_SPEECH_REGION || '';
 const AZURE_SPEECH_VOICE = process.env.AZURE_SPEECH_VOICE || 'uz-UZ-MadinaNeural';
 const AZURE_SPEECH_ENDPOINT =
   process.env.AZURE_SPEECH_ENDPOINT ||
   (AZURE_SPEECH_REGION ? `https://${AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1` : '');
-const TTS_ENABLED = Boolean(AZURE_SPEECH_KEY && AZURE_SPEECH_ENDPOINT);
+const TTS_PROVIDER = LYNX_API_KEY ? 'lynx' : AZURE_SPEECH_KEY && AZURE_SPEECH_ENDPOINT ? 'azure' : '';
+const TTS_ENABLED = Boolean(TTS_PROVIDER);
 
 const TTS_CACHE_MAX = 400;
 const TTS_RATE_PER_MIN = 90;
@@ -1056,33 +1061,47 @@ function xmlEscape(text) {
   return text.replace(/[<>&'"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[c]);
 }
 
-function buildAnnouncement(code, op, recall) {
-  // Letter and digits are read one by one ("B nol nol bir"), as customers see them on screen.
+const LETTER_SPEECH = { A: 'A', B: 'Be', C: 'Se', D: 'De', E: 'E', F: 'Ef', G: 'Ge' };
+const DIGIT_SPEECH = ['nol', 'bir', 'ikki', 'uch', "to‘rt", 'besh', 'olti', 'yetti', 'sakkiz', "to‘qqiz"];
+const OPERATOR_SPEECH = ['birinchi', 'ikkinchi', 'uchinchi', "to‘rtinchi", 'beshinchi', 'oltinchi', 'yettinchi'];
+
+function buildAnnouncementText(code, operatorId, recall) {
+  const spokenCode = [LETTER_SPEECH[code[0]], ...code.slice(1).split('').map((digit) => DIGIT_SPEECH[Number(digit)])].join(' ');
   const prefix = recall ? 'Qayta chaqiruv. ' : '';
-  const spoken = `<say-as interpret-as="characters">${xmlEscape(code)}</say-as>`;
-  const body = `${prefix}${spoken} raqamli mijoz, ${xmlEscape(op)}ga murojaat qiling.`;
+  return `${prefix}Hurmatli ${spokenCode} raqamli mijoz, ${OPERATOR_SPEECH[operatorId - 1]} operatorga murojaat qiling.`;
+}
+
+function buildAzureSsml(text) {
   return (
     `<speak version='1.0' xml:lang='uz-UZ'>` +
-    `<voice xml:lang='uz-UZ' name='${AZURE_SPEECH_VOICE}'>${body}</voice></speak>`
+    `<voice xml:lang='uz-UZ' name='${AZURE_SPEECH_VOICE}'>${xmlEscape(text)}</voice></speak>`
   );
 }
 
-async function synthesize(ssml) {
+async function synthesize(text) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
+  const timer = setTimeout(() => controller.abort(), 12000);
   try {
-    const r = await fetch(AZURE_SPEECH_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Ocp-Apim-Subscription-Key': AZURE_SPEECH_KEY,
-        'Content-Type': 'application/ssml+xml',
-        'X-Microsoft-OutputFormat': 'audio-16khz-128kbitrate-mono-mp3',
-        'User-Agent': 'bank-navbat',
-      },
-      body: ssml,
-      signal: controller.signal,
-    });
-    if (!r.ok) throw new Error(`Azure TTS ${r.status}`);
+    const isLynx = TTS_PROVIDER === 'lynx';
+    const r = await fetch(isLynx ? LYNX_TTS_ENDPOINT : AZURE_SPEECH_ENDPOINT, isLynx
+      ? {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${LYNX_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+          signal: controller.signal,
+        }
+      : {
+          method: 'POST',
+          headers: {
+            'Ocp-Apim-Subscription-Key': AZURE_SPEECH_KEY,
+            'Content-Type': 'application/ssml+xml',
+            'X-Microsoft-OutputFormat': 'audio-16khz-128kbitrate-mono-mp3',
+            'User-Agent': 'bank-navbat',
+          },
+          body: buildAzureSsml(text),
+          signal: controller.signal,
+        });
+    if (!r.ok) throw new Error(`${isLynx ? 'Lynx' : 'Azure'} TTS ${r.status}`);
     return Buffer.from(await r.arrayBuffer());
   } finally {
     clearTimeout(timer);
@@ -1101,20 +1120,26 @@ async function ttsHandler(res, url) {
     return res.end(
       JSON.stringify({
         enabled: TTS_ENABLED,
-        hasKey: Boolean(AZURE_SPEECH_KEY),
+        provider: TTS_PROVIDER || null,
+        hasLynxKey: Boolean(LYNX_API_KEY),
+        hasAzureKey: Boolean(AZURE_SPEECH_KEY),
         hasRegion: Boolean(AZURE_SPEECH_REGION),
         hasEndpointOverride: Boolean(process.env.AZURE_SPEECH_ENDPOINT),
-        voice: AZURE_SPEECH_VOICE,
+        voice: TTS_PROVIDER === 'lynx' ? 'lynx-default-uz' : AZURE_SPEECH_VOICE,
       })
     );
   }
   if (!TTS_ENABLED) return send(503, 'TTS sozlanmagan');
   const code = url.searchParams.get('code') || '';
   const op = url.searchParams.get('op') || '';
+  const operatorParam = url.searchParams.get('operator') || '';
   const recall = url.searchParams.get('recall') === '1';
-  if (!/^[A-Z]\d{3,4}$/.test(code) || !/^[0-9A-Za-zʻʼ'’ -]{1,30}$/.test(op)) return send(400, 'Notoʻgʻri parametr');
+  const operatorId = Number(operatorParam || ((op.match(/\d+/) || [])[0]) || (/valyuta/i.test(op) ? 7 : 0));
+  if (!/^[A-G]\d{3,4}$/.test(code) || !Number.isInteger(operatorId) || operatorId < 1 || operatorId > 7) {
+    return send(400, 'Notoʻgʻri parametr');
+  }
 
-  const key = `${AZURE_SPEECH_VOICE}|${recall ? 1 : 0}|${code}|${op}`;
+  const key = `${TTS_PROVIDER}|${recall ? 1 : 0}|${code}|${operatorId}`;
   let audio = ttsCache.get(key);
   if (!audio) {
     let job = ttsInflight.get(key);
@@ -1125,7 +1150,7 @@ async function ttsHandler(res, url) {
         ttsWindowCount = 0;
       }
       if (++ttsWindowCount > TTS_RATE_PER_MIN) return send(429, 'Juda koʻp soʻrov');
-      job = synthesize(buildAnnouncement(code, op, recall)).finally(() => ttsInflight.delete(key));
+      job = synthesize(buildAnnouncementText(code, operatorId, recall)).finally(() => ttsInflight.delete(key));
       ttsInflight.set(key, job);
     }
     try {

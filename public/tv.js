@@ -91,71 +91,10 @@
     });
   }
 
-  // ---- Spoken call: server voice (Azure, Uzbek) with the browser voice as a fallback ----
-  // The TV is never touched, so the audio element is "unlocked" on the first interaction
-  // (the Signal / Sinash buttons count). If the server voice isn't configured or fails,
-  // the old browser speechSynthesis path is used instead.
+  // ---- Spoken call ----
+  // TVVoice queues calls, prefers the server's natural Uzbek voice, and automatically
+  // falls back to the local recordings when the provider or network is unavailable.
   var ttsEnabled = false;
-  var ttsAudio = new Audio();
-  var ttsUnlocked = false;
-  var SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YQAAAAA=';
-  function unlockTts() {
-    if (ttsUnlocked) return;
-    ttsUnlocked = true;
-    try {
-      ttsAudio.src = SILENT_WAV;
-      var p = ttsAudio.play();
-      if (p && p.catch) {
-        p.catch(function () {
-          ttsUnlocked = false;
-        });
-      }
-    } catch (e) {
-      ttsUnlocked = false;
-    }
-  }
-  ['click', 'touchstart', 'keydown'].forEach(function (ev) {
-    document.addEventListener(ev, unlockTts, { passive: true });
-  });
-
-  function browserSpeak(code, op, recall) {
-    var prefix = recall ? 'Qayta chaqiruv. ' : '';
-    Navbat.speak(prefix + code + ' raqamli mijoz, ' + op + 'ga murojaat qiling.');
-  }
-
-  // Exactly one of the paths below speaks per call: play() can be rejected (autoplay
-  // blocked), the file can fail to load (error event), or a newer call can replace this one.
-  var currentFallback = null;
-  function speakCall(call) {
-    var done = false;
-    var fallback = function () {
-      if (done) return;
-      done = true;
-      browserSpeak(call.code, call.operatorName, call.recall);
-    };
-    currentFallback = fallback;
-    if (!ttsEnabled) return fallback();
-    try {
-      ttsAudio.src =
-        '/api/tts?code=' + encodeURIComponent(call.code) +
-        '&op=' + encodeURIComponent(call.operatorName) +
-        (call.recall ? '&recall=1' : '');
-      var p = ttsAudio.play();
-      if (p && p.catch) {
-        p.catch(function (err) {
-          if (err && err.name === 'AbortError') return; // replaced by a newer call
-          fallback();
-        });
-      }
-    } catch (e) {
-      fallback();
-    }
-  }
-  ttsAudio.addEventListener('error', function () {
-    // a real server-voice failure (not the silent unlock clip) falls back to the browser voice
-    if (ttsAudio.src.indexOf('/api/tts') === -1) return;
-    if (currentFallback) currentFallback();
-  });
 
   function announce(call) {
     if (soundOn) TVVoice.enqueue(call);
@@ -205,6 +144,7 @@
 
   function render(view) {
     ttsEnabled = !!view.tts;
+    TVVoice.setNaturalEnabled(ttsEnabled);
     // Unattended TV: when the server is redeployed (new asset version), reload to pick up the new page.
     if (view.assetVersion) {
       if (!loadedAssetVersion) loadedAssetVersion = view.assetVersion;

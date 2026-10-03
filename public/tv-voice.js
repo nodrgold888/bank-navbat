@@ -7,6 +7,7 @@
   var running = false;
   var generation = 0;
   var enabled = true;
+  var naturalEnabled = false;
   var report = function () {};
   function context() {
     if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -44,6 +45,22 @@
       source.start();
     });
   }
+  function natural(call) {
+    var key = 'natural:' + (call.recall ? '1:' : '0:') + call.code + ':' + call.operatorId;
+    if (!buffers.has(key)) {
+      var controller = new AbortController();
+      var timeout = setTimeout(function () { controller.abort(); }, 15000);
+      var url = '/api/tts?code=' + encodeURIComponent(call.code) +
+        '&operator=' + encodeURIComponent(call.operatorId) + (call.recall ? '&recall=1' : '');
+      var promise = fetch(url, { signal: controller.signal })
+        .then(function (r) { if (!r.ok) throw new Error('Tabiiy ovoz ishlamadi'); return r.arrayBuffer(); })
+        .then(function (bytes) { return context().decodeAudioData(bytes); })
+        .catch(function (err) { buffers.delete(key); throw err; })
+        .finally(function () { clearTimeout(timeout); });
+      buffers.set(key, promise);
+    }
+    return buffers.get(key);
+  }
   // F was not supplied. Only that letter uses speech synthesis until F.wav exists.
   async function missingF() {
     try { return await load('F'); } catch (_) { return null; }
@@ -73,6 +90,14 @@
       while (queue.length && enabled && version === generation) {
         var call = queue.shift();
         try {
+          if (naturalEnabled) {
+            try {
+              await play(await natural(call));
+              continue;
+            } catch (_) {
+              // Keep the TV useful during an API/network outage by using local recordings.
+            }
+          }
           var parts = tokens(call);
           var audio = await Promise.all(parts.map(function (key) { return key === 'F' ? missingF() : load(key); }));
           for (var i = 0; i < parts.length && enabled && version === generation; i++) {
@@ -91,6 +116,7 @@
     enqueue: function (call) { if (enabled) { queue.push(call); drain(); } },
     onError: function (cb) { report = cb; },
     unlock: function () { try { context().resume().then(drain).catch(function () { report('Ovozni yoqish uchun “Sinash” tugmasini bosing'); }); } catch (e) { report(e.message); } },
+    setNaturalEnabled: function (value) { naturalEnabled = !!value; },
     setEnabled: function (value) {
       enabled = value;
       if (!value) { generation++; queue.length = 0; if (currentSource) currentSource.stop(); if (cancelSpeech) cancelSpeech(); }
