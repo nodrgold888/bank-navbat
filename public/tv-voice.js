@@ -82,12 +82,12 @@
     var n = Number(m[2]);
     if (n < 1 || n > 999) return null;
     var plan = call.recall ? [['recall', 0.25]] : [];
-    plan.push(['l-' + m[1], 0.06]);
+    plan.push(['l-' + m[1], 0.03]);
     var hundreds = Math.floor(n / 100), rest = n % 100;
-    if (hundreds && !rest) plan.push(['ht-' + hundreds, 0.18]);
+    if (hundreds && !rest) plan.push(['ht-' + hundreds, 0.1]);
     else {
-      if (hundreds) plan.push(['h-' + hundreds, 0.06]);
-      plan.push(['n-' + rest, 0.18]);
+      if (hundreds) plan.push(['h-' + hundreds, 0.03]);
+      plan.push(['n-' + rest, 0.1]);
     }
     plan.push(['op-' + operator, 0]);
     return plan;
