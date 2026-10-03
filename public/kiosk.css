@@ -5,6 +5,13 @@ body.kiosk {
     radial-gradient(900px 620px at 100% 0%, rgba(48, 200, 139, 0.34), transparent 62%),
     linear-gradient(135deg, #0c5e78 0%, #168463 100%);
 }
+/* Davr Bank mark as a large white watermark behind the content */
+body.kiosk::before {
+  content: ''; position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 0; pointer-events: none;
+  background: url('/img/davr-mark.svg') 50% 54% / auto 105vh no-repeat;
+  opacity: 0.13; filter: brightness(0) invert(1);
+}
+.kiosk .k-wrap { position: relative; z-index: 1; }
 .kiosk .k-wrap { max-width: 1320px; padding: clamp(18px, 3vw, 44px); }
 .kiosk .k-head { padding: 0 0 clamp(20px, 2.5vw, 32px); }
 .kiosk .k-brand { gap: 14px; font-size: clamp(1.15rem, 2vw, 1.6rem); }
