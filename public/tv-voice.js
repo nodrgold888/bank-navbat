@@ -7,6 +7,7 @@
   var running = false;
   var generation = 0;
   var enabled = true;
+  var mode = 'voice'; // 'voice' = spoken call, 'ringtone' = the original bell only
   var naturalEnabled = false;
   var report = function () {};
   function context() {
@@ -26,7 +27,7 @@
     if (!buffers.has(key)) {
       var controller = new AbortController();
       var timeout = setTimeout(function () { controller.abort(); }, 10000);
-      var promise = fetch('/audio/voice/' + key + '.wav', { signal: controller.signal })
+      var promise = fetch(key === 'ringtone' ? '/audio/ringtone.mp3' : '/audio/voice/' + key + '.wav', { signal: controller.signal })
         .then(function (r) { if (!r.ok) throw new Error('Audio topilmadi: ' + key); return r.arrayBuffer(); })
         .then(function (bytes) { return context().decodeAudioData(bytes); })
         .catch(function (err) { buffers.delete(key); throw err; })
@@ -124,6 +125,12 @@
       window.speechSynthesis.speak(utter);
     });
   }
+  // Original bell (public/audio/ringtone.mp3): once for a call, twice for a recall.
+  async function ring(call) {
+    var bell = await load('ringtone');
+    await play(bell);
+    if (call.recall) { await pause(0.3); await play(bell); }
+  }
   async function drain() {
     if (running || !enabled || !queue.length) return;
     running = true;
@@ -134,6 +141,10 @@
       while (queue.length && enabled && version === generation) {
         var call = queue.shift();
         try {
+          if (mode === 'ringtone') {
+            await ring(call);
+            continue;
+          }
           if (naturalEnabled) {
             try {
               await play(await natural(call));
@@ -171,6 +182,8 @@
     onError: function (cb) { report = cb; },
     unlock: function () { try { context().resume().then(drain).catch(function () { report('Ovozni yoqish uchun “Sinash” tugmasini bosing'); }); } catch (e) { report(e.message); } },
     setNaturalEnabled: function (value) { naturalEnabled = !!value; },
+    setMode: function (value) { mode = value === 'ringtone' ? 'ringtone' : 'voice'; },
+    getMode: function () { return mode; },
     setEnabled: function (value) {
       enabled = value;
       if (!value) { generation++; queue.length = 0; if (currentSource) currentSource.stop(); if (cancelSpeech) cancelSpeech(); }

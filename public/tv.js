@@ -11,6 +11,26 @@
   TVVoice.setEnabled(soundOn);
   TVVoice.onError(voiceToast);
 
+  // Sound mode: spoken call ('voice') or the original bell ('ringtone'). Priority: ?mode= in
+  // the URL, then the button on this TV, then the server default (TV_SOUND_MODE).
+  var serverMode = 'voice';
+  var urlMode = (location.search.match(/[?&]mode=(voice|ringtone)/) || [])[1];
+  var savedMode = null;
+  try { savedMode = localStorage.getItem('tvMode'); } catch (e) {}
+  function currentMode() { return urlMode || savedMode || serverMode; }
+  function applyMode() {
+    TVVoice.setMode(currentMode());
+    $('modeToggle').textContent = currentMode() === 'ringtone' ? '🔔 Qo‘ng‘iroq' : '🗣️ Ovoz';
+  }
+  $('modeToggle').addEventListener('click', function () {
+    savedMode = currentMode() === 'ringtone' ? 'voice' : 'ringtone';
+    urlMode = null;
+    try { localStorage.setItem('tvMode', savedMode); } catch (e) {}
+    applyMode();
+    TVVoice.unlock();
+  });
+  applyMode();
+
   function updateSoundBtn() {
     $('soundToggle').textContent = soundOn ? '🔊 Signal' : '🔇 Signal';
   }
@@ -144,6 +164,7 @@
 
   function render(view) {
     ttsEnabled = !!view.tts;
+    if (view.tvMode && view.tvMode !== serverMode) { serverMode = view.tvMode; applyMode(); }
     TVVoice.setNaturalEnabled(ttsEnabled);
     // Unattended TV: when the server is redeployed (new asset version), reload to pick up the new page.
     if (view.assetVersion) {

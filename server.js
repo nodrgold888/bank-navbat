@@ -680,6 +680,8 @@ function buildView() {
   return {
     assetVersion: ASSET_VERSION,
     tts: TTS_ENABLED,
+    // Default TV sound: 'voice' (spoken call) or 'ringtone' (original bell only). Env TV_SOUND_MODE.
+    tvMode: process.env.TV_SOUND_MODE === 'ringtone' ? 'ringtone' : 'voice',
     businessDate: state.businessDate,
     services,
     board,

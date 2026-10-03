@@ -58,6 +58,11 @@ sentence is prepared when the ticket is issued for every operator that serves th
 the TV automatically uses the bundled Uzbek recordings.
 The restricted `part=clip&key=...` variant exists only to create the finite set of bundled
 Mira clips; it cannot synthesize arbitrary text and is inactive while cloud speech is off.
+**Spoken call or ringtone only:** the TV can either speak each call (`voice`, default) or just
+play the original bell (`ringtone`, `public/audio/ringtone.mp3`; twice for a repeat call). Switch
+it with the **🗣️ Ovoz / 🔔 Qo'ng'iroq** button in the TV header, with `/tv?mode=ringtone` (or
+`?mode=voice`), or for every TV at once with `TV_SOUND_MODE=ringtone` on the host. Priority: URL,
+then the button on that TV, then `TV_SOUND_MODE`.
 Without the key (or if Azure fails) the TV falls back to the browser voice. Browsers need
 one interaction (press "Signal" or "Sinash" once) before audio can play, unless Chrome
 is started with `--autoplay-policy=no-user-gesture-required` (`tv-autostart.bat` does).
