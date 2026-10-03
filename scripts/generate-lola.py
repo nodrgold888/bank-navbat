@@ -7,8 +7,11 @@ account suspended for "automated access" once. Needs curl and ffmpeg.
 """
 import json, os, subprocess, sys, time
 KEY = os.environ['LK']
+VOICE = os.environ.get('LYNX_TTS_VOICE', 'lynx_voice_mira_v1')
+LANGUAGE = os.environ.get('LYNX_TTS_LANGUAGE', 'uz')
+EXPRESSIVENESS = os.environ.get('LYNX_TTS_EXPRESSIVENESS', 'natural')
 OUT = sys.argv[1]; os.makedirs(OUT, exist_ok=True)
-RAW = os.path.join(os.environ.get('TMPDIR', '/tmp'), 'lola-raw'); os.makedirs(RAW, exist_ok=True)
+RAW = os.path.join(os.environ.get('TMPDIR', '/tmp'), 'mira-natural-raw'); os.makedirs(RAW, exist_ok=True)
 ONES = ['', 'bir', 'ikki', 'uch', 'to‘rt', 'besh', 'olti', 'yetti', 'sakkiz', 'to‘qqiz']
 TENS = ['', 'o‘n', 'yigirma', 'o‘ttiz', 'qirq', 'ellik', 'oltmish', 'yetmish', 'sakson', 'to‘qson']
 def words(n):  # 1..99
@@ -20,8 +23,8 @@ items = {}
 for k, v in LET.items(): items['l-' + k] = v
 # Keep each destination phrase in one recording. Building it from separate
 # ordinal/operator/instruction clips makes the cadence sound robotic.
-for i in range(1, 7): items['op-%d' % i] = ORD[i - 1] + ' operatorga marhamat.'
-items['op-7'] = 'valyuta kassasiga marhamat.'
+for i in range(1, 7): items['op-%d' % i] = ORD[i - 1] + ' aperatorga murojaat qiling.'
+items['op-7'] = 'valyuta aperatorga murojaat qiling.'
 items['recall'] = 'Qayta chaqiruv.'
 for h in range(1, 10):
     items['h-%d' % h] = HUND[h]
@@ -36,7 +39,9 @@ for key, text in items.items():
     for attempt in range(3):
         subprocess.run(['curl', '-s', '-m', '90', '-o', raw, '-D', hdr, '-X', 'POST', 'https://api.lynx-ai.uz/v1/audio/speech',
                         '-H', 'Authorization: Bearer ' + KEY, '-H', 'Content-Type: application/json',
-                        '-d', json.dumps({'text': text, 'voice': 'lynx_voice_lola_v1'})])
+                        '-d', json.dumps({'text': text, 'voice': VOICE, 'language': LANGUAGE,
+                                          'expressiveness': EXPRESSIVENESS,
+                                          'ai_normalize': False, 'enhance': False})])
         h = open(hdr).read()
         if 'audio/mpeg' in h: break
         print('retry', key, open(raw, 'rb').read()[:200]); time.sleep(3)
