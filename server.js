@@ -1081,7 +1081,7 @@ const NUMBER_TENS = ['', "o‘n", 'yigirma', "o‘ttiz", 'qirq', 'ellik', 'oltmi
 
 function operatorInstruction(operatorId) {
   return operatorId === 7
-    ? 'valyuta aperatorga murojaat qiling.'
+    ? 'valyuta kassaga murojaat qiling.'
     : `${OPERATOR_SPEECH[operatorId - 1]} aperatorga murojaat qiling.`;
 }
 
