@@ -1044,6 +1044,8 @@ const LYNX_TTS_ENDPOINT = process.env.LYNX_TTS_ENDPOINT || 'https://api.lynx-ai.
 const LYNX_TTS_VOICE = process.env.LYNX_TTS_VOICE || 'lynx_voice_mira_v1';
 const LYNX_TTS_LANGUAGE = process.env.LYNX_TTS_LANGUAGE || 'uz';
 const LYNX_TTS_EXPRESSIVENESS = process.env.LYNX_TTS_EXPRESSIVENESS || 'natural';
+// The voice Lynx reports it actually used (x-lynx-voice), to confirm LYNX_TTS_VOICE took effect.
+let lynxServedVoice = null;
 const AZURE_SPEECH_KEY = process.env.AZURE_SPEECH_KEY || '';
 const AZURE_SPEECH_REGION = process.env.AZURE_SPEECH_REGION || '';
 const AZURE_SPEECH_VOICE = process.env.AZURE_SPEECH_VOICE || 'uz-UZ-MadinaNeural';
@@ -1082,16 +1084,29 @@ function operatorInstruction(operatorId) {
 }
 
 function buildAnnouncementText(code, operatorId, recall) {
-  const spokenCode = [LETTER_SPEECH[code[0]], ...code.slice(1).split('').map((digit) => DIGIT_SPEECH[Number(digit)])].join(' ');
   const prefix = recall ? 'Qayta chaqiruv. ' : '';
-  return `${prefix}Hurmatli ${spokenCode} raqamli mijoz, ${operatorInstruction(operatorId)}`;
+  return `${prefix}Hurmatli ${spokenCode(code)} raqamli mijoz, ${operatorInstruction(operatorId)}`;
 }
 
 // The announcement is built from two independently cached pieces so nothing has to be
 // synthesized when an operator presses "call": the ticket part is prepared as soon as the
 // ticket exists (its code is known), and the 7 operator parts are prepared at boot.
+// Numbers are read as words ("yuz yigirma uch"), like the bundled Mira clips; reading them
+// digit by digit ("bir ikki uch") sounded robotic. Codes past 999 fall back to digits.
+function numberWords(n) {
+  if (!Number.isInteger(n) || n < 1 || n > 999) return null;
+  const hundreds = Math.floor(n / 100);
+  const rest = n % 100;
+  return [
+    hundreds ? (hundreds === 1 ? 'yuz' : `${NUMBER_ONES[hundreds]} yuz`) : '',
+    NUMBER_TENS[Math.floor(rest / 10)],
+    NUMBER_ONES[rest % 10],
+  ].filter(Boolean).join(' ');
+}
 function spokenCode(code) {
-  return [LETTER_SPEECH[code[0]], ...code.slice(1).split('').map((digit) => DIGIT_SPEECH[Number(digit)])].join(' ');
+  const words = numberWords(Number(code.slice(1)));
+  const number = words || code.slice(1).split('').map((digit) => DIGIT_SPEECH[Number(digit)]).join(' ');
+  return `${LETTER_SPEECH[code[0]]}, ${number}`;
 }
 function buildTicketPartText(code, recall) {
   return `${recall ? 'Qayta chaqiruv. ' : ''}Hurmatli ${spokenCode(code)} raqamli mijoz,`;
@@ -1206,6 +1221,7 @@ async function synthesize(text) {
           signal: controller.signal,
         });
     if (!r.ok) throw new Error(`${isLynx ? 'Lynx' : 'Azure'} TTS ${r.status}`);
+    if (isLynx) lynxServedVoice = r.headers.get('x-lynx-voice') || lynxServedVoice;
     return Buffer.from(await r.arrayBuffer());
   } finally {
     clearTimeout(timer);
@@ -1233,6 +1249,7 @@ async function ttsHandler(res, url) {
         voice: TTS_PROVIDER === 'lynx' ? LYNX_TTS_VOICE : AZURE_SPEECH_VOICE,
         language: TTS_PROVIDER === 'lynx' ? LYNX_TTS_LANGUAGE : 'uz-UZ',
         expressiveness: TTS_PROVIDER === 'lynx' ? LYNX_TTS_EXPRESSIVENESS : null,
+        lynxServedVoice,
       })
     );
   }
