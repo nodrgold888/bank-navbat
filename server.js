@@ -1069,11 +1069,19 @@ function xmlEscape(text) {
 const LETTER_SPEECH = { A: 'A', B: 'Be', C: 'Se', D: 'De', E: 'E', F: 'Ef', G: 'Ge' };
 const DIGIT_SPEECH = ['nol', 'bir', 'ikki', 'uch', "to‘rt", 'besh', 'olti', 'yetti', 'sakkiz', "to‘qqiz"];
 const OPERATOR_SPEECH = ['birinchi', 'ikkinchi', 'uchinchi', "to‘rtinchi", 'beshinchi', 'oltinchi', 'yettinchi'];
+const NUMBER_ONES = ['', 'bir', 'ikki', 'uch', "to‘rt", 'besh', 'olti', 'yetti', 'sakkiz', "to‘qqiz"];
+const NUMBER_TENS = ['', "o‘n", 'yigirma', "o‘ttiz", 'qirq', 'ellik', 'oltmish', 'yetmish', 'sakson', "to‘qson"];
+
+function operatorInstruction(operatorId) {
+  return operatorId === 7
+    ? 'valyuta operatoriga murojaat qiling.'
+    : `${OPERATOR_SPEECH[operatorId - 1]} operatorga murojaat qiling.`;
+}
 
 function buildAnnouncementText(code, operatorId, recall) {
   const spokenCode = [LETTER_SPEECH[code[0]], ...code.slice(1).split('').map((digit) => DIGIT_SPEECH[Number(digit)])].join(' ');
   const prefix = recall ? 'Qayta chaqiruv. ' : '';
-  return `${prefix}Hurmatli ${spokenCode} raqamli mijoz, ${OPERATOR_SPEECH[operatorId - 1]} operatorga murojaat qiling.`;
+  return `${prefix}Hurmatli ${spokenCode} raqamli mijoz, ${operatorInstruction(operatorId)}`;
 }
 
 // The announcement is built from two independently cached pieces so nothing has to be
@@ -1086,7 +1094,11 @@ function buildTicketPartText(code, recall) {
   return `${recall ? 'Qayta chaqiruv. ' : ''}Hurmatli ${spokenCode(code)} raqamli mijoz,`;
 }
 function buildOperatorPartText(operatorId) {
-  return `${OPERATOR_SPEECH[operatorId - 1]} operatorga murojaat qiling.`;
+  return operatorInstruction(operatorId);
+}
+function buildNumberPartText(number) {
+  const words = [NUMBER_TENS[Math.floor(number / 10)], NUMBER_ONES[number % 10]].filter(Boolean).join(' ');
+  return `${words} raqamli mijoz,`;
 }
 
 /** Cached, de-duplicated, rate-limited synthesis. Resolves null when the rate limit is hit. */
@@ -1114,6 +1126,7 @@ function cachedSynthesis(key, text) {
 
 const ticketPartKey = (code, recall) => `${TTS_PROVIDER}|ticket|${recall ? 1 : 0}|${code}`;
 const operatorPartKey = (operatorId) => `${TTS_PROVIDER}|operator|${operatorId}`;
+const numberPartKey = (number) => `${TTS_PROVIDER}|number|${number}`;
 
 function prefetchTicketVoice(code, recall) {
   if (!TTS_ENABLED) return;
@@ -1150,7 +1163,7 @@ async function synthesize(text) {
       ? {
           method: 'POST',
           headers: { Authorization: `Bearer ${LYNX_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({ text, voice: 'lynx_voice_lola_v1' }),
           signal: controller.signal,
         }
       : {
@@ -1198,18 +1211,31 @@ async function ttsHandler(res, url) {
   const code = url.searchParams.get('code') || '';
   const op = url.searchParams.get('op') || '';
   const operatorParam = url.searchParams.get('operator') || '';
+  const number = Number(url.searchParams.get('number') || '');
   const recall = url.searchParams.get('recall') === '1';
   const operatorId = Number(operatorParam || ((op.match(/\d+/) || [])[0]) || (/valyuta/i.test(op) ? 7 : 0));
-  if (part === 'ticket' || part === 'operator') {
+  if (part === 'ticket' || part === 'operator' || part === 'number') {
     const valid =
       part === 'ticket'
         ? /^[A-G]\d{3,4}$/.test(code)
-        : Number.isInteger(operatorId) && operatorId >= 1 && operatorId <= 7;
+        : part === 'operator'
+          ? Number.isInteger(operatorId) && operatorId >= 1 && operatorId <= 7
+          : Number.isInteger(number) && number >= 1 && number <= 99;
     if (!valid) return send(400, 'Notoʻgʻri parametr');
     try {
+      const cacheKey = part === 'ticket'
+        ? ticketPartKey(code, recall)
+        : part === 'operator'
+          ? operatorPartKey(operatorId)
+          : numberPartKey(number);
+      const text = part === 'ticket'
+        ? buildTicketPartText(code, recall)
+        : part === 'operator'
+          ? buildOperatorPartText(operatorId)
+          : buildNumberPartText(number);
       const audio = await cachedSynthesis(
-        part === 'ticket' ? ticketPartKey(code, recall) : operatorPartKey(operatorId),
-        part === 'ticket' ? buildTicketPartText(code, recall) : buildOperatorPartText(operatorId)
+        cacheKey,
+        text
       );
       if (!audio) return send(429, 'Juda koʻp soʻrov');
       res.writeHead(200, {
