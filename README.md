@@ -42,8 +42,11 @@ flag the on-screen "Signal: yoniq" toggle looks on but nothing plays.
 The API key stays on the server — set `LYNX_API_KEY` on Render and never commit it.
 Azure remains available as a fallback through `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION`
 (e.g. `westeurope`) and optional `AZURE_SPEECH_VOICE`. The TV asks
-`GET /api/tts?code=B001&operator=6`; the server builds the announcement itself (no free
-text), caches the audio and rate-limits new synthesis. If cloud speech is unavailable,
+`GET /api/tts?part=ticket&code=B001` and `GET /api/tts?part=operator&operator=6` and plays
+the two pieces back to back; the server builds the text itself (no free text), caches the
+audio and rate-limits new synthesis. To avoid a multi-second wait when an operator presses
+"call", the ticket piece is prepared when the ticket is issued (and its "Qayta chaqiruv"
+variant when it is called) and the seven operator pieces when the server starts. If cloud speech is unavailable,
 the TV automatically uses the bundled Uzbek recordings.
 Without the key (or if Azure fails) the TV falls back to the browser voice. Browsers need
 one interaction (press "Signal" or "Sinash" once) before audio can play, unless Chrome

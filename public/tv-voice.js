@@ -45,14 +45,13 @@
       source.start();
     });
   }
-  function natural(call) {
-    var key = 'natural:' + (call.recall ? '1:' : '0:') + call.code + ':' + call.operatorId;
+  // The server serves the announcement as two cached pieces (ticket, operator) that are
+  // already prepared by the time an operator presses "call"; they play back to back.
+  function naturalPart(key, query) {
     if (!buffers.has(key)) {
       var controller = new AbortController();
       var timeout = setTimeout(function () { controller.abort(); }, 15000);
-      var url = '/api/tts?code=' + encodeURIComponent(call.code) +
-        '&operator=' + encodeURIComponent(call.operatorId) + (call.recall ? '&recall=1' : '');
-      var promise = fetch(url, { signal: controller.signal })
+      var promise = fetch('/api/tts?' + query, { signal: controller.signal })
         .then(function (r) { if (!r.ok) throw new Error('Tabiiy ovoz ishlamadi'); return r.arrayBuffer(); })
         .then(function (bytes) { return context().decodeAudioData(bytes); })
         .catch(function (err) { buffers.delete(key); throw err; })
@@ -60,6 +59,17 @@
       buffers.set(key, promise);
     }
     return buffers.get(key);
+  }
+  function natural(call) {
+    var recall = call.recall ? '&recall=1' : '';
+    var ticketKey = 'natural:ticket:' + (call.recall ? '1:' : '0:') + call.code;
+    return Promise.all([
+      naturalPart(ticketKey, 'part=ticket&code=' + encodeURIComponent(call.code) + recall),
+      naturalPart('natural:operator:' + call.operatorId, 'part=operator&operator=' + encodeURIComponent(call.operatorId))
+    ]).then(function (parts) {
+      buffers.delete(ticketKey); // per-ticket audio is not reused; keep memory flat on a long-running TV
+      return parts;
+    });
   }
   // F was not supplied. Only that letter uses speech synthesis until F.wav exists.
   async function missingF() {
@@ -92,7 +102,9 @@
         try {
           if (naturalEnabled) {
             try {
-              await play(await natural(call));
+              var pieces = await natural(call);
+              await play(pieces[0]);
+              await play(pieces[1]);
               continue;
             } catch (_) {
               // Keep the TV useful during an API/network outage by using local recordings.

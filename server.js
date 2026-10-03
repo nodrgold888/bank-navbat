@@ -341,6 +341,7 @@ function issueTicket(serviceId) {
     operatorId: null,
   };
   state.tickets.push(ticket);
+  prefetchTicketVoice(ticket.code, false);
 
   const peopleAhead = state.tickets.filter(
     (t) => t.status === 'waiting' && t.serviceId === serviceId && t.createdAt < ticket.createdAt
@@ -406,6 +407,7 @@ function assignNext(op, serviceId) {
     recall: false,
     seq: state.callSeq,
   };
+  prefetchTicketVoice(next.code, true); // so a later "Qayta chaqirish" is instant too
   return next;
 }
 
@@ -1071,6 +1073,64 @@ function buildAnnouncementText(code, operatorId, recall) {
   return `${prefix}Hurmatli ${spokenCode} raqamli mijoz, ${OPERATOR_SPEECH[operatorId - 1]} operatorga murojaat qiling.`;
 }
 
+// The announcement is built from two independently cached pieces so nothing has to be
+// synthesized when an operator presses "call": the ticket part is prepared as soon as the
+// ticket exists (its code is known), and the 7 operator parts are prepared at boot.
+function spokenCode(code) {
+  return [LETTER_SPEECH[code[0]], ...code.slice(1).split('').map((digit) => DIGIT_SPEECH[Number(digit)])].join(' ');
+}
+function buildTicketPartText(code, recall) {
+  return `${recall ? 'Qayta chaqiruv. ' : ''}Hurmatli ${spokenCode(code)} raqamli mijoz,`;
+}
+function buildOperatorPartText(operatorId) {
+  return `${OPERATOR_SPEECH[operatorId - 1]} operatorga murojaat qiling.`;
+}
+
+/** Cached, de-duplicated, rate-limited synthesis. Resolves null when the rate limit is hit. */
+function cachedSynthesis(key, text) {
+  const hit = ttsCache.get(key);
+  if (hit) return Promise.resolve(hit);
+  let job = ttsInflight.get(key);
+  if (job) return job;
+  const now = Date.now();
+  if (now - ttsWindowStart > 60000) {
+    ttsWindowStart = now;
+    ttsWindowCount = 0;
+  }
+  if (++ttsWindowCount > TTS_RATE_PER_MIN) return Promise.resolve(null);
+  job = synthesize(text)
+    .then((audio) => {
+      ttsCache.set(key, audio);
+      while (ttsCache.size > TTS_CACHE_MAX) ttsCache.delete(ttsCache.keys().next().value);
+      return audio;
+    })
+    .finally(() => ttsInflight.delete(key));
+  ttsInflight.set(key, job);
+  return job;
+}
+
+const ticketPartKey = (code, recall) => `${TTS_PROVIDER}|ticket|${recall ? 1 : 0}|${code}`;
+const operatorPartKey = (operatorId) => `${TTS_PROVIDER}|operator|${operatorId}`;
+
+function prefetchTicketVoice(code, recall) {
+  if (!TTS_ENABLED) return;
+  cachedSynthesis(ticketPartKey(code, recall), buildTicketPartText(code, recall)).catch((err) =>
+    console.error('TTS oldindan tayyorlash xatosi:', err.message)
+  );
+}
+
+function prefetchOperatorVoices() {
+  if (!TTS_ENABLED) return;
+  // Staggered so a restart doesn't hit the provider with 7 requests at once.
+  for (let id = 1; id <= OPERATOR_SPEECH.length; id++) {
+    setTimeout(() => {
+      cachedSynthesis(operatorPartKey(id), buildOperatorPartText(id)).catch((err) =>
+        console.error('TTS oldindan tayyorlash xatosi:', err.message)
+      );
+    }, id * 1500).unref();
+  }
+}
+
 function buildAzureSsml(text) {
   return (
     `<speak version='1.0' xml:lang='uz-UZ'>` +
@@ -1115,7 +1175,7 @@ async function ttsHandler(res, url) {
   };
   // GET /api/tts with no parameters reports the setup (booleans only, never the key) so a
   // missing/misnamed environment variable can be spotted without server logs.
-  if (!url.searchParams.has('code') && !url.searchParams.has('op')) {
+  if (!url.searchParams.has('code') && !url.searchParams.has('op') && !url.searchParams.has('part')) {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
     return res.end(
       JSON.stringify({
@@ -1130,11 +1190,35 @@ async function ttsHandler(res, url) {
     );
   }
   if (!TTS_ENABLED) return send(503, 'TTS sozlanmagan');
+  const part = url.searchParams.get('part') || '';
   const code = url.searchParams.get('code') || '';
   const op = url.searchParams.get('op') || '';
   const operatorParam = url.searchParams.get('operator') || '';
   const recall = url.searchParams.get('recall') === '1';
   const operatorId = Number(operatorParam || ((op.match(/\d+/) || [])[0]) || (/valyuta/i.test(op) ? 7 : 0));
+  if (part === 'ticket' || part === 'operator') {
+    const valid =
+      part === 'ticket'
+        ? /^[A-G]\d{3,4}$/.test(code)
+        : Number.isInteger(operatorId) && operatorId >= 1 && operatorId <= 7;
+    if (!valid) return send(400, 'Notoʻgʻri parametr');
+    try {
+      const audio = await cachedSynthesis(
+        part === 'ticket' ? ticketPartKey(code, recall) : operatorPartKey(operatorId),
+        part === 'ticket' ? buildTicketPartText(code, recall) : buildOperatorPartText(operatorId)
+      );
+      if (!audio) return send(429, 'Juda koʻp soʻrov');
+      res.writeHead(200, {
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': audio.length,
+        'Cache-Control': 'private, max-age=3600',
+      });
+      return res.end(audio);
+    } catch (err) {
+      console.error('TTS xatosi:', err.message);
+      return send(502, 'TTS xatosi');
+    }
+  }
   if (!/^[A-G]\d{3,4}$/.test(code) || !Number.isInteger(operatorId) || operatorId < 1 || operatorId > 7) {
     return send(400, 'Notoʻgʻri parametr');
   }
@@ -1291,6 +1375,7 @@ server.keepAliveTimeout = 65 * 1000;
 server.headersTimeout = 66 * 1000;
 
 server.listen(PORT, () => {
+  prefetchOperatorVoices();
   const addrs = ['localhost', ...lanAddresses()];
   console.log('\n  Bank navbat tizimi ishga tushdi\n');
   for (const a of addrs) {
