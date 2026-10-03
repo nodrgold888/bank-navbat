@@ -1048,7 +1048,10 @@ const AZURE_SPEECH_ENDPOINT =
   process.env.AZURE_SPEECH_ENDPOINT ||
   (AZURE_SPEECH_REGION ? `https://${AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1` : '');
 const TTS_PROVIDER = LYNX_API_KEY ? 'lynx' : AZURE_SPEECH_KEY && AZURE_SPEECH_ENDPOINT ? 'azure' : '';
-const TTS_ENABLED = Boolean(TTS_PROVIDER);
+// Cloud speech bills per request, so it stays OFF unless TV_CLOUD_VOICE=on is set; the TV
+// otherwise announces calls from the bundled recordings (public/audio/voice), which are free.
+const CLOUD_VOICE_ON = process.env.TV_CLOUD_VOICE === 'on';
+const TTS_ENABLED = Boolean(TTS_PROVIDER) && CLOUD_VOICE_ON;
 
 const TTS_CACHE_MAX = 400;
 const TTS_RATE_PER_MIN = 90;
@@ -1181,6 +1184,7 @@ async function ttsHandler(res, url) {
       JSON.stringify({
         enabled: TTS_ENABLED,
         provider: TTS_PROVIDER || null,
+        cloudVoiceOn: CLOUD_VOICE_ON,
         hasLynxKey: Boolean(LYNX_API_KEY),
         hasAzureKey: Boolean(AZURE_SPEECH_KEY),
         hasRegion: Boolean(AZURE_SPEECH_REGION),

@@ -40,6 +40,9 @@ flag the on-screen "Signal: yoniq" toggle looks on but nothing plays.
 
 **TV voice (native Uzbek):** the TV announces each call through Lynx AI Uzbekistan.
 The API key stays on the server — set `LYNX_API_KEY` on Render and never commit it.
+**Cloud speech is off by default** (it bills per request): the TV announces calls from the
+bundled recordings in `public/audio/voice` at no cost. Set `TV_CLOUD_VOICE=on` together with a
+key to turn cloud speech back on.
 Azure remains available as a fallback through `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION`
 (e.g. `westeurope`) and optional `AZURE_SPEECH_VOICE`. The TV asks
 `GET /api/tts?part=ticket&code=B001` and `GET /api/tts?part=operator&operator=6` and plays
