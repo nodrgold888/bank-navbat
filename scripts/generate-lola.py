@@ -18,7 +18,7 @@ def words(n):  # 1..99
     return ' '.join(w for w in (TENS[n // 10], ONES[n % 10]) if w)
 HUND = ['', 'yuz'] + [ONES[i] + ' yuz' for i in range(2, 10)]
 ORD = ['birinchi', 'ikkinchi', 'uchinchi', 'to‘rtinchi', 'beshinchi', 'oltinchi']
-LET = {'A': 'A', 'B': 'Be', 'C': 'Si', 'D': 'De', 'E': 'E', 'F': 'Ef', 'G': 'Gey'}  # Mira reads plain "Ge" as "xe"; "Gey" gives a clear G
+LET = {'A': 'Ey', 'B': 'Bi', 'C': 'Si', 'D': 'Di', 'E': 'I', 'F': 'Ef', 'G': 'Ji'}  # letter names as the branch says them; bare 'Ge'/'A'/'E' were misread by Mira
 items = {}
 for k, v in LET.items(): items['l-' + k] = v
 # Keep each destination phrase in one recording. Building it from separate

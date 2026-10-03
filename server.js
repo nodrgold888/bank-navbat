@@ -1073,7 +1073,7 @@ function xmlEscape(text) {
   return text.replace(/[<>&'"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[c]);
 }
 
-const LETTER_SPEECH = { A: 'A', B: 'Be', C: 'Si', D: 'De', E: 'E', F: 'Ef', G: 'Gey' };
+const LETTER_SPEECH = { A: 'Ey', B: 'Bi', C: 'Si', D: 'Di', E: 'I', F: 'Ef', G: 'Ji' };
 const DIGIT_SPEECH = ['nol', 'bir', 'ikki', 'uch', "to‘rt", 'besh', 'olti', 'yetti', 'sakkiz', "to‘qqiz"];
 const OPERATOR_SPEECH = ['birinchi', 'ikkinchi', 'uchinchi', "to‘rtinchi", 'beshinchi', 'oltinchi', 'yettinchi'];
 const NUMBER_ONES = ['', 'bir', 'ikki', 'uch', "to‘rt", 'besh', 'olti', 'yetti', 'sakkiz', "to‘qqiz"];
