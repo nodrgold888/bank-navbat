@@ -71,6 +71,45 @@
       return parts;
     });
   }
+  // Lola recordings (public/audio/lola): whole phrases, so a call is 3-4 natural pieces:
+  // letter, number ("yigirma uch raqamli mijoz,"), operator ("oltinchi operatorga marhamat.").
+  // Numbers 100-999 add a hundreds piece. Returns null when a call can't be built from them.
+  function lolaPlan(call) {
+    var code = String(call.code || '').toUpperCase();
+    var m = /^([A-G])(\d{3,})$/.exec(code);
+    var operator = Number(call.operatorId);
+    if (!m || !Number.isInteger(operator) || operator < 1 || operator > 7) return null;
+    var n = Number(m[2]);
+    if (n < 1 || n > 999) return null;
+    var plan = call.recall ? [['recall', 0.25]] : [];
+    plan.push(['l-' + m[1], 0.06]);
+    var hundreds = Math.floor(n / 100), rest = n % 100;
+    if (hundreds && !rest) plan.push(['ht-' + hundreds, 0.18]);
+    else {
+      if (hundreds) plan.push(['h-' + hundreds, 0.06]);
+      plan.push(['n-' + rest, 0.18]);
+    }
+    plan.push(['op-' + operator, 0]);
+    return plan;
+  }
+  function loadLola(key) {
+    var k = 'lola:' + key;
+    if (!buffers.has(k)) {
+      var controller = new AbortController();
+      var timeout = setTimeout(function () { controller.abort(); }, 10000);
+      var promise = fetch('/audio/lola/' + key + '.mp3', { signal: controller.signal })
+        .then(function (r) { if (!r.ok) throw new Error('Audio topilmadi: ' + key); return r.arrayBuffer(); })
+        .then(function (bytes) { return context().decodeAudioData(bytes); })
+        .catch(function (err) { buffers.delete(k); throw err; })
+        .finally(function () { clearTimeout(timeout); });
+      buffers.set(k, promise);
+    }
+    return buffers.get(k);
+  }
+  function pause(seconds) {
+    return new Promise(function (resolve) { setTimeout(resolve, seconds * 1000); });
+  }
+
   // F was not supplied. Only that letter uses speech synthesis until F.wav exists.
   async function missingF() {
     try { return await load('F'); } catch (_) { return null; }
@@ -110,6 +149,16 @@
               // Keep the TV useful during an API/network outage by using local recordings.
             }
           }
+          var plan = lolaPlan(call);
+          var lola = plan && await Promise.all(plan.map(function (step) { return loadLola(step[0]); })).catch(function () { return null; });
+          if (lola) {
+            for (var j = 0; j < plan.length && enabled && version === generation; j++) {
+              await play(lola[j]);
+              if (plan[j][1]) await pause(plan[j][1]);
+            }
+            continue;
+          }
+          // Older recordings cover anything the Lola set can't (e.g. a missing number clip).
           var parts = tokens(call);
           var audio = await Promise.all(parts.map(function (key) { return key === 'F' ? missingF() : load(key); }));
           for (var i = 0; i < parts.length && enabled && version === generation; i++) {
