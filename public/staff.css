@@ -198,3 +198,11 @@ body.staff.staff-dark {
   .staff button, .staff summary, .staff summary::after { transition: none; }
   .staff button:hover:not(:disabled), .staff button:active:not(:disabled) { transform: none; }
 }
+
+/* Davr Bank mark as a faint watermark behind the workspace (kept light so work areas stay readable) */
+body.staff::before {
+  content: ''; position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 0; pointer-events: none;
+  background: url('/img/davr-mark.svg') 50% 56% / auto 100vh no-repeat;
+  opacity: 0.09;
+}
+body.staff .staff-wrap { position: relative; z-index: 1; }
