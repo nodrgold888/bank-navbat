@@ -18,8 +18,8 @@ ORD = ['birinchi', 'ikkinchi', 'uchinchi', 'to‘rtinchi', 'beshinchi', 'oltinch
 LET = {'A': 'A', 'B': 'Be', 'C': 'Se', 'D': 'De', 'E': 'E', 'F': 'Ef', 'G': 'Ge'}
 items = {}
 for k, v in LET.items(): items['l-' + k] = v
-for i in range(1, 7): items['op-%d' % i] = ORD[i - 1] + ' aperatorga marhamat.'  # spoken form the branch prefers
-items['op-7'] = 'valyuta kassasiga marhamat.'
+for i in range(1, 7): items['op-%d' % i] = ORD[i - 1] + ' aperatorga murojaat qiling.'  # spoken form the branch prefers
+items['op-7'] = 'valyuta aperatorga murojaat qiling.'
 items['recall'] = 'Qayta chaqiruv.'
 for h in range(1, 10):
     items['h-%d' % h] = HUND[h]
