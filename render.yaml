@@ -8,6 +8,7 @@ services:
     buildCommand: npm install
     startCommand: npm start
     autoDeploy: true
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_VERSION
         value: "20"

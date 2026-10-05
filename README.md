@@ -58,6 +58,17 @@ sentence is prepared when the ticket is issued for every operator that serves th
 the TV automatically uses the bundled Uzbek recordings.
 The restricted `part=clip&key=...` variant exists only to create the finite set of bundled
 Mira clips; it cannot synthesize arbitrary text and is inactive while cloud speech is off.
+**Health check and keep-alive:** `GET /healthz` (also `HEAD`) is a cheap endpoint that returns
+`{ok, status, uptimeSec, version, time, keepAlive}` without touching any queue data; Render's
+`healthCheckPath` and the Docker `HEALTHCHECK` use it, and an external uptime monitor can too.
+On Render's free plan the service sleeps after ~15 minutes without inbound requests, so the server
+pings its own public URL (`RENDER_EXTERNAL_URL`) every ~4 minutes. The pinger skips a ping when
+real traffic already kept the host awake, retries with backoff, logs only when it starts failing or
+recovers, never crashes the server, and reports its counters under `keepAlive` on `/healthz`.
+Environment: `SELF_PING=off`, `SELF_PING_URL`, `SELF_PING_INTERVAL_MS` (5 s – 14 min),
+`SELF_PING_HOURS=07:00-21:00` with `SELF_PING_TZ` (default `Asia/Tashkent`) to let the host sleep
+outside business hours.
+
 **TV self-recovery:** the TV runs unattended on a low-memory browser, so `public/tv.js` reloads
 the page itself when it detects trouble — timers that stalled and resumed (device slept), or no
 data for 2 minutes while the server still answers — and every 45 minutes when idle (no call in the

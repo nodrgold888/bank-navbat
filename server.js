@@ -1362,8 +1362,10 @@ setInterval(() => {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = url.pathname;
+  if (req.headers['x-self-ping'] !== '1') lastInboundAt = Date.now(); // real traffic only
 
   try {
+    if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/healthz') return healthHandler(req, res);
     if (req.method === 'GET' && pathname === '/events') return sseHandler(req, res);
     if (req.method === 'GET' && pathname === '/api/state') {
       res.writeHead(200, {
@@ -1426,22 +1428,130 @@ setInterval(() => {
   if (checkRollover()) commit();
 }, 60 * 1000);
 
-// Free hosting plans (e.g. Render's free tier) suspend the service after
-// ~15 minutes with no *inbound* HTTP traffic — a plain setInterval inside the
-// process doesn't count, since it generates no external request. Making a
-// real request to our own public URL does count as inbound traffic and keeps
-// the host from ever seeing 15 idle minutes, at no cost and no separate
-// uptime service. Only runs when RENDER_EXTERNAL_URL is actually set (i.e.
-// really running on Render), so local/dev runs never self-ping.
-if (process.env.RENDER_EXTERNAL_URL) {
-  const SELF_PING_INTERVAL_MS = 10 * 60 * 1000; // comfortably under the ~15 min sleep threshold
-  const selfPingUrl = `${process.env.RENDER_EXTERNAL_URL.replace(/\/+$/, '')}/api/qr`;
-  setInterval(() => {
-    fetch(selfPingUrl).catch(() => {
-      /* a missed ping just means we skip resetting the idle clock this time */
-    });
-  }, SELF_PING_INTERVAL_MS);
+// ---------------------------------------------------------------------------
+// Health endpoint + keep-alive (self-ping)
+// ---------------------------------------------------------------------------
+// Free hosting plans (e.g. Render's free tier) suspend a service after ~15 minutes
+// with no *inbound* HTTP traffic; a timer inside the process doesn't count, a real
+// request to our own public URL does. GET /healthz is a cheap, side-effect-free
+// endpoint for that (also usable as the host's health check or by an external monitor).
+//
+// The pinger is quiet and self-aware: it skips a ping when real traffic already kept the
+// host awake, retries a failed ping with backoff, logs only when its state changes
+// (first failure / recovery), and exposes its stats on /healthz. Configuration:
+//   SELF_PING=off            disable it
+//   SELF_PING_URL            base URL to ping (defaults to RENDER_EXTERNAL_URL)
+//   SELF_PING_INTERVAL_MS    default 240000 (4 min); clamped to 5 s .. 14 min
+//   SELF_PING_HOURS          optional "HH:MM-HH:MM" window (e.g. 07:00-21:00); outside it no pings
+//   SELF_PING_TZ             time zone for that window (default Asia/Tashkent)
+const BOOT_AT = Date.now();
+let lastInboundAt = Date.now();
+const keepAlive = {
+  enabled: false,
+  intervalMs: 0,
+  lastAt: null,
+  lastOk: null,
+  lastStatus: null,
+  lastMs: null,
+  failures: 0, // consecutive failed cycles
+  totalOk: 0,
+  totalFailed: 0,
+  skipped: 0,
+};
+
+function healthHandler(req, res) {
+  const body = {
+    ok: true,
+    status: 'up',
+    uptimeSec: Math.round((Date.now() - BOOT_AT) / 1000),
+    version: ASSET_VERSION,
+    time: new Date().toISOString(),
+    keepAlive: {
+      ...keepAlive,
+      lastAt: keepAlive.lastAt && new Date(keepAlive.lastAt).toISOString(),
+    },
+  };
+  res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+  res.end(req.method === 'HEAD' ? undefined : JSON.stringify(body));
 }
+
+function inPingWindow(spec, tz) {
+  const m = /^(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})$/.exec(spec || '');
+  if (!m) return true; // no/invalid window => always on
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false })
+    .formatToParts(new Date());
+  const get = (t) => Number(parts.find((p) => p.type === t).value);
+  const now = (get('hour') % 24) * 60 + get('minute');
+  const from = Number(m[1]) * 60 + Number(m[2]);
+  const to = Number(m[3]) * 60 + Number(m[4]);
+  return from <= to ? now >= from && now < to : now >= from || now < to; // window may cross midnight
+}
+
+function startKeepAlive() {
+  const base = (process.env.SELF_PING_URL || process.env.RENDER_EXTERNAL_URL || '').replace(/\/+$/, '');
+  if (!base || process.env.SELF_PING === 'off') return;
+  const interval = Math.min(14 * 60 * 1000, Math.max(5000, Number(process.env.SELF_PING_INTERVAL_MS) || 4 * 60 * 1000));
+  const windowSpec = process.env.SELF_PING_HOURS || '';
+  const tz = process.env.SELF_PING_TZ || 'Asia/Tashkent';
+  const target = `${base}/healthz`;
+  keepAlive.enabled = true;
+  keepAlive.intervalMs = interval;
+
+  async function pingOnce() {
+    const started = Date.now();
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 10000);
+      try {
+        const r = await fetch(target, {
+          headers: { 'X-Self-Ping': '1', 'Cache-Control': 'no-cache' },
+          signal: controller.signal,
+        });
+        keepAlive.lastStatus = r.status;
+        if (r.ok) return true;
+      } catch (err) {
+        keepAlive.lastStatus = err.name === 'AbortError' ? 'timeout' : (err.cause && err.cause.code) || err.code || err.message;
+      } finally {
+        clearTimeout(timer);
+      }
+      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 2000 * (attempt + 1) ** 2).unref?.());
+    }
+    keepAlive.lastMs = Date.now() - started;
+    return false;
+  }
+
+  async function cycle() {
+    if (!inPingWindow(windowSpec, tz)) return; // outside business hours: let the host sleep
+    if (Date.now() - lastInboundAt < interval * 0.9) { // real traffic already counts as activity
+      keepAlive.skipped++;
+      return;
+    }
+    const started = Date.now();
+    const ok = await pingOnce();
+    keepAlive.lastAt = Date.now();
+    keepAlive.lastOk = ok;
+    if (ok) keepAlive.lastMs = Date.now() - started;
+    if (ok) {
+      keepAlive.totalOk++;
+      if (keepAlive.failures > 0) console.log(`Keep-alive tiklandi (${keepAlive.failures} urinishdan keyin)`);
+      keepAlive.failures = 0;
+    } else {
+      keepAlive.totalFailed++;
+      if (keepAlive.failures++ === 0) console.warn(`Keep-alive ishlamayapti: ${keepAlive.lastStatus} (${target})`);
+    }
+  }
+
+  function schedule(delay) {
+    const jitter = 1 + (Math.random() - 0.5) * 0.2; // +-10% so restarts never ping in lockstep
+    const timer = setTimeout(async () => {
+      try { await cycle(); } catch { /* never let the keep-alive crash the server */ }
+      schedule(interval);
+    }, Math.round(delay * jitter));
+    timer.unref();
+  }
+  schedule(Math.min(30000, interval)); // first check shortly after boot
+}
+startKeepAlive();
 
 // Node closes idle keep-alive sockets after 5s by default. Render/Cloudflare reuse
 // upstream connections for longer, so a request sent just as Node closes the socket
