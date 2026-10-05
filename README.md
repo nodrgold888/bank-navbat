@@ -51,8 +51,8 @@ key to turn cloud speech back on.
 Azure remains available as a fallback through `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION`
 (e.g. `westeurope`) and optional `AZURE_SPEECH_VOICE`. The TV plays each call as **one whole sentence**
 (`GET /api/tts?code=B001&operator=6`, `&recall=1` for a repeat call); pieces joined together
-sounded robotic. The server builds the text itself (no free text), caches the audio and
-rate-limits new synthesis. To avoid a multi-second wait when an operator presses "call", the
+sounded robotic. The server builds the text itself (no free text), caches the audio
+(no request limit; set `TTS_RATE_PER_MIN` to add one). To avoid a multi-second wait when an operator presses "call", the
 sentence is prepared when the ticket is issued for every operator that serves that service
 (at most two), and the "Qayta chaqiruv" variant when it is called. If cloud speech is unavailable,
 the TV automatically uses the bundled Uzbek recordings.
@@ -63,8 +63,9 @@ the page itself when it detects trouble — timers that stalled and resumed (dev
 data for 2 minutes while the server still answers — and every 45 minutes when idle (no call in the
 last 20 s, voice queue empty). It only reloads while the server answers, so an outage never turns
 the working page into a browser error page. In `public/tv-voice.js` a clip never waits for the
-audio `ended` event forever (a suspended audio context used to wedge the voice queue), a wedged
-queue restarts itself after 45 s, and decoded audio is capped at 48 clips.
+audio `ended` event forever (a suspended audio context used to wedge the voice queue) and a queue
+that made no progress for a minute restarts itself. Voice itself is never limited: no cap on
+cached clips, no limit on queued calls.
 
 **Spoken call or ringtone only:** the TV can either speak each call (`voice`, default) or just
 play the original bell (`ringtone`, `public/audio/ringtone.mp3`; twice for a repeat call). Switch

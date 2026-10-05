@@ -5,7 +5,7 @@
   var buffers = new Map();
   var queue = [];
   var running = false;
-  var runningSince = 0;
+  var lastProgressAt = 0;
   var generation = 0;
   var enabled = true;
   var mode = 'voice'; // 'voice' = spoken call, 'ringtone' = the original bell only
@@ -24,14 +24,9 @@
     return (call.recall ? ['recall'] : ['attention'])
       .concat(code.split(''), ['customer'], operator === 7 ? ['7', 'operator-word'] : ['operator-' + operator], ['proceed']);
   }
-  // Decoded audio is large; keep only the most recently used clips (a Chrome 73 TV has little RAM).
-  var BUFFER_CAP = 48;
+  // Every clip stays cached once decoded; nothing is evicted or limited.
   function touch(key) {
-    var p = buffers.get(key);
-    buffers.delete(key);
-    buffers.set(key, p);
-    while (buffers.size > BUFFER_CAP) buffers.delete(buffers.keys().next().value);
-    return p;
+    return buffers.get(key);
   }
   function load(key) {
     if (!buffers.has(key)) {
@@ -65,6 +60,7 @@
       // focus). Waiting for it forever used to wedge the whole voice queue until a reload.
       var guard = setTimeout(function () { try { source.stop(); } catch (e) {} done(); }, (buffer.duration || 3) * 1000 + 1500);
       source.onended = done;
+      lastProgressAt = Date.now();
       source.start();
     });
   }
@@ -154,10 +150,12 @@
     if (call.recall) { await pause(0.3); await play(bell); }
   }
   async function drain() {
-    if (running && Date.now() - runningSince > 45000) { running = false; generation++; } // wedged: start over
+    // Only a queue that has made NO progress for a minute counts as wedged; a long queue of
+    // calls that is steadily playing is never interrupted.
+    if (running && Date.now() - lastProgressAt > 60000) { running = false; generation++; }
     if (running || !enabled || !queue.length) return;
     running = true;
-    runningSince = Date.now();
+    lastProgressAt = Date.now();
     var version = generation;
     try {
       if (context().state !== 'running') {
@@ -167,6 +165,7 @@
       if (ctx.state !== 'running') throw new Error('Ovozni yoqish uchun “Sinash” tugmasini bosing');
       while (queue.length && enabled && version === generation) {
         var call = queue.shift();
+        lastProgressAt = Date.now();
         try {
           if (mode === 'ringtone') {
             await ring(call);

@@ -1063,7 +1063,7 @@ const CLOUD_VOICE_ON = process.env.TV_CLOUD_SPEECH === 'on';
 const TTS_ENABLED = Boolean(TTS_PROVIDER) && CLOUD_VOICE_ON;
 
 const TTS_CACHE_MAX = 600;
-const TTS_RATE_PER_MIN = 90;
+const TTS_RATE_PER_MIN = Number(process.env.TTS_RATE_PER_MIN) || 0; // 0 = no limit (cloud speech is off by default)
 /** @type {Map<string, Buffer>} */
 const ttsCache = new Map();
 /** @type {Map<string, Promise<Buffer>>} */
@@ -1152,7 +1152,7 @@ function cachedSynthesis(key, text) {
     ttsWindowStart = now;
     ttsWindowCount = 0;
   }
-  if (++ttsWindowCount > TTS_RATE_PER_MIN) return Promise.resolve(null);
+  if (TTS_RATE_PER_MIN && ++ttsWindowCount > TTS_RATE_PER_MIN) return Promise.resolve(null);
   job = synthesize(text)
     .then((audio) => {
       ttsCache.set(key, audio);
