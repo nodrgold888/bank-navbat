@@ -152,6 +152,10 @@ window.Navbat = (function () {
       close: function () {
         stopped = true;
       },
+      // Last time any state (poll or stream) arrived; lets an unattended screen notice it froze.
+      lastOk: function () {
+        return lastOkAt;
+      },
     };
   }
 

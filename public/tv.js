@@ -115,8 +115,10 @@
   // TVVoice queues calls, prefers the server's natural Uzbek voice, and automatically
   // falls back to the local recordings when the provider or network is unavailable.
   var ttsEnabled = false;
+  var lastCallAt = 0; // when a call was last announced, so the periodic reload never cuts one off
 
   function announce(call) {
+    lastCallAt = Date.now();
     if (soundOn) TVVoice.enqueue(call);
     var f = $('flash');
     f.classList.remove('go');
@@ -229,8 +231,40 @@
     document.body.appendChild(dbg);
   }
 
-  Navbat.connect(render, function (online) {
+  var conn = Navbat.connect(render, function (online) {
     $('offline').classList.toggle('show', !online);
     $('liveDot').classList.toggle('off', !online);
   });
+
+  // ---- Unattended-TV self-recovery ----
+  // The panel runs for days on a TV browser with little memory, and it was seen to freeze
+  // after an hour or two. A reload clears everything (audio queue, leaked memory, a wedged
+  // timer), so the page reloads itself when it detects trouble, and on a slow schedule when
+  // nothing is happening.
+  var bootedAt = Date.now();
+  var lastTickAt = Date.now();
+  var SOFT_RELOAD_MS = 45 * 60 * 1000;
+  var reloading = false;
+  // Only reload when the server answers right now: reloading while it is down would swap the
+  // working (offline-tolerant) page for a browser error page that never recovers.
+  function reloadIfReachable() {
+    if (reloading) return;
+    reloading = true;
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, 6000);
+    fetch('/api/state', { cache: 'no-store', signal: controller.signal })
+      .then(function (r) { if (r.ok) location.reload(); else reloading = false; })
+      .catch(function () { reloading = false; })
+      .then(function () { clearTimeout(timer); });
+  }
+  setInterval(function () {
+    var now = Date.now();
+    var gap = now - lastTickAt; // timers stalled (device slept / page was frozen) and just resumed
+    lastTickAt = now;
+    if (document.hidden) return; // a background tab is throttled on purpose; nothing to fix
+    var lastOk = conn.lastOk ? conn.lastOk() : 0;
+    var wedged = lastOk && now - lastOk > 120000; // no data for 2 min although the server can answer
+    var quiet = TVVoice.isIdle() && !(lastCallAt && now - lastCallAt < 20000);
+    if (gap > 30000 || wedged || (now - bootedAt > SOFT_RELOAD_MS && quiet)) reloadIfReachable();
+  }, 5000);
 })();

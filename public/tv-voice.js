@@ -5,6 +5,7 @@
   var buffers = new Map();
   var queue = [];
   var running = false;
+  var runningSince = 0;
   var generation = 0;
   var enabled = true;
   var mode = 'voice'; // 'voice' = spoken call, 'ringtone' = the original bell only
@@ -23,6 +24,15 @@
     return (call.recall ? ['recall'] : ['attention'])
       .concat(code.split(''), ['customer'], operator === 7 ? ['7', 'operator-word'] : ['operator-' + operator], ['proceed']);
   }
+  // Decoded audio is large; keep only the most recently used clips (a Chrome 73 TV has little RAM).
+  var BUFFER_CAP = 48;
+  function touch(key) {
+    var p = buffers.get(key);
+    buffers.delete(key);
+    buffers.set(key, p);
+    while (buffers.size > BUFFER_CAP) buffers.delete(buffers.keys().next().value);
+    return p;
+  }
   function load(key) {
     if (!buffers.has(key)) {
       var controller = new AbortController();
@@ -34,7 +44,7 @@
         .finally(function () { clearTimeout(timeout); });
       buffers.set(key, promise);
     }
-    return buffers.get(key);
+    return touch(key);
   }
   function play(buffer) {
     return new Promise(function (resolve) {
@@ -42,7 +52,19 @@
       source.buffer = buffer;
       source.connect(ctx.destination);
       currentSource = source;
-      source.onended = function () { source.disconnect(); if (currentSource === source) currentSource = null; resolve(); };
+      var finished = false;
+      function done() {
+        if (finished) return;
+        finished = true;
+        clearTimeout(guard);
+        try { source.disconnect(); } catch (e) {}
+        if (currentSource === source) currentSource = null;
+        resolve();
+      }
+      // 'ended' never fires if the audio context is suspended mid-clip (TV sleep, lost audio
+      // focus). Waiting for it forever used to wedge the whole voice queue until a reload.
+      var guard = setTimeout(function () { try { source.stop(); } catch (e) {} done(); }, (buffer.duration || 3) * 1000 + 1500);
+      source.onended = done;
       source.start();
     });
   }
@@ -100,7 +122,7 @@
         .finally(function () { clearTimeout(timeout); });
       buffers.set(k, promise);
     }
-    return buffers.get(k);
+    return touch(k);
   }
   function pause(seconds) {
     return new Promise(function (resolve) { setTimeout(resolve, seconds * 1000); });
@@ -132,11 +154,16 @@
     if (call.recall) { await pause(0.3); await play(bell); }
   }
   async function drain() {
+    if (running && Date.now() - runningSince > 45000) { running = false; generation++; } // wedged: start over
     if (running || !enabled || !queue.length) return;
     running = true;
+    runningSince = Date.now();
     var version = generation;
     try {
-      if (context().state !== 'running') await ctx.resume();
+      if (context().state !== 'running') {
+        // resume() can stay pending until a user gesture; don't let that hold the queue.
+        await Promise.race([ctx.resume(), pause(2.5)]);
+      }
       if (ctx.state !== 'running') throw new Error('Ovozni yoqish uchun “Sinash” tugmasini bosing');
       while (queue.length && enabled && version === generation) {
         var call = queue.shift();
@@ -184,6 +211,7 @@
     setNaturalEnabled: function (value) { naturalEnabled = !!value; },
     setMode: function (value) { mode = value === 'ringtone' ? 'ringtone' : 'voice'; },
     getMode: function () { return mode; },
+    isIdle: function () { return !running && !queue.length; },
     setEnabled: function (value) {
       enabled = value;
       if (!value) { generation++; queue.length = 0; if (currentSource) currentSource.stop(); if (cancelSpeech) cancelSpeech(); }

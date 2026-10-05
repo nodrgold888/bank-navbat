@@ -58,6 +58,14 @@ sentence is prepared when the ticket is issued for every operator that serves th
 the TV automatically uses the bundled Uzbek recordings.
 The restricted `part=clip&key=...` variant exists only to create the finite set of bundled
 Mira clips; it cannot synthesize arbitrary text and is inactive while cloud speech is off.
+**TV self-recovery:** the TV runs unattended on a low-memory browser, so `public/tv.js` reloads
+the page itself when it detects trouble — timers that stalled and resumed (device slept), or no
+data for 2 minutes while the server still answers — and every 45 minutes when idle (no call in the
+last 20 s, voice queue empty). It only reloads while the server answers, so an outage never turns
+the working page into a browser error page. In `public/tv-voice.js` a clip never waits for the
+audio `ended` event forever (a suspended audio context used to wedge the voice queue), a wedged
+queue restarts itself after 45 s, and decoded audio is capped at 48 clips.
+
 **Spoken call or ringtone only:** the TV can either speak each call (`voice`, default) or just
 play the original bell (`ringtone`, `public/audio/ringtone.mp3`; twice for a repeat call). Switch
 it with the **🗣️ Ovoz / 🔔 Qo'ng'iroq** button in the TV header, with `/tv?mode=ringtone` (or
