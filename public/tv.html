@@ -13,6 +13,12 @@
   </head>
   <body class="tvn tvd">
     <div class="tvn-flash" id="flash"></div>
+    <!-- Keeps the TV awake: a TV counts a page that is playing video as "in use", so its
+         screensaver / sleep timer never starts. Silent, 4 px, bottom-right corner. -->
+    <video id="keepAwake" class="tvn-keepawake" muted loop playsinline autoplay preload="auto" aria-hidden="true" tabindex="-1">
+      <source src="/video/keepawake.mp4" type="video/mp4" />
+      <source src="/video/keepawake.webm" type="video/webm" />
+    </video>
     <div class="tvn-wrap">
       <header class="tvn-head">
         <span class="tvn-live"><i id="liveDot"></i>Jonli</span>

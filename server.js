@@ -846,6 +846,8 @@ const MIME = {
   '.webp': 'image/webp',
   '.mp3': 'audio/mpeg',
   '.wav': 'audio/wav',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
   '.ogg': 'audio/ogg',
   '.woff2': 'font/woff2',
 };
@@ -879,8 +881,29 @@ function serveStatic(req, res, urlPath) {
     if (ext === '.html') {
       data = Buffer.from(withAssetVersion(data.toString('utf8')), 'utf8');
     }
+    // Media elements ask for byte ranges (and some TV browsers refuse to loop without them).
+    const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+    if (range && (ext === '.mp4' || ext === '.webm' || ext === '.mp3' || ext === '.wav') && (range[1] || range[2])) {
+      const start = range[1] ? Number(range[1]) : Math.max(0, data.length - Number(range[2]));
+      const end = range[1] && range[2] ? Math.min(Number(range[2]), data.length - 1) : data.length - 1;
+      if (start >= data.length || start > end) {
+        res.writeHead(416, { 'Content-Range': `bytes */${data.length}` });
+        res.end();
+        return;
+      }
+      res.writeHead(206, {
+        'Content-Type': MIME[ext],
+        'Content-Range': `bytes ${start}-${end}/${data.length}`,
+        'Content-Length': end - start + 1,
+        'Accept-Ranges': 'bytes',
+        'Cache-Control': 'no-store',
+      });
+      res.end(req.method === 'HEAD' ? undefined : data.subarray(start, end + 1));
+      return;
+    }
     res.writeHead(200, {
       'Content-Type': MIME[ext] || 'application/octet-stream',
+      'Accept-Ranges': 'bytes',
       // "no-cache" alone still lets a misbehaving proxy/CDN cache the
       // response as long as it wants (some ignore weak validators
       // entirely) — "no-store" plus the "?v=" cache-buster on every asset

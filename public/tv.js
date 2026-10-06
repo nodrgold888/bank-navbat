@@ -236,6 +236,32 @@
     $('liveDot').classList.toggle('off', !online);
   });
 
+  // ---- Keep the TV awake ----
+  // A TV puts the screen to sleep / starts its screensaver when nothing "plays". Old TV browsers
+  // (Chrome 73) have no wake-lock API, but a playing video counts, so a tiny silent looping video
+  // runs all the time. Turn it off with /tv?keepawake=off.
+  var kv = $('keepAwake');
+  if (kv && /[?&]keepawake=off/.test(location.search)) {
+    kv.parentNode.removeChild(kv);
+    kv = null;
+  }
+  function kickVideo() {
+    if (!kv || document.hidden) return;
+    if (kv.paused || kv.ended) {
+      var p = kv.play();
+      if (p && p.catch) p.catch(function () {});
+    }
+  }
+  if (kv) {
+    kv.muted = true;
+    kickVideo();
+    setInterval(kickVideo, 15000);
+    document.addEventListener('visibilitychange', kickVideo);
+    ['click', 'touchstart', 'keydown'].forEach(function (ev) {
+      document.addEventListener(ev, kickVideo, { passive: true });
+    });
+  }
+
   // ---- Unattended-TV self-recovery ----
   // The panel runs for days on a TV browser with little memory, and it was seen to freeze
   // after an hour or two. A reload clears everything (audio queue, leaked memory, a wedged

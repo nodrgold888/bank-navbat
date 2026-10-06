@@ -322,3 +322,6 @@ body.tvn::before { opacity: 0.16; filter: brightness(3) saturate(0); }
 .tvn-right > * { margin-left: 1.6vw; }
 .tvn-voice .tvn-btn { margin-left: 0.6vw; }
 .tvn-voice .tvn-btn:first-child { margin-left: 0; }
+
+/* Keep-awake video: present and playing (so the TV sees video), but practically invisible. */
+.tvn-keepawake { position: fixed; right: 0; bottom: 0; width: 4px; height: 4px; opacity: 0.06; pointer-events: none; z-index: 1; }

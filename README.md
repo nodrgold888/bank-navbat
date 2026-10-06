@@ -69,6 +69,13 @@ Environment: `SELF_PING=off`, `SELF_PING_URL`, `SELF_PING_INTERVAL_MS` (5 s – 
 `SELF_PING_HOURS=07:00-21:00` with `SELF_PING_TZ` (default `Asia/Tashkent`) to let the host sleep
 outside business hours.
 
+**Keep the TV awake:** TVs start a screensaver / sleep timer when nothing "plays", and old TV
+browsers (Chrome 73) have no wake-lock API. `public/tv.html` therefore contains a silent, 4 px,
+almost invisible looping video (`public/video/keepawake.mp4` / `.webm`) that `tv.js` keeps playing
+(re-started every 15 s if the browser pauses it). It does not stop the TV's own "auto power off"
+timer on every model — if the TV still turns off, set that to "never" in the TV settings. Add
+`?keepawake=off` to the URL to remove the video.
+
 **TV self-recovery:** the TV runs unattended on a low-memory browser, so `public/tv.js` reloads
 the page itself when it detects trouble — timers that stalled and resumed (device slept), or no
 data for 2 minutes while the server still answers — and every 45 minutes when idle (no call in the
