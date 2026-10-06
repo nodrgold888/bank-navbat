@@ -290,7 +290,10 @@
     if (document.hidden) return; // a background tab is throttled on purpose; nothing to fix
     var lastOk = conn.lastOk ? conn.lastOk() : 0;
     var wedged = lastOk && now - lastOk > 120000; // no data for 2 min although the server can answer
-    var quiet = TVVoice.isIdle() && !(lastCallAt && now - lastCallAt < 20000);
+    // Voice counts as "not busy" when idle OR stuck (no progress for 90 s): a stuck queue must
+    // never block the reload that would clear it.
+    var voiceFree = TVVoice.isIdle() || TVVoice.stalledFor() > 90000;
+    var quiet = voiceFree && !(lastCallAt && now - lastCallAt < 20000);
     if (gap > 30000 || wedged || (now - bootedAt > SOFT_RELOAD_MS && quiet)) reloadIfReachable();
   }, 5000);
 })();

@@ -204,13 +204,21 @@
   }
   window.TVVoice = {
     tokens: tokens,
-    enqueue: function (call) { if (enabled) { queue.push(call); drain(); } },
+    enqueue: function (call) {
+      if (!enabled) return;
+      if (!running && !queue.length) lastProgressAt = Date.now();
+      queue.push(call);
+      drain();
+    },
     onError: function (cb) { report = cb; },
     unlock: function () { try { context().resume().then(drain).catch(function () { report('Ovozni yoqish uchun “Sinash” tugmasini bosing'); }); } catch (e) { report(e.message); } },
     setNaturalEnabled: function (value) { naturalEnabled = !!value; },
     setMode: function (value) { mode = value === 'ringtone' ? 'ringtone' : 'voice'; },
     getMode: function () { return mode; },
     isIdle: function () { return !running && !queue.length; },
+    // How long calls have been waiting/playing without any progress (0 when nothing is pending).
+    // A TV that restarted with no click leaves the audio locked: calls pile up and never play.
+    stalledFor: function () { return running || queue.length ? Date.now() - lastProgressAt : 0; },
     setEnabled: function (value) {
       enabled = value;
       if (!value) { generation++; queue.length = 0; if (currentSource) currentSource.stop(); if (cancelSpeech) cancelSpeech(); }
