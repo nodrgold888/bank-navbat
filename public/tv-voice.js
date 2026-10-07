@@ -198,8 +198,12 @@
       }
     } catch (error) { report(error.message); }
     finally {
-      running = false;
-      if (queue.length && enabled && ctx && ctx.state === 'running') drain();
+      // An older loop that was given up on (see the wedge guard) must not clear the flag of the
+      // loop that replaced it, or two loops would play over each other.
+      if (version === generation) {
+        running = false;
+        if (queue.length && enabled && ctx && ctx.state === 'running') drain();
+      }
     }
   }
   window.TVVoice = {
@@ -221,7 +225,7 @@
     stalledFor: function () { return running || queue.length ? Date.now() - lastProgressAt : 0; },
     setEnabled: function (value) {
       enabled = value;
-      if (!value) { generation++; queue.length = 0; if (currentSource) currentSource.stop(); if (cancelSpeech) cancelSpeech(); }
+      if (!value) { generation++; running = false; queue.length = 0; if (currentSource) currentSource.stop(); if (cancelSpeech) cancelSpeech(); }
     }
   };
   document.addEventListener('pointerdown', window.TVVoice.unlock, { passive: true });

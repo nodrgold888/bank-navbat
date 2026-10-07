@@ -100,7 +100,10 @@ window.Navbat = (function () {
       mine.addEventListener('ping', function () {
         lastSseAt = Date.now();
         sseBackoff = 1000;
-        setConn(true);
+        if (alive === false) {
+          setConn(true);
+          verify(); // we were showing "offline": fetch the current state right away
+        }
       });
       mine.addEventListener('error', function () {
         verify();
