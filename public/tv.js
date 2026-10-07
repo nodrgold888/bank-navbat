@@ -236,6 +236,14 @@
     $('liveDot').classList.toggle('off', !online);
   });
 
+  // Header look: gradient "brand" bar by default; /tv?hdr=glass for the translucent version,
+  // /tv?hdr=classic for the old white card.
+  var hdrVariant = (location.search.match(/[?&]hdr=(glass|brand|classic)/) || [])[1];
+  if (hdrVariant) {
+    document.body.classList.remove('hdr-brand', 'hdr-glass');
+    if (hdrVariant !== 'classic') document.body.classList.add('hdr-' + hdrVariant);
+  }
+
   // ---- Keep the TV awake ----
   // A TV puts the screen to sleep / starts its screensaver when nothing "plays". Old TV browsers
   // (Chrome 73) have no wake-lock API, but a playing video counts, so a tiny silent looping video

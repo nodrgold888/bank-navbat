@@ -325,3 +325,40 @@ body.tvn::before { opacity: 0.16; filter: brightness(3) saturate(0); }
 
 /* Keep-awake video: present and playing (so the TV sees video), but practically invisible. */
 .tvn-keepawake { position: fixed; right: 0; bottom: 0; width: 4px; height: 4px; opacity: 0.06; pointer-events: none; z-index: 1; }
+
+/* ==========================================================================
+   Header redesign (preview variants: /tv?hdr=glass | /tv?hdr=brand)
+   Chrome 73 safe: plain vh/vw, margins instead of gap, no backdrop-filter.
+   ========================================================================== */
+body.hdr-glass .tvn-head,
+body.hdr-brand .tvn-head { padding: 1.3vh 2vw; border: 0; color: #fff; }
+body.hdr-glass .tvn-head::before,
+body.hdr-brand .tvn-head::before { display: none; }
+body.hdr-glass .tvn-head { background: rgba(255, 255, 255, 0.17); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 12px 30px -16px rgba(4, 38, 78, 0.7); }
+body.hdr-brand .tvn-head { background: #0a4f8f; background: linear-gradient(100deg, #0a4a86 0%, #0f6f94 55%, #1f8f55 100%); box-shadow: 0 12px 30px -16px rgba(4, 38, 78, 0.8), inset 0 -0.5vh 0 rgba(255, 255, 255, 0.28); }
+body.hdr-glass .tvn-brand img,
+body.hdr-brand .tvn-brand img { width: 7.4vh; height: 7.4vh; padding: 0.7vh; background: #fff; border-radius: 1.8vh; box-shadow: 0 6px 16px -8px rgba(2, 30, 60, 0.7); }
+body.hdr-glass .tvn-brand b,
+body.hdr-brand .tvn-brand b { color: #fff; font-size: 4vh; letter-spacing: 0.02em; line-height: 1.05; }
+body.hdr-glass .tvn-brand span,
+body.hdr-brand .tvn-brand span { color: rgba(255, 255, 255, 0.88); font-size: 1.9vh; letter-spacing: 0.04em; margin-top: 0.3vh; }
+body.hdr-glass .tvn-time .clock,
+body.hdr-brand .tvn-time .clock { color: #fff; font-size: 5vh; letter-spacing: 0.02em; }
+body.hdr-glass .tvn-time .date,
+body.hdr-brand .tvn-time .date { color: rgba(255, 255, 255, 0.88); font-size: 1.9vh; }
+body.hdr-glass .tvn-live,
+body.hdr-brand .tvn-live { color: #fff !important; background: rgba(255, 255, 255, 0.18); padding: 0.7vh 1.2vw; border-radius: 3vh; font-size: 1.8vh !important; letter-spacing: 0.05em; text-transform: uppercase; }
+body.hdr-glass .tvn-live i,
+body.hdr-brand .tvn-live i { margin-right: 0.6vw; background: #7dffb0; box-shadow: 0 0 0 0.5vh rgba(125, 255, 176, 0.3); }
+body.hdr-glass .tvn-live i.off,
+body.hdr-brand .tvn-live i.off { background: #ff6b81; box-shadow: none; }
+body.hdr-glass .tvn-btn,
+body.hdr-brand .tvn-btn { background: rgba(255, 255, 255, 0.2); color: #fff; font-size: 1.6vh; padding: 0.9vh 1vw; }
+body.hdr-glass .tvn-time .date,
+body.hdr-brand .tvn-time .date,
+body.hdr-glass .tvn-btn,
+body.hdr-brand .tvn-btn,
+body.hdr-glass .tvn-live,
+body.hdr-brand .tvn-live { white-space: nowrap; }
+body.hdr-glass .tvn-time .date,
+body.hdr-brand .tvn-time .date { font-size: 1.8vh; }

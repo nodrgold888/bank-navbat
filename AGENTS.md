@@ -72,6 +72,10 @@ The owner's final choice is the current layout:
   card. The most recently called card gets an outline and a short pulse.
 - **Valyuta (operator 7) is its own wide gold card above the grid** — keep it
   separate from the equal-size grid; don't merge it without asking.
+- The header is a gradient Davr Bank bar (blue to green) with a white logo tile, white text,
+  a "JONLI" pill, small sound buttons and a big clock (`body.hdr-brand`). `?hdr=glass` shows a
+  translucent variant and `?hdr=classic` the old white card; keep it to brand, live pill, sound
+  buttons and clock.
 - A "Keyingilar" strip along the bottom lists the waiting tickets. The header
   is deliberately just the brand, live dot, sound buttons and clock — the
   owner asked for the queue-summary boxes that used to sit in the middle to be
