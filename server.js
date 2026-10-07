@@ -574,8 +574,39 @@ function serviceReport(s) {
 // page (browsers can't, CORS), keeps the last good answer, and refreshes it every 30 minutes;
 // if the site is unreachable or its layout changes, the last good rate stays on screen (and is
 // flagged stale after 6 hours) rather than blanking or showing a wrong number.
+// Refresh timing: see RATES_FAST_WINDOWS below.
 const RATES_URL = process.env.RATES_URL || 'https://davrbank.uz/uz/exchange-rate';
 const RATES_REFRESH_MS = 30 * 60 * 1000;
+// The bank resets its rates every morning (~09:00-09:30) and again around 11:00-11:10, so in those
+// windows (a margin added) the page is checked every minute and the TV follows within a minute.
+// Elsewhere every 30 minutes is plenty. Times are Tashkent time (UTC+5, no daylight saving).
+const RATES_FAST_WINDOWS = process.env.RATES_FAST_WINDOWS || '09:00-09:45,11:00-11:20';
+const RATES_FAST_MS = Math.max(5000, Number(process.env.RATES_FAST_MS) || 60 * 1000);
+const RATES_TZ = process.env.RATES_TZ || 'Asia/Tashkent';
+
+/** Minutes since midnight in the rates time zone. */
+function minutesOfDayIn(tz, date) {
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false })
+    .formatToParts(date);
+  const get = (t) => Number(parts.find((p) => p.type === t).value);
+  return (get('hour') % 24) * 60 + get('minute');
+}
+
+/** Delay until the next rates check: fast inside a window, and never sleeping past a window's start. */
+function nextRatesDelay(now = new Date()) {
+  const windows = RATES_FAST_WINDOWS.split(',')
+    .map((w) => /^(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})$/.exec(w.trim()))
+    .filter(Boolean)
+    .map((m) => [Number(m[1]) * 60 + Number(m[2]), Number(m[3]) * 60 + Number(m[4])]);
+  const nowMin = minutesOfDayIn(RATES_TZ, now);
+  if (windows.some(([from, to]) => nowMin >= from && nowMin < to)) return RATES_FAST_MS;
+  let delay = RATES_REFRESH_MS;
+  for (const [from] of windows) {
+    const untilStart = ((from - nowMin + 1440) % 1440) * 60 * 1000 - now.getSeconds() * 1000;
+    if (untilStart > 0) delay = Math.min(delay, untilStart);
+  }
+  return Math.max(delay, 5000);
+}
 const RATES_STALE_MS = 6 * 60 * 60 * 1000;
 let usdRate = null; // { buy, sell, mb, at }
 
@@ -635,7 +666,7 @@ function startRates() {
   if (process.env.RATES === 'off') return;
   const loop = () => {
     refreshRates().finally(() => {
-      const t = setTimeout(loop, RATES_REFRESH_MS * (0.9 + Math.random() * 0.2));
+      const t = setTimeout(loop, nextRatesDelay());
       t.unref();
     });
   };
