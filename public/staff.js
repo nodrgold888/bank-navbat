@@ -187,9 +187,18 @@
 
   // ---- "Navbatda kutayotganlar" rows (also: call from a specific queue, or
   // pull out one particular waiting ticket instead of just "next") ----
+  // Replace a list's contents only when they actually changed. Rebuilding identical buttons on every
+  // state push swapped them out under the operator's finger: a tap that landed during a rebuild
+  // was dropped, which felt like the panel had frozen.
+  function swapIn(real, fresh) {
+    if (fresh.innerHTML === real.innerHTML) return;
+    real.innerHTML = '';
+    while (fresh.firstChild) real.appendChild(fresh.firstChild);
+  }
+
   function buildQueues(view) {
-    var box = $('queues');
-    box.innerHTML = '';
+    var realBox = $('queues');
+    var box = document.createElement('div');
     var me = myOp(view);
     var mine = me ? me.serviceIds : [];
     var queue = view.queue || [];
@@ -236,6 +245,7 @@
           box.appendChild(chips);
         }
       });
+    swapIn(realBox, box);
   }
 
   // A single clickable ticket code — used for both the per-service waiting
@@ -260,7 +270,8 @@
   // ---- "Oʻtkazib yuborilganlar" — tickets a skip left behind; recallable ----
   function buildSkipped(view) {
     var section = $('skippedSection');
-    var box = $('skipped');
+    var realBox = $('skipped');
+    var box = document.createElement('div');
     var me = myOp(view);
     var mine = me ? me.serviceIds : [];
     var list = (view.skipped || []).filter(function (t) {
@@ -271,10 +282,10 @@
       return;
     }
     section.hidden = false;
-    box.innerHTML = '';
     list.forEach(function (t) {
       box.appendChild(ticketChip(t, true));
     });
+    swapIn(realBox, box);
   }
 
   // ---- "Operatorlar holati" — who's serving which ticket right now.
@@ -290,8 +301,8 @@
   }
 
   function buildOpsStatus(view) {
-    var box = $('opsStatus');
-    box.innerHTML = '';
+    var realBox = $('opsStatus');
+    var box = document.createElement('div');
     var me = myOp(view);
     var mine = me ? me.serviceIds : [];
     (view.operators || [])
@@ -318,6 +329,7 @@
       row.innerHTML = '<span class="s2-op-name">' + o.name + '</span>' + statusHtml;
       box.appendChild(row);
     });
+    swapIn(realBox, box);
   }
 
   // ---- Service-type checkboxes (setup) ----

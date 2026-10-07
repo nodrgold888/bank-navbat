@@ -31,7 +31,7 @@ window.Navbat = (function () {
     const POLL_TIMEOUT_MS = 8000; // a stalled poll must never stop the loop
     const SSE_STALE_MS = 35000; // no state/ping this long => the stream is silently dead, reopen it
     const SSE_HEALTHY_MS = 26000; // no state/ping within this => treat SSE as down
-    const OFFLINE_AFTER_MS = 7000;
+    const OFFLINE_AFTER_MS = 15000; // no sign of life (state, ping or a poll) this long => show "offline"
 
     function setConn(v) {
       if (v !== alive) {
@@ -52,9 +52,25 @@ window.Navbat = (function () {
       }
     }
 
-    function markMaybeOffline() {
-      if (Date.now() - lastOkAt > OFFLINE_AFTER_MS) setConn(false);
+    // Any sign the server is reachable counts: a state, a poll answer OR the stream's 15 s ping.
+    // (Only counting states/polls made a healthy stream look dead: with the stream up the poll
+    // runs every 10 s, so a single reconnect blip was enough to flash the red banner.)
+    function lastSign() {
+      return Math.max(lastOkAt, lastSseAt);
     }
+    function markMaybeOffline() {
+      if (Date.now() - lastSign() > OFFLINE_AFTER_MS) setConn(false);
+    }
+    // After a stream error, check the server right away instead of waiting for the next
+    // poll tick or assuming the worst; at most one check per second.
+    let verifyAt = 0;
+    function verify() {
+      const now = Date.now();
+      if (now - verifyAt < 1000) return;
+      verifyAt = now;
+      poll();
+    }
+    let sseBackoff = 1000;
 
     // --- Transport 1: SSE (primary when it works) ---
     let es = null;
@@ -78,14 +94,21 @@ window.Navbat = (function () {
       const mine = es;
       mine.addEventListener('state', function (e) {
         lastSseAt = Date.now();
+        sseBackoff = 1000;
         apply(e.data);
       });
       mine.addEventListener('ping', function () {
         lastSseAt = Date.now();
+        sseBackoff = 1000;
+        setConn(true);
       });
       mine.addEventListener('error', function () {
-        markMaybeOffline();
-        if (mine.readyState === EventSource.CLOSED && es === mine) setTimeout(openSSE, 3000);
+        verify();
+        if (mine.readyState === EventSource.CLOSED && es === mine) {
+          const wait = sseBackoff;
+          sseBackoff = Math.min(sseBackoff * 2, 10000); // 1 s, 2 s, 4 s ... 10 s
+          setTimeout(openSSE, wait);
+        }
       });
     }
     openSSE();
