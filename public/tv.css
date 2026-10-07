@@ -362,3 +362,13 @@ body.hdr-glass .tvn-live,
 body.hdr-brand .tvn-live { white-space: nowrap; }
 body.hdr-glass .tvn-time .date,
 body.hdr-brand .tvn-time .date { font-size: 1.8vh; }
+
+/* USD rate inside the gold Valyuta card: left column of the card's grid */
+.vip .c-rates { grid-column: 1; grid-row: 1 / span 2; justify-self: start; align-self: center; text-align: left; color: #3b2c00; min-width: 17vw; }
+.c-rates .r-title { font-size: 2.3vh; font-weight: 800; letter-spacing: 0.02em; margin-bottom: 0.8vh; }
+.c-rates .r-row { display: flex; align-items: baseline; justify-content: space-between; padding: 0.5vh 1.2vw; margin-bottom: 0.7vh; background: rgba(255, 255, 255, 0.5); border-radius: 1.2vh; }
+.c-rates .r-row span { font-size: 2.2vh; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-right: 1.4vw; }
+.c-rates .r-row b { font-size: 4.4vh; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.c-rates.stale { opacity: 0.55; }
+.vip.free .c-rates { color: #fff; }
+.vip.free .c-rates .r-row { background: rgba(255, 255, 255, 0.22); }

@@ -567,6 +567,82 @@ function serviceReport(s) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// USD exchange rate for the TV's Valyuta card
+// ---------------------------------------------------------------------------
+// The bank publishes its branch ("Bank ofislarida") rates on its website. The server reads the
+// page (browsers can't, CORS), keeps the last good answer, and refreshes it every 30 minutes;
+// if the site is unreachable or its layout changes, the last good rate stays on screen (and is
+// flagged stale after 6 hours) rather than blanking or showing a wrong number.
+const RATES_URL = process.env.RATES_URL || 'https://davrbank.uz/uz/exchange-rate';
+const RATES_REFRESH_MS = 30 * 60 * 1000;
+const RATES_STALE_MS = 6 * 60 * 60 * 1000;
+let usdRate = null; // { buy, sell, mb, at }
+
+function parseUzNumber(text) {
+  const n = Number(String(text).replace(/[^\d,]/g, '').replace(',', '.'));
+  return Number.isFinite(n) ? n : NaN;
+}
+
+/** Reads the USD row of the first rates table: columns are looked up by their header labels. */
+function parseUsdRates(html) {
+  const table = /<table[\s\S]*?<\/table>/.exec(html);
+  if (!table) return null;
+  const heads = [...table[0].matchAll(/<th[^>]*>([^<]*)<\/th>/g)].map((m) => m[1].trim().toLowerCase());
+  const row = /AQSH dollari[\s\S]*?<\/span><\/td>((?:<td[^>]*>[^<]*<\/td>)+)/.exec(table[0]);
+  if (!row) return null;
+  const cells = [...row[1].matchAll(/<td[^>]*>([^<]*)<\/td>/g)].map((m) => parseUzNumber(m[1]));
+  const at = (label) => cells[heads.indexOf(label) - 1]; // heads[0] is the currency column
+  const buy = at('xarid');
+  const sell = at('sotuv');
+  const mb = at('mb');
+  if (![buy, sell].every((v) => v > 1000 && v < 100000) || sell < buy) return null;
+  return { buy, sell, mb: Number.isFinite(mb) ? mb : null };
+}
+
+async function refreshRates() {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  try {
+    const r = await fetch(RATES_URL, { headers: { 'User-Agent': 'Mozilla/5.0 bank-navbat' }, signal: controller.signal });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const parsed = parseUsdRates(await r.text());
+    if (!parsed) throw new Error('kurs jadvali topilmadi (sayt tuzilishi oʻzgargan boʻlishi mumkin)');
+    const changed = !usdRate || usdRate.buy !== parsed.buy || usdRate.sell !== parsed.sell;
+    usdRate = { ...parsed, at: Date.now() };
+    if (changed) {
+      console.log(`USD kursi yangilandi: xarid ${parsed.buy}, sotuv ${parsed.sell}`);
+      invalidateView();
+      broadcast();
+    }
+  } catch (err) {
+    console.warn('USD kursini yangilab boʻlmadi:', err.message);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function ratesView() {
+  if (!usdRate) return null;
+  return {
+    usd: { buy: usdRate.buy, sell: usdRate.sell },
+    updatedAt: new Date(usdRate.at).toISOString(),
+    stale: Date.now() - usdRate.at > RATES_STALE_MS,
+  };
+}
+
+function startRates() {
+  if (process.env.RATES === 'off') return;
+  const loop = () => {
+    refreshRates().finally(() => {
+      const t = setTimeout(loop, RATES_REFRESH_MS * (0.9 + Math.random() * 0.2));
+      t.unref();
+    });
+  };
+  const first = setTimeout(loop, 3000);
+  first.unref();
+}
+
 function buildView() {
   const services = state.services.map((s) => {
     const waiting = waitingCountFor(s.id);
@@ -679,6 +755,7 @@ function buildView() {
 
   return {
     assetVersion: ASSET_VERSION,
+    rates: ratesView(),
     tts: TTS_ENABLED,
     // Default TV sound: 'voice' (spoken call) or 'ringtone' (original bell only). Env TV_SOUND_MODE.
     tvMode: process.env.TV_SOUND_MODE === 'ringtone' ? 'ringtone' : 'voice',
@@ -1575,6 +1652,7 @@ function startKeepAlive() {
   schedule(Math.min(30000, interval)); // first check shortly after boot
 }
 startKeepAlive();
+startRates();
 
 // Node closes idle keep-alive sockets after 5s by default. Render/Cloudflare reuse
 // upstream connections for longer, so a request sent just as Node closes the socket

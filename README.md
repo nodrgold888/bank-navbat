@@ -58,6 +58,12 @@ sentence is prepared when the ticket is issued for every operator that serves th
 the TV automatically uses the bundled Uzbek recordings.
 The restricted `part=clip&key=...` variant exists only to create the finite set of bundled
 Mira clips; it cannot synthesize arbitrary text and is inactive while cloud speech is off.
+**USD rate on the TV:** the Valyuta card shows the dollar's SOTUV (sell) and XARID (buy) rates from
+the bank's own page (https://davrbank.uz/uz/exchange-rate, the "Bank ofislarida" table). The server
+fetches it every 30 minutes (`RATES_URL` to change the source, `RATES=off` to disable), keeps the
+last good value if the site is unreachable or its layout changes (dimmed after 6 hours) and sends it
+to the TV in the state as `rates`.
+
 **Health check and keep-alive:** `GET /healthz` (also `HEAD`) is a cheap endpoint that returns
 `{ok, status, uptimeSec, version, time, keepAlive}` without touching any queue data; Render's
 `healthCheckPath` and the Docker `HEALTHCHECK` use it, and an external uptime monitor can too.

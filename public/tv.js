@@ -126,7 +126,22 @@
     f.classList.add('go');
   }
 
-  function cardHtml(b, latest) {
+  // 11740 -> "11 740" (a no-break space groups the thousands; Chrome 73 has no toLocaleString grouping we can trust)
+  function money(n) {
+    return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+  }
+  function ratesHtml(rates) {
+    if (!rates || !rates.usd) return '';
+    return (
+      '<div class="c-rates' + (rates.stale ? ' stale' : '') + '">' +
+      '<div class="r-title">💵 AQSH dollari</div>' +
+      '<div class="r-row"><span>Sotuv</span><b>' + money(rates.usd.sell) + '</b></div>' +
+      '<div class="r-row"><span>Xarid</span><b>' + money(rates.usd.buy) + '</b></div>' +
+      '</div>'
+    );
+  }
+
+  function cardHtml(b, latest, rates) {
     var busy = !!b.ticketCode;
     var cls = 'card ' + (busy ? 'busy' : 'free') + (b.name === 'Valyuta' ? ' vip' : '') + (latest ? ' latest' : '');
     return (
@@ -135,6 +150,7 @@
       '<div class="c-code">' + (busy ? esc(b.ticketCode) : '—') + '</div>' +
       '<div class="c-go"><span>➜</span><b>' + esc(b.name) + '</b></div>' +
       '<div class="c-svc">' + (busy ? (b.serviceIcon ? esc(b.serviceIcon) + ' ' : '') + esc(b.serviceName || '') : '&nbsp;') + '</div>' +
+      (b.name === 'Valyuta' ? ratesHtml(rates) : '') +
       '</div>'
     );
   }
@@ -191,7 +207,7 @@
       return !!(call && call.operatorId === b.id && b.ticketCode === call.code);
     }
 
-    $('vwrap').innerHTML = valyuta ? cardHtml(valyuta, isLatest(valyuta)) : '';
+    $('vwrap').innerHTML = valyuta ? cardHtml(valyuta, isLatest(valyuta), view.rates) : '';
     var cols = rest.length <= 3 ? Math.max(rest.length, 1) : rest.length <= 6 ? 3 : 4;
     $('grid').style.setProperty('--cols', cols);
     $('grid').innerHTML = rest
@@ -236,7 +252,7 @@
     $('liveDot').classList.toggle('off', !online);
   });
 
-  // Header look: gradient "brand" bar by default; /tv?hdr=glass for the translucent version,
+  // Header look: translucent "glass" bar by default; /tv?hdr=brand for the gradient bar,
   // /tv?hdr=classic for the old white card.
   var hdrVariant = (location.search.match(/[?&]hdr=(glass|brand|classic)/) || [])[1];
   if (hdrVariant) {

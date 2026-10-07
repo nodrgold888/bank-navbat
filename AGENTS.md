@@ -72,10 +72,13 @@ The owner's final choice is the current layout:
   card. The most recently called card gets an outline and a short pulse.
 - **Valyuta (operator 7) is its own wide gold card above the grid** — keep it
   separate from the equal-size grid; don't merge it without asking.
-- The header is a gradient Davr Bank bar (blue to green) with a white logo tile, white text,
-  a "JONLI" pill, small sound buttons and a big clock (`body.hdr-brand`). `?hdr=glass` shows a
-  translucent variant and `?hdr=classic` the old white card; keep it to brand, live pill, sound
-  buttons and clock.
+- The header is a translucent "glass" bar (`body.hdr-glass`, the owner's pick) with a white logo
+  tile, white text, a "JONLI" pill, small sound buttons and a big clock. `?hdr=brand` shows a solid
+  gradient bar and `?hdr=classic` the old white card; keep it to brand, live pill, sound buttons
+  and clock.
+- The gold Valyuta card also shows the USD rate (SOTUV / XARID) on its left. The server reads it
+  from davrbank.uz's branch rates table (`parseUsdRates` in `server.js`, refreshed every 30 min,
+  last good value kept if the site is down or changes layout).
 - A "Keyingilar" strip along the bottom lists the waiting tickets. The header
   is deliberately just the brand, live dot, sound buttons and clock — the
   owner asked for the queue-summary boxes that used to sit in the middle to be
