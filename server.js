@@ -570,12 +570,13 @@ function serviceReport(s) {
 // ---------------------------------------------------------------------------
 // USD exchange rate for the TV's Valyuta card
 // ---------------------------------------------------------------------------
-// The bank publishes its branch ("Bank ofislarida") rates on its website. The server reads the
-// page (browsers can't, CORS), keeps the last good answer, and refreshes it every 30 minutes;
-// if the site is unreachable or its layout changes, the last good rate stays on screen (and is
-// flagged stale after 6 hours) rather than blanking or showing a wrong number.
+// The bank's official Telegram channel posts "Valyutalar kursi" (USD buy/sell for individuals) on
+// working mornings (~09:00, sometimes again at 11:00 or in the afternoon). The server reads the
+// channel's public web preview (t.me/s/<channel>), takes the newest rate post, keeps the last good
+// answer, and sends it to the TV. If Telegram is unreachable or the page layout changes, the last good
+// rate stays on screen (flagged stale after 4 days: the channel is quiet on weekends).
 // Refresh timing: see RATES_FAST_WINDOWS below.
-const RATES_URL = process.env.RATES_URL || 'https://davrbank.uz/uz/exchange-rate';
+const RATES_URL = process.env.RATES_URL || 'https://t.me/s/davrbankuz';
 const RATES_REFRESH_MS = 30 * 60 * 1000;
 // The bank resets its rates every morning (~09:00-09:30) and again around 11:00-11:10, so in those
 // windows (a margin added) the page is checked every minute and the TV follows within a minute.
@@ -607,7 +608,7 @@ function nextRatesDelay(now = new Date()) {
   }
   return Math.max(delay, 5000);
 }
-const RATES_STALE_MS = 6 * 60 * 60 * 1000;
+const RATES_STALE_MS = 4 * 24 * 60 * 60 * 1000;
 let usdRate = null; // { buy, sell, mb, at }
 
 function parseUzNumber(text) {
@@ -615,20 +616,24 @@ function parseUzNumber(text) {
   return Number.isFinite(n) ? n : NaN;
 }
 
-/** Reads the USD row of the first rates table: columns are looked up by their header labels. */
+/** Finds the newest "Valyutalar kursi" post of the channel page: { buy, sell, postedAt } or null.
+ *  The post's own timestamp is used, not the date typed in its text (which has been wrong before). */
 function parseUsdRates(html) {
-  const table = /<table[\s\S]*?<\/table>/.exec(html);
-  if (!table) return null;
-  const heads = [...table[0].matchAll(/<th[^>]*>([^<]*)<\/th>/g)].map((m) => m[1].trim().toLowerCase());
-  const row = /AQSH dollari[\s\S]*?<\/span><\/td>((?:<td[^>]*>[^<]*<\/td>)+)/.exec(table[0]);
-  if (!row) return null;
-  const cells = [...row[1].matchAll(/<td[^>]*>([^<]*)<\/td>/g)].map((m) => parseUzNumber(m[1]));
-  const at = (label) => cells[heads.indexOf(label) - 1]; // heads[0] is the currency column
-  const buy = at('xarid');
-  const sell = at('sotuv');
-  const mb = at('mb');
-  if (![buy, sell].every((v) => v > 1000 && v < 100000) || sell < buy) return null;
-  return { buy, sell, mb: Number.isFinite(mb) ? mb : null };
+  let best = null;
+  for (const block of html.split('tgme_widget_message_wrap').slice(1)) {
+    const text = (/<div class="tgme_widget_message_text[^>]*>([\s\S]*?)<\/div>/.exec(block) || [])[1];
+    const when = Date.parse((/datetime="([^"]+)"/.exec(block) || [])[1]);
+    if (!text || !Number.isFinite(when)) continue;
+    const plain = text.replace(/<br\s*\/?>/g, ' ').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ');
+    if (!/Valyutalar kursi/i.test(plain)) continue;
+    const m = /USD:\s*Sotib olish:\s*([\d\s ]+?)\s*\|\s*Sotish:\s*([\d\s ]+)/i.exec(plain);
+    if (!m) continue;
+    const buy = parseUzNumber(m[1]);
+    const sell = parseUzNumber(m[2]);
+    if (![buy, sell].every((v) => v > 1000 && v < 100000) || sell < buy) continue;
+    if (!best || when > best.postedAt) best = { buy, sell, postedAt: when };
+  }
+  return best;
 }
 
 async function refreshRates() {
@@ -638,9 +643,9 @@ async function refreshRates() {
     const r = await fetch(RATES_URL, { headers: { 'User-Agent': 'Mozilla/5.0 bank-navbat' }, signal: controller.signal });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const parsed = parseUsdRates(await r.text());
-    if (!parsed) throw new Error('kurs jadvali topilmadi (sayt tuzilishi oʻzgargan boʻlishi mumkin)');
+    if (!parsed) throw new Error('kanalda kurs posti topilmadi (sahifa tuzilishi oʻzgargan boʻlishi mumkin)');
     const changed = !usdRate || usdRate.buy !== parsed.buy || usdRate.sell !== parsed.sell;
-    usdRate = { ...parsed, at: Date.now() };
+    usdRate = { ...parsed, at: parsed.postedAt };
     if (changed) {
       console.log(`USD kursi yangilandi: xarid ${parsed.buy}, sotuv ${parsed.sell}`);
       invalidateView();

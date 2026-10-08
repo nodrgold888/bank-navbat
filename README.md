@@ -59,13 +59,14 @@ the TV automatically uses the bundled Uzbek recordings.
 The restricted `part=clip&key=...` variant exists only to create the finite set of bundled
 Mira clips; it cannot synthesize arbitrary text and is inactive while cloud speech is off.
 **USD rate on the TV:** the Valyuta card shows the dollar's SOTUV (sell) and XARID (buy) rates from
-the bank's own page (https://davrbank.uz/uz/exchange-rate, the "Bank ofislarida" table). The server
-fetches it every 30 minutes, but **every minute in the windows when the bank changes its rates**
+the bank's official Telegram channel (https://t.me/s/davrbankuz, the newest "Valyutalar kursi"
+post, individuals' USD buy/sell; the post's own timestamp is used, not the date typed in its text).
+The davrbank.uz page is no longer used. The server fetches it every 30 minutes, but **every minute in the windows when the bank changes its rates**
 (about 09:00-09:30 and 11:00-11:10 Tashkent time; `RATES_FAST_WINDOWS` defaults to
 `09:00-09:45,11:00-11:20`, a margin included), so a new rate reaches the open TV within about a
 minute without a reload. It never sleeps past the start of a window. Other settings: `RATES_URL`
-(source), `RATES_TZ`, `RATES_FAST_MS`, `RATES=off`. The last good value is kept if the site is
-unreachable or its layout changes (dimmed after 6 hours) and it is sent to the TV as `rates`.
+(source), `RATES_TZ`, `RATES_FAST_MS`, `RATES=off`. The last good value is kept if Telegram is
+unreachable or its layout changes (dimmed after 4 days: the channel is quiet on weekends) and it is sent to the TV as `rates`.
 
 **Health check and keep-alive:** `GET /healthz` (also `HEAD`) is a cheap endpoint that returns
 `{ok, status, uptimeSec, version, time, keepAlive}` without touching any queue data; Render's

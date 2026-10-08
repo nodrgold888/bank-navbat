@@ -77,8 +77,9 @@ The owner's final choice is the current layout:
   gradient bar and `?hdr=classic` the old white card; keep it to brand, live pill, sound buttons
   and clock.
 - The gold Valyuta card also shows the USD rate (SOTUV / XARID) on its left. The server reads it
-  from davrbank.uz's branch rates table (`parseUsdRates` in `server.js`, refreshed every 30 min,
-  last good value kept if the site is down or changes layout).
+  from the bank's Telegram channel t.me/s/davrbankuz (`parseUsdRates` in `server.js`: newest
+  "Valyutalar kursi" post; the owner chose Telegram over davrbank.uz, which lagged). Refreshed every
+  30 min, every minute in the morning windows; last good value kept if Telegram is down or changes layout.
 - A "Keyingilar" strip along the bottom lists the waiting tickets. The header
   is deliberately just the brand, live dot, sound buttons and clock — the
   owner asked for the queue-summary boxes that used to sit in the middle to be
